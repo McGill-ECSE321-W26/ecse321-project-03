@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 52 "model.ump"
-// line 131 "model.ump"
+// line 54 "model.ump"
+// line 124 "model.ump"
 public class OrderItem
 {
 
@@ -102,4 +102,3 @@ public class OrderItem
                 "  " + "itemType = "+(getItemType()!=null?Integer.toHexString(System.identityHashCode(getItemType())):"null");
     }
 }
-

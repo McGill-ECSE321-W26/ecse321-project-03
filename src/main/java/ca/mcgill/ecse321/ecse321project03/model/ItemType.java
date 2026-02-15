@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 57 "model.ump"
-// line 136 "model.ump"
+// line 59 "model.ump"
+// line 129 "model.ump"
 public class ItemType
 {
 

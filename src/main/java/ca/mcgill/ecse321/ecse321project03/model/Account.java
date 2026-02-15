@@ -1,10 +1,12 @@
 package ca.mcgill.ecse321.ecse321project03.model;
 
-/**
- * @@@skipcppcompile
- */
+/*PLEASE DO NOT EDIT THIS CODE*/
+/*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
+
+
+
 // line 11 "model.ump"
-// line 101 "model.ump"
+// line 99 "model.ump"
 public class Account
 {
 
@@ -163,5 +165,6 @@ public class Account
                 "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
     }
 }
+
 
 

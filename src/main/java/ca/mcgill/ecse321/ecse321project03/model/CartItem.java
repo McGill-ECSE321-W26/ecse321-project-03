@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 80 "model.ump"
-// line 146 "model.ump"
+// line 82 "model.ump"
+// line 139 "model.ump"
 public class CartItem
 {
 
@@ -102,5 +102,3 @@ public class CartItem
                 "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
     }
 }
-
-

@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 35 "model.ump"
-// line 119 "model.ump"
+// line 37 "model.ump"
+// line 114 "model.ump"
 public class Manager extends Role
 {
 
@@ -33,3 +33,5 @@ public class Manager extends Role
     }
 
 }
+
+
