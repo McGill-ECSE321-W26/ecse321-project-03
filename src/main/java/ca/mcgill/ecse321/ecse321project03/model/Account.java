@@ -6,7 +6,7 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 // line 11 "model.ump"
-// line 99 "model.ump"
+// line 102 "model.ump"
 public class Account
 {
 
@@ -165,6 +165,3 @@ public class Account
                 "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
     }
 }
-
-
-

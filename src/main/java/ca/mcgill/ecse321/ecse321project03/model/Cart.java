@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 87 "model.ump"
-// line 144 "model.ump"
+// line 91 "model.ump"
+// line 158 "model.ump"
 public class Cart
 {
 

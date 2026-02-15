@@ -6,7 +6,7 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 // line 31 "model.ump"
-// line 109 "model.ump"
+// line 114 "model.ump"
 public class Employee extends Role
 {
 
@@ -33,5 +33,7 @@ public class Employee extends Role
     }
 
 }
+
+
 
 

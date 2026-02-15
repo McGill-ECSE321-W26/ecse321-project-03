@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 82 "model.ump"
-// line 139 "model.ump"
+// line 83 "model.ump"
+// line 151 "model.ump"
 public class CartItem
 {
 
@@ -14,20 +14,24 @@ public class CartItem
     // MEMBER VARIABLES
     //------------------------
 
-    //CartItem Attributes
-    private int quantity;
-
     //CartItem Associations
     private ItemType itemType;
     private Cart cart;
+
+    //Helper Variables
+    private int cachedHashCode;
+    private boolean canSetCart;
+    private boolean canSetItemType;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public CartItem(int aQuantity, ItemType aItemType, Cart aCart)
+    public CartItem(ItemType aItemType, Cart aCart)
     {
-        quantity = aQuantity;
+        cachedHashCode = -1;
+        canSetCart = true;
+        canSetItemType = true;
         if (!setItemType(aItemType))
         {
             throw new RuntimeException("Unable to create CartItem due to aItemType. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
@@ -41,19 +45,6 @@ public class CartItem
     //------------------------
     // INTERFACE
     //------------------------
-
-    public boolean setQuantity(int aQuantity)
-    {
-        boolean wasSet = false;
-        quantity = aQuantity;
-        wasSet = true;
-        return wasSet;
-    }
-
-    public int getQuantity()
-    {
-        return quantity;
-    }
     /* Code from template association_GetOne */
     public ItemType getItemType()
     {
@@ -68,6 +59,7 @@ public class CartItem
     public boolean setItemType(ItemType aNewItemType)
     {
         boolean wasSet = false;
+        if (!canSetItemType) { return false; }
         if (aNewItemType != null)
         {
             itemType = aNewItemType;
@@ -79,6 +71,7 @@ public class CartItem
     public boolean setCart(Cart aNewCart)
     {
         boolean wasSet = false;
+        if (!canSetCart) { return false; }
         if (aNewCart != null)
         {
             cart = aNewCart;
@@ -87,18 +80,67 @@ public class CartItem
         return wasSet;
     }
 
+    public boolean equals(Object obj)
+    {
+        if (obj == null) { return false; }
+        if (!getClass().equals(obj.getClass())) { return false; }
+
+        CartItem compareTo = (CartItem)obj;
+
+        if (getCart() == null && compareTo.getCart() != null)
+        {
+            return false;
+        }
+        else if (getCart() != null && !getCart().equals(compareTo.getCart()))
+        {
+            return false;
+        }
+
+        if (getItemType() == null && compareTo.getItemType() != null)
+        {
+            return false;
+        }
+        else if (getItemType() != null && !getItemType().equals(compareTo.getItemType()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        if (cachedHashCode != -1)
+        {
+            return cachedHashCode;
+        }
+        cachedHashCode = 17;
+        if (getCart() != null)
+        {
+            cachedHashCode = cachedHashCode * 23 + getCart().hashCode();
+        }
+        else
+        {
+            cachedHashCode = cachedHashCode * 23;
+        }
+        if (getItemType() != null)
+        {
+            cachedHashCode = cachedHashCode * 23 + getItemType().hashCode();
+        }
+        else
+        {
+            cachedHashCode = cachedHashCode * 23;
+        }
+
+        canSetCart = false;
+        canSetItemType = false;
+        return cachedHashCode;
+    }
+
     public void delete()
     {
         itemType = null;
         cart = null;
     }
 
-
-    public String toString()
-    {
-        return super.toString() + "["+
-                "quantity" + ":" + getQuantity()+ "]" + System.getProperties().getProperty("line.separator") +
-                "  " + "itemType = "+(getItemType()!=null?Integer.toHexString(System.identityHashCode(getItemType())):"null") + System.getProperties().getProperty("line.separator") +
-                "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
-    }
 }

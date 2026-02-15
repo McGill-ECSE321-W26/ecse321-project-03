@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 54 "model.ump"
-// line 124 "model.ump"
+// line 53 "model.ump"
+// line 131 "model.ump"
 public class OrderItem
 {
 
@@ -14,71 +14,52 @@ public class OrderItem
     // MEMBER VARIABLES
     //------------------------
 
-    //OrderItem Attributes
-    private int quantity;
-
     //OrderItem Associations
-    private Order order;
     private ItemType itemType;
+    private Order order;
+
+    //Helper Variables
+    private int cachedHashCode;
+    private boolean canSetItemType;
+    private boolean canSetOrder;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public OrderItem(int aQuantity, Order aOrder, ItemType aItemType)
+    public OrderItem(ItemType aItemType, Order aOrder)
     {
-        quantity = aQuantity;
-        if (!setOrder(aOrder))
-        {
-            throw new RuntimeException("Unable to create OrderItem due to aOrder. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-        }
+        cachedHashCode = -1;
+        canSetItemType = true;
+        canSetOrder = true;
         if (!setItemType(aItemType))
         {
             throw new RuntimeException("Unable to create OrderItem due to aItemType. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+        }
+        if (!setOrder(aOrder))
+        {
+            throw new RuntimeException("Unable to create OrderItem due to aOrder. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
     }
 
     //------------------------
     // INTERFACE
     //------------------------
-
-    public boolean setQuantity(int aQuantity)
+    /* Code from template association_GetOne */
+    public ItemType getItemType()
     {
-        boolean wasSet = false;
-        quantity = aQuantity;
-        wasSet = true;
-        return wasSet;
-    }
-
-    public int getQuantity()
-    {
-        return quantity;
+        return itemType;
     }
     /* Code from template association_GetOne */
     public Order getOrder()
     {
         return order;
     }
-    /* Code from template association_GetOne */
-    public ItemType getItemType()
-    {
-        return itemType;
-    }
-    /* Code from template association_SetUnidirectionalOne */
-    public boolean setOrder(Order aNewOrder)
-    {
-        boolean wasSet = false;
-        if (aNewOrder != null)
-        {
-            order = aNewOrder;
-            wasSet = true;
-        }
-        return wasSet;
-    }
     /* Code from template association_SetUnidirectionalOne */
     public boolean setItemType(ItemType aNewItemType)
     {
         boolean wasSet = false;
+        if (!canSetItemType) { return false; }
         if (aNewItemType != null)
         {
             itemType = aNewItemType;
@@ -86,19 +67,80 @@ public class OrderItem
         }
         return wasSet;
     }
+    /* Code from template association_SetUnidirectionalOne */
+    public boolean setOrder(Order aNewOrder)
+    {
+        boolean wasSet = false;
+        if (!canSetOrder) { return false; }
+        if (aNewOrder != null)
+        {
+            order = aNewOrder;
+            wasSet = true;
+        }
+        return wasSet;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (obj == null) { return false; }
+        if (!getClass().equals(obj.getClass())) { return false; }
+
+        OrderItem compareTo = (OrderItem)obj;
+
+        if (getItemType() == null && compareTo.getItemType() != null)
+        {
+            return false;
+        }
+        else if (getItemType() != null && !getItemType().equals(compareTo.getItemType()))
+        {
+            return false;
+        }
+
+        if (getOrder() == null && compareTo.getOrder() != null)
+        {
+            return false;
+        }
+        else if (getOrder() != null && !getOrder().equals(compareTo.getOrder()))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public int hashCode()
+    {
+        if (cachedHashCode != -1)
+        {
+            return cachedHashCode;
+        }
+        cachedHashCode = 17;
+        if (getItemType() != null)
+        {
+            cachedHashCode = cachedHashCode * 23 + getItemType().hashCode();
+        }
+        else
+        {
+            cachedHashCode = cachedHashCode * 23;
+        }
+        if (getOrder() != null)
+        {
+            cachedHashCode = cachedHashCode * 23 + getOrder().hashCode();
+        }
+        else
+        {
+            cachedHashCode = cachedHashCode * 23;
+        }
+
+        canSetItemType = false;
+        canSetOrder = false;
+        return cachedHashCode;
+    }
 
     public void delete()
     {
-        order = null;
         itemType = null;
+        order = null;
     }
 
-
-    public String toString()
-    {
-        return super.toString() + "["+
-                "quantity" + ":" + getQuantity()+ "]" + System.getProperties().getProperty("line.separator") +
-                "  " + "order = "+(getOrder()!=null?Integer.toHexString(System.identityHashCode(getOrder())):"null") + System.getProperties().getProperty("line.separator") +
-                "  " + "itemType = "+(getItemType()!=null?Integer.toHexString(System.identityHashCode(getItemType())):"null");
-    }
 }

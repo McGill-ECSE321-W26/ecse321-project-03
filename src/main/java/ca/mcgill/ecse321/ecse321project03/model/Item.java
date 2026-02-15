@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 72 "model.ump"
-// line 134 "model.ump"
+// line 73 "model.ump"
+// line 145 "model.ump"
 public class Item
 {
 
@@ -107,3 +107,4 @@ public class Item
                 "  " + "tag" + "=" + (getTag() != null ? !getTag().equals(this)  ? getTag().toString().replaceAll("  ","    ") : "this" : "null");
     }
 }
+

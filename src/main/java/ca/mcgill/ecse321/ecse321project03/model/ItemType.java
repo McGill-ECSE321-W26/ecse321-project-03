@@ -5,8 +5,8 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 59 "model.ump"
-// line 129 "model.ump"
+// line 62 "model.ump"
+// line 138 "model.ump"
 public class ItemType
 {
 
@@ -134,3 +134,5 @@ public class ItemType
                 "  " + "generalItem = "+(getGeneralItem()!=null?Integer.toHexString(System.identityHashCode(getGeneralItem())):"null");
     }
 }
+
+
