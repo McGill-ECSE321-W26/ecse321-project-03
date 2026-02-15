@@ -7,6 +7,13 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 // line 91 "model.ump"
 // line 158 "model.ump"
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+
+@Entity
 public class Cart
 {
 
@@ -15,18 +22,21 @@ public class Cart
     //------------------------
 
     //Cart Attributes
+
+    @Id
+    @GeneratedValue
     private int id;
 
     //Cart Associations
+    @OneToOne
     private Account account;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Cart(int aId, Account aAccount)
+    public Cart(Account aAccount)
     {
-        id = aId;
         if (aAccount == null || aAccount.getCart() != null)
         {
             throw new RuntimeException("Unable to create Cart due to aAccount. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
@@ -34,10 +44,9 @@ public class Cart
         account = aAccount;
     }
 
-    public Cart(int aId, int aIdForAccount, String aUsernameForAccount, String aEmailForAccount, String aPasswordForAccount, String aAddressForAccount, int aLoyaltyPtsForAccount)
+    public Cart(String aUsernameForAccount, String aEmailForAccount, String aPasswordForAccount, String aAddressForAccount, int aLoyaltyPtsForAccount)
     {
-        id = aId;
-        account = new Account(aIdForAccount, aUsernameForAccount, aEmailForAccount, aPasswordForAccount, aAddressForAccount, aLoyaltyPtsForAccount, this);
+        account = new Account(aUsernameForAccount, aEmailForAccount, aPasswordForAccount, aAddressForAccount, aLoyaltyPtsForAccount, this);
     }
 
     //------------------------

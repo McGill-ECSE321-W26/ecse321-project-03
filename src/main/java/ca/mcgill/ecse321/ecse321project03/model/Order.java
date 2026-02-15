@@ -4,10 +4,17 @@ package ca.mcgill.ecse321.ecse321project03.model;
 /*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+
 import java.sql.Date;
 
 // line 44 "model.ump"
 // line 125 "model.ump"
+
+@Entity
 public class Order
 {
 
@@ -22,22 +29,26 @@ public class Order
     //------------------------
 
     //Order Attributes
+
+    @Id
+    @GeneratedValue
     private int id;
     private Date orderDate;
     private Date delivDate;
     private OrderState orderState;
 
     //Order Associations
+    @ManyToOne
     private Account customer;
+    @ManyToOne
     private Employee assignee;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Order(int aId, Date aOrderDate, Date aDelivDate, OrderState aOrderState, Account aCustomer, Employee aAssignee)
+    public Order(Date aOrderDate, Date aDelivDate, OrderState aOrderState, Account aCustomer, Employee aAssignee)
     {
-        id = aId;
         orderDate = aOrderDate;
         delivDate = aDelivDate;
         orderState = aOrderState;

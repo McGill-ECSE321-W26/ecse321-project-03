@@ -4,9 +4,14 @@ package ca.mcgill.ecse321.ecse321project03.model;
 /*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 // line 11 "model.ump"
 // line 102 "model.ump"
+@Entity
 public class Account
 {
 
@@ -15,6 +20,8 @@ public class Account
     //------------------------
 
     //Account Attributes
+    @Id
+    @GeneratedValue
     private int id;
     private String username;
     private String email;
@@ -23,15 +30,16 @@ public class Account
     private int loyaltyPts;
 
     //Account Associations
+
+    @OneToOne
     private Cart cart;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
+    public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
     {
-        id = aId;
         username = aUsername;
         email = aEmail;
         password = aPassword;
@@ -44,7 +52,7 @@ public class Account
         cart = aCart;
     }
 
-    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, int aIdForCart)
+    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts)
     {
         id = aId;
         username = aUsername;
@@ -52,7 +60,7 @@ public class Account
         password = aPassword;
         address = aAddress;
         loyaltyPts = aLoyaltyPts;
-        cart = new Cart(aIdForCart, this);
+        cart = new Cart(this);
     }
 
     //------------------------

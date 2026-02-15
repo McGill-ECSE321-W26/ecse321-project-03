@@ -6,6 +6,10 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 // line 37 "model.ump"
 // line 120 "model.ump"
+
+import jakarta.persistence.Entity;
+
+@Entity
 public class Manager extends Role
 {
 
