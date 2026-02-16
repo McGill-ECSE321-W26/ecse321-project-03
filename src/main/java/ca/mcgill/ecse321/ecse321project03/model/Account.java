@@ -33,6 +33,9 @@ public class Account
 
     @OneToOne
     private Cart cart;
+    @OneToOne
+    private Role role;
+
 
     //------------------------
     // CONSTRUCTOR
@@ -52,9 +55,8 @@ public class Account
         cart = aCart;
     }
 
-    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts)
+    public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, int aIdForCart)
     {
-        id = aId;
         username = aUsername;
         email = aEmail;
         password = aPassword;
@@ -149,6 +151,44 @@ public class Account
     {
         return cart;
     }
+    /* Code from template association_GetOne */
+    public Role getRole()
+    {
+        return role;
+    }
+
+    public boolean hasRole()
+    {
+        boolean has = role != null;
+        return has;
+    }
+    /* Code from template association_SetOptionalOneToOne */
+    public boolean setRole(Role aNewRole)
+    {
+        boolean wasSet = false;
+        if (role != null && !role.equals(aNewRole) && equals(role.getAccount()))
+        {
+            //Unable to setRole, as existing role would become an orphan
+            return wasSet;
+        }
+
+        role = aNewRole;
+        Account anOldAccount = aNewRole != null ? aNewRole.getAccount() : null;
+
+        if (!this.equals(anOldAccount))
+        {
+            if (anOldAccount != null)
+            {
+                anOldAccount.role = null;
+            }
+            if (role != null)
+            {
+                role.setAccount(this);
+            }
+        }
+        wasSet = true;
+        return wasSet;
+    }
 
     public void delete()
     {
@@ -157,6 +197,12 @@ public class Account
         if (existingCart != null)
         {
             existingCart.delete();
+        }
+        Role existingRole = role;
+        role = null;
+        if (existingRole != null)
+        {
+            existingRole.delete();
         }
     }
 
@@ -170,6 +216,9 @@ public class Account
                 "password" + ":" + getPassword()+ "," +
                 "address" + ":" + getAddress()+ "," +
                 "loyaltyPts" + ":" + getLoyaltyPts()+ "]" + System.getProperties().getProperty("line.separator") +
-                "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
+                "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null") + System.getProperties().getProperty("line.separator") +
+                "  " + "role = "+(getRole()!=null?Integer.toHexString(System.identityHashCode(getRole())):"null");
     }
 }
+
+
