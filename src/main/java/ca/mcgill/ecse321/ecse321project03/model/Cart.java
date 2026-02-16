@@ -5,8 +5,15 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 87 "model.ump"
-// line 144 "model.ump"
+// line 91 "model.ump"
+// line 158 "model.ump"
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+
+@Entity
 public class Cart
 {
 
@@ -15,29 +22,25 @@ public class Cart
     //------------------------
 
     //Cart Attributes
+
+    @Id
+    @GeneratedValue
     private int id;
 
     //Cart Associations
+    @OneToOne
     private Account account;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Cart(int aId, Account aAccount)
+    public Cart(Account aAccount)
     {
-        id = aId;
-        if (aAccount == null || aAccount.getCart() != null)
+        if (!setAccount(aAccount))
         {
             throw new RuntimeException("Unable to create Cart due to aAccount. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
-        account = aAccount;
-    }
-
-    public Cart(int aId, int aIdForAccount, String aUsernameForAccount, String aEmailForAccount, String aPasswordForAccount, String aAddressForAccount, int aLoyaltyPtsForAccount)
-    {
-        id = aId;
-        account = new Account(aIdForAccount, aUsernameForAccount, aEmailForAccount, aPasswordForAccount, aAddressForAccount, aLoyaltyPtsForAccount, this);
     }
 
     //------------------------
@@ -56,20 +59,26 @@ public class Cart
     {
         return id;
     }
-    /* Code from template association_GetOne */
+
     public Account getAccount()
     {
         return account;
     }
+    /* Code from template association_GetOne */
+    public boolean setAccount(Account aNewAccount)
+    {
+        boolean wasSet = false;
+        if (aNewAccount != null)
+        {
+            account = aNewAccount;
+            wasSet = true;
+        }
+        return wasSet;
+    }
 
     public void delete()
     {
-        Account existingAccount = account;
         account = null;
-        if (existingAccount != null)
-        {
-            existingAccount.delete();
-        }
     }
 
 

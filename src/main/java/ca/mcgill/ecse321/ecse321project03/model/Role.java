@@ -1,12 +1,19 @@
 package ca.mcgill.ecse321.ecse321project03.model;
-
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
 
 
 
 // line 24 "model.ump"
-// line 104 "model.ump"
+// line 108 "model.ump"
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.OneToOne;
+
+@Entity
+@Inheritance (strategy = InheritanceType.JOINED)
 public abstract class Role
 {
 
@@ -15,6 +22,8 @@ public abstract class Role
     //------------------------
 
     //Role Associations
+
+    @OneToOne(optional = false)
     private Account account;
 
     //------------------------

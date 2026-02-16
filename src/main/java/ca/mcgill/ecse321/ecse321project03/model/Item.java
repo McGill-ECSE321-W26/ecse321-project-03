@@ -5,8 +5,14 @@ package ca.mcgill.ecse321.ecse321project03.model;
 
 
 
-// line 72 "model.ump"
-// line 134 "model.ump"
+// line 73 "model.ump"
+// line 145 "model.ump"
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
+@Entity
 public class Item
 {
 
@@ -24,18 +30,20 @@ public class Item
     private String name;
     private Tag tag;
     private double price;
+
+    @Id
+    @GeneratedValue
     private int id;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Item(String aName, Tag aTag, double aPrice, int aId)
+    public Item(String aName, Tag aTag, double aPrice)
     {
         name = aName;
         tag = aTag;
         price = aPrice;
-        id = aId;
     }
 
     //------------------------
@@ -107,3 +115,4 @@ public class Item
                 "  " + "tag" + "=" + (getTag() != null ? !getTag().equals(this)  ? getTag().toString().replaceAll("  ","    ") : "this" : "null");
     }
 }
+

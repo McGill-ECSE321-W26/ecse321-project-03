@@ -4,9 +4,14 @@ package ca.mcgill.ecse321.ecse321project03.model;
 /*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 // line 11 "model.ump"
-// line 99 "model.ump"
+// line 102 "model.ump"
+@Entity
 public class Account
 {
 
@@ -15,6 +20,8 @@ public class Account
     //------------------------
 
     //Account Attributes
+    @Id
+    @GeneratedValue
     private int id;
     private String username;
     private String email;
@@ -22,38 +29,21 @@ public class Account
     private String address;
     private int loyaltyPts;
 
-    //Account Associations
-    private Cart cart;
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
 
-    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
+    public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
     {
-        id = aId;
         username = aUsername;
         email = aEmail;
         password = aPassword;
         address = aAddress;
         loyaltyPts = aLoyaltyPts;
-        if (aCart == null || aCart.getAccount() != null)
-        {
-            throw new RuntimeException("Unable to create Account due to aCart. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-        }
-        cart = aCart;
+
     }
 
-    public Account(int aId, String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, int aIdForCart)
-    {
-        id = aId;
-        username = aUsername;
-        email = aEmail;
-        password = aPassword;
-        address = aAddress;
-        loyaltyPts = aLoyaltyPts;
-        cart = new Cart(aIdForCart, this);
-    }
 
     //------------------------
     // INTERFACE
@@ -137,19 +127,13 @@ public class Account
         return loyaltyPts;
     }
     /* Code from template association_GetOne */
-    public Cart getCart()
-    {
-        return cart;
-    }
+
+
+
 
     public void delete()
     {
-        Cart existingCart = cart;
-        cart = null;
-        if (existingCart != null)
-        {
-            existingCart.delete();
-        }
+
     }
 
 
@@ -161,10 +145,8 @@ public class Account
                 "email" + ":" + getEmail()+ "," +
                 "password" + ":" + getPassword()+ "," +
                 "address" + ":" + getAddress()+ "," +
-                "loyaltyPts" + ":" + getLoyaltyPts()+ "]" + System.getProperties().getProperty("line.separator") +
-                "  " + "cart = "+(getCart()!=null?Integer.toHexString(System.identityHashCode(getCart())):"null");
+                "loyaltyPts" + ":" + getLoyaltyPts()+ "]";
     }
 }
-
 
 
