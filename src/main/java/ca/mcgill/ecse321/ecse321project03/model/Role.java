@@ -32,10 +32,9 @@ public abstract class Role
 
     public Role(Account aAccount)
     {
-        boolean didAddAccount = setAccount(aAccount);
-        if (!didAddAccount)
+        if (!setAccount(aAccount))
         {
-            throw new RuntimeException("Unable to create role due to account. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+            throw new RuntimeException("Unable to create Role due to aAccount. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
     }
 
@@ -51,39 +50,17 @@ public abstract class Role
     public boolean setAccount(Account aNewAccount)
     {
         boolean wasSet = false;
-        if (aNewAccount == null)
+        if (aNewAccount != null)
         {
-            //Unable to setAccount to null, as role must always be associated to a account
-            return wasSet;
+            account = aNewAccount;
+            wasSet = true;
         }
-
-        Role existingRole = aNewAccount.getRole();
-        if (existingRole != null && !equals(existingRole))
-        {
-            //Unable to setAccount, the current account already has a role, which would be orphaned if it were re-assigned
-            return wasSet;
-        }
-
-        Account anOldAccount = account;
-        account = aNewAccount;
-        account.setRole(this);
-
-        if (anOldAccount != null)
-        {
-            anOldAccount.setRole(null);
-        }
-        wasSet = true;
         return wasSet;
     }
 
     public void delete()
     {
-        Account existingAccount = account;
         account = null;
-        if (existingAccount != null)
-        {
-            existingAccount.setRole(null);
-        }
     }
 
 }

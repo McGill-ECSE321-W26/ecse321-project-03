@@ -37,16 +37,10 @@ public class Cart
 
     public Cart(Account aAccount)
     {
-        if (aAccount == null || aAccount.getCart() != null)
+        if (!setAccount(aAccount))
         {
             throw new RuntimeException("Unable to create Cart due to aAccount. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
-        account = aAccount;
-    }
-
-    public Cart(String aUsernameForAccount, String aEmailForAccount, String aPasswordForAccount, String aAddressForAccount, int aLoyaltyPtsForAccount)
-    {
-        account = new Account(aUsernameForAccount, aEmailForAccount, aPasswordForAccount, aAddressForAccount, aLoyaltyPtsForAccount, this);
     }
 
     //------------------------
@@ -65,20 +59,26 @@ public class Cart
     {
         return id;
     }
-    /* Code from template association_GetOne */
+
     public Account getAccount()
     {
         return account;
     }
+    /* Code from template association_GetOne */
+    public boolean setAccount(Account aNewAccount)
+    {
+        boolean wasSet = false;
+        if (aNewAccount != null)
+        {
+            account = aNewAccount;
+            wasSet = true;
+        }
+        return wasSet;
+    }
 
     public void delete()
     {
-        Account existingAccount = account;
         account = null;
-        if (existingAccount != null)
-        {
-            existingAccount.delete();
-        }
     }
 
 
