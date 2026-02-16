@@ -7,10 +7,7 @@ package ca.mcgill.ecse321.ecse321project03.model;
 // line 24 "model.ump"
 // line 108 "model.ump"
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity
 @Inheritance (strategy = InheritanceType.JOINED)
