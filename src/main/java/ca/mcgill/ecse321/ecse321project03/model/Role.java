@@ -17,7 +17,9 @@ public abstract class Role
     //------------------------
     // MEMBER VARIABLES
     //------------------------
-
+    @Id
+    @GeneratedValue
+    private int id;
     //Role Associations
 
     @OneToOne(optional = false)
