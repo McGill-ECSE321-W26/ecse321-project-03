@@ -34,9 +34,9 @@ public class Account
     // CONSTRUCTOR
     //------------------------
 
-    public Account(){};
 
-    public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
+
+    public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts)
     {
         username = aUsername;
         email = aEmail;
@@ -45,6 +45,11 @@ public class Account
         loyaltyPts = aLoyaltyPts;
 
     }
+
+    public Account() {
+
+    }
+
 
 
     //------------------------
