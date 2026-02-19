@@ -46,6 +46,10 @@ public class Item
         price = aPrice;
     }
 
+    public Item() {
+
+    }
+
     //------------------------
     // INTERFACE
     //------------------------
