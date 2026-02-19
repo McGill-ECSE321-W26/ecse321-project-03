@@ -74,11 +74,9 @@ public class CartItemRepositoryTests {
          CartItem retrievedCartItem = cartItemRepository.findById(cartItemId).orElse(null);
 
         assertNotNull(retrievedCartItem);
-        assertNotNull(retrievedCartItem.getCartItemId().getCart());
-        assertNotNull(retrievedCartItem.getCartItemId().getItemType());
         assertEquals(3, retrievedCartItem.getCartItemId().getQuantity());
-        assertEquals(cart.getId(), retrievedCartItem.getCartItemId().getCart().getId());
-        assertEquals(itemType.getId(), retrievedCartItem.getCartItemId().getItemType().getId());
+        assertEquals(cart, retrievedCartItem.getCartItemId().getCart());
+        assertEquals(itemType, retrievedCartItem.getCartItemId().getItemType());
     }
     
 }

@@ -50,6 +50,7 @@ public class AccountRepositoryTests {
         assertEquals(email, retrievedAccount.getEmail());
         assertEquals(address, retrievedAccount.getAddress());
         assertEquals(loyaltyPts, retrievedAccount.getLoyaltyPts());
+        assertEquals(password, retrievedAccount.getPassword());
 
     }
     

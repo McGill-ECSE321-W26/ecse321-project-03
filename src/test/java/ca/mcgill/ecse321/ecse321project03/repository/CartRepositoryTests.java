@@ -50,7 +50,5 @@ public class CartRepositoryTests {
         assertNotNull(retrievedCart);
         assertEquals(account.getId(), retrievedCart.getAccount().getId());
         assertEquals(cartId, retrievedCart.getId());
-        assertNotNull(account.getId()); retrievedCart.getAccount().getId();
-    }
     
-}
+}}
