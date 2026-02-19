@@ -25,4 +25,11 @@ are collaborating to implement a functional and structured system.
 | Maria Klinski     | mashaklin       | Manager, Secretary             |                       |                       |                       |
 | Yani Zhang        | yannniiii       | Submitter                      |                       |                       |                       |
 
+## Project reports (meeting minutes)
+| Deliverable    | Link                 |                    
+| -------------- | -------------------- | 
+| 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
+| 2              |                      |
+| 3              |                      | 
+
 
