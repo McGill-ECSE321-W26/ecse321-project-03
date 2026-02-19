@@ -34,6 +34,8 @@ public class Account
     // CONSTRUCTOR
     //------------------------
 
+    public Account(){};
+
     public Account(String aUsername, String aEmail, String aPassword, String aAddress, int aLoyaltyPts, Cart aCart)
     {
         username = aUsername;

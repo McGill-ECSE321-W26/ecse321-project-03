@@ -38,6 +38,7 @@ public class Item
     //------------------------
     // CONSTRUCTOR
     //------------------------
+    protected Item() {}
 
     public Item(String aName, Tag aTag, double aPrice)
     {

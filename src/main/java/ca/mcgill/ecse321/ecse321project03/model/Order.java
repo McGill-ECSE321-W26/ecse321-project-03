@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 import java.sql.Date;
 
@@ -15,6 +16,7 @@ import java.sql.Date;
 // line 125 "model.ump"
 
 @Entity
+@Table(name = "orders")
 public class Order
 {
 
@@ -46,6 +48,7 @@ public class Order
     //------------------------
     // CONSTRUCTOR
     //------------------------
+    protected Order() {}
 
     public Order(Date aOrderDate, Date aDelivDate, OrderState aOrderState, Account aCustomer, Employee aAssignee)
     {

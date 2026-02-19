@@ -27,6 +27,8 @@ public class Employee extends Role
         super(aAccount);
     }
 
+    protected Employee() { super(); }
+
     //------------------------
     // INTERFACE
     //------------------------

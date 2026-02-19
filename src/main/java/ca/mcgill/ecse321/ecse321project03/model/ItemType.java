@@ -44,6 +44,7 @@ public class ItemType
     //------------------------
     // CONSTRUCTOR
     //------------------------
+    protected ItemType() {}
 
     public ItemType(Size aSize, Color aColor, int aStock, Item aGeneralItem)
     {

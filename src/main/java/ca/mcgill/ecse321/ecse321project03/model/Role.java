@@ -37,6 +37,8 @@ public abstract class Role
         }
     }
 
+    protected Role() { }
+
     //------------------------
     // INTERFACE
     //------------------------
@@ -61,5 +63,10 @@ public abstract class Role
     {
         account = null;
     }
+
+    public int getId() {
+        return id;
+    }
+
 
 }
