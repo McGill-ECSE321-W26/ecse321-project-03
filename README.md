@@ -23,5 +23,6 @@ are collaborating to implement a functional and structured system.
 | Zirun Wang        | kana797         | Proof-reader                   |                       |                       |                       |
 | Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |                       |                       |                       |
 | Maria Klinski     | mashaklin       | Manager, Secretary             |                       |                       |                       |
-| Yani Zhang        | Yani            | Submitter                      |                       |                       |                       |
+| Yani Zhang        | yannniiii       | Submitter                      |                       |                       |                       |
+
 
