@@ -57,10 +57,6 @@ public class ItemType
         }
     }
 
-    public ItemType() {
-
-    }   
-
     //------------------------
     // INTERFACE
     //------------------------
