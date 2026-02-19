@@ -15,12 +15,13 @@ are collaborating to implement a functional and structured system.
 
 ## Team Members
 
-| Name          | GitHub username | Team roles                     | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
-| ------------- | --------------- | ------------------------------ | --------------------- | --------------------- | --------------------- |
-| Team Member A | Vikivik-19      | Manager, Proof-Reader          |                       |                       |                       |
-| Team Member B | EmilySunKI7     | Submitter                      |                       |                       |                       |
-| Team Member C | LySonia         | Manager, Secretary, Note-taker |                       |                       |                       |
-| Team Member D | kana797         | Proof-reader                   |                       |                       |                       |
-| Team Member E | wissamabcc      | Submitter, Contact person      |                       |                       |                       |
-| Team Member F | mashaklin       | Manager, Secretary             |                       |                       |                       |
-| Team Member G | Yani            | Submitter                      |                       |                       |                       |
+| Name              | GitHub username | Team roles                     | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
+| ----------------- | --------------- | ------------------------------ | --------------------- | --------------------- | --------------------- |
+| Victoire Bergeron | Vikivik-19      | Manager, Proof-Reader          |                       |                       |                       |
+| Emily Sun         | EmilySunKI7     | Submitter                      |                       |                       |                       |
+| Sonia Ly          | LySonia         | Manager, Secretary, Note-taker |                       |                       |                       |
+| Zirun Wang        | kana797         | Proof-reader                   |                       |                       |                       |
+| Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |                       |                       |                       |
+| Maria Klinski     | mashaklin       | Manager, Secretary             |                       |                       |                       |
+| Yani Zhang        | Yani            | Submitter                      |                       |                       |                       |
+
