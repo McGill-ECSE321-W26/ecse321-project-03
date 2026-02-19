@@ -50,6 +50,35 @@ public class OrderItem {
         public Order getOrder() {
             return order;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            OrderItemId that = (OrderItemId) o;
+
+            if (quantity != that.quantity) return false;
+
+            // Compare by referenced IDs if possible (safer than comparing whole objects)
+            Integer thisItemTypeId = (itemType == null) ? null : itemType.getId();
+            Integer thatItemTypeId = (that.itemType == null) ? null : that.itemType.getId();
+            if (thisItemTypeId == null ? thatItemTypeId != null : !thisItemTypeId.equals(thatItemTypeId)) return false;
+
+            Integer thisOrderId = (order == null) ? null : order.getId();
+            Integer thatOrderId = (that.order == null) ? null : that.order.getId();
+            return thisOrderId == null ? thatOrderId == null : thisOrderId.equals(thatOrderId);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = quantity;
+            Integer itemTypeId = (itemType == null) ? null : itemType.getId();
+            Integer orderId = (order == null) ? null : order.getId();
+            result = 31 * result + (itemTypeId == null ? 0 : itemTypeId.hashCode());
+            result = 31 * result + (orderId == null ? 0 : orderId.hashCode());
+            return result;
+        }
     }
 
     //------------------------
@@ -64,16 +93,12 @@ public class OrderItem {
     //------------------------
     // CONSTRUCTOR
     //------------------------
-    public OrderItem(){
-
-    }
+    public OrderItem(){}
 
     public OrderItem(OrderItemId orderItemId) {
         cachedHashCode = -1;
         this.orderItemId = orderItemId;
     }
-
-
 
     //------------------------
     // INTERFACE
