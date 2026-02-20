@@ -37,7 +37,7 @@ public abstract class Role
         }
     }
 
-    protected Role() { }
+    public Role() { }
 
     //------------------------
     // INTERFACE

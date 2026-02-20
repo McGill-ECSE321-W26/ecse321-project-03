@@ -26,6 +26,10 @@ public class Manager extends Role
         super(aAccount);
     }
 
+    public Manager(){
+        super();
+    }
+
     //------------------------
     // INTERFACE
     //------------------------
