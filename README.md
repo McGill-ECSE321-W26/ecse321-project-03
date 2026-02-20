@@ -21,7 +21,7 @@ are collaborating to implement a functional and structured system.
 | Emily Sun         | EmilySunKI7     | Submitter                      |           4           |                       |                       |
 | Sonia Ly          | LySonia         | Manager, Secretary, Note-taker |           5           |                       |                       |
 | Zirun Wang        | kana797         | Proof-reader                   |           5           |                       |                       |
-| Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |                       |                       |                       |
+| Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |           7           |                       |                       |
 | Maria Klinski     | mashaklin       | Manager, Secretary             |           6           |                       |                       |
 | Yani Zhang        | yannniiii       | Submitter                      |           6           |                       |                       |
 
@@ -31,6 +31,7 @@ are collaborating to implement a functional and structured system.
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              |                      |
 | 3              |                      | 
+
 
 
 
