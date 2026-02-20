@@ -1,0 +1,98 @@
+enum OrderState { Ordered, InPreparation, Prepared, Delivered, Cancelled }  
+
+enum Size { XS, S, M, L, XL }  
+
+enum Color { White, Brown, Black, Grey, Yellow, Green, Orange, Blue, Purple, Pink, Red } 
+
+enum Tag { Top, Dress, Skirt, Pants, Accessory } 
+
+
+class Account
+{
+  Integer id;
+  username;
+  email;
+  password;
+  address;
+  Integer loyaltyPts;
+  1 customer <- * Order orders;
+  1 account <- 0..1 Cart cart;
+
+}
+
+class Role
+{
+abstract;
+Integer id;
+    0..1 role  -> 1 Account account;
+
+}
+
+class Employee
+{
+  isA Role;
+   1 assignee <- * Order orderAssignments;
+}
+
+class Manager
+{
+    isA Role;
+
+}
+
+
+class Order
+{
+  Integer id;
+  Date orderDate;
+  Date delivDate;
+  OrderState orderState;
+
+}
+
+class OrderItem
+{
+  Integer quantity;
+  * orderItems -> 1 ItemType itemType;
+    * orderItems -> 1 Order order;
+  key {itemType, order}
+
+
+}
+
+class ItemType
+{
+  Size size;
+  Integer id;
+  Color color;
+  Integer stock;
+
+
+}
+
+
+class Item
+{
+  String name;
+  Tag tag;
+  Double price;
+  Integer id;
+  1 generalItem <- * ItemType itemTypes;
+
+}
+
+class CartItem
+{
+    Integer quantity;
+
+  * cartItems -> 1 ItemType itemType;
+  * cartItems -> 1 Cart cart;
+
+key {cart, itemType}
+}
+
+class Cart
+{
+  Integer id;
+
+}
