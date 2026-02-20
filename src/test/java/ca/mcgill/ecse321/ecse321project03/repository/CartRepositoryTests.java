@@ -1,6 +1,7 @@
 package ca.mcgill.ecse321.ecse321project03.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.AfterEach;
@@ -32,23 +33,27 @@ public class CartRepositoryTests {
 
     @Test
     public void testCreateAndReadCart() {
+         // ---------- 1) Create + save customer account ----------
         String username = "Joyanne Smith";
         String email = "joyanne.smith@gmail.com";
         String password = "Password127!";
         String address = "123 Univeristy Street, Montreal, QC";
         int loyaltyPts = 100;
         Account account = new Account(username, email, password, address, loyaltyPts);
-
         accountRepository.save(account);
 
+        // ---------- 2) Create + save customer cart ----------
         Cart cart = new Cart(account);
         cartRepository.save(cart);
 
+        // ---------- 3) Check ID is generated ----------
+        assertNotEquals(0, account.getId());
         int cartId = cart.getId();
-        Cart retrievedCart = cartRepository.findById(cartId).orElse(null);
 
-        assertNotNull(retrievedCart);
-        assertEquals(account.getId(), retrievedCart.getAccount().getId());
-        assertEquals(cartId, retrievedCart.getId());
+        // ---------- 4) Load back & Test ----------
+        Cart loadedCart = cartRepository.findById(cartId).orElse(null);
+        assertNotNull(loadedCart);
+        assertEquals(account.getId(), loadedCart.getAccount().getId());
+        assertEquals(cartId, loadedCart.getId());
     
 }}

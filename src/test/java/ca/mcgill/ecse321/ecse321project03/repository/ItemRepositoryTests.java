@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.ecse321project03.persistance;
+package ca.mcgill.ecse321.ecse321project03.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import ca.mcgill.ecse321.ecse321project03.model.*;
-import ca.mcgill.ecse321.ecse321project03.repository.*;
 
 @SpringBootTest
 public class ItemRepositoryTests {

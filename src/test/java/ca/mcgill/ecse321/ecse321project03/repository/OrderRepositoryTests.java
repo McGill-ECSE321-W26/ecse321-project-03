@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.ecse321project03.persistance;
+package ca.mcgill.ecse321.ecse321project03.repository;
 
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;

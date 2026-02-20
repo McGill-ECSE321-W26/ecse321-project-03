@@ -33,24 +33,27 @@ public class AccountRepositoryTests {
     
     @Test
     public void testCreateAndReadAccount() {
+        // ---------- 1) Create + save customer account ----------
         String username = "Joyanne Smith";
         String email = "joyanne.smith@gmail.com";
         String password = "Password127!";
         String address = "123 Univeristy Street, Montreal, QC";
         int loyaltyPts = 100;
         Account account = new Account(username, email, password, address, loyaltyPts);
-        
         accountRepository.save(account);
 
+        // ---------- 2) Check ID is generated ----------
+        assertNotEquals(0, account.getId());
         int accountId = account.getId();
-        Account retrievedAccount = accountRepository.findById(accountId).orElse(null);
-        
-        assertNotNull(retrievedAccount);
-        assertEquals(username, retrievedAccount.getUsername());
-        assertEquals(email, retrievedAccount.getEmail());
-        assertEquals(address, retrievedAccount.getAddress());
-        assertEquals(loyaltyPts, retrievedAccount.getLoyaltyPts());
-        assertEquals(password, retrievedAccount.getPassword());
+
+        // ---------- 3) Load back & Test ----------
+        Account loadedAccount = accountRepository.findById(accountId).orElse(null);
+        assertNotNull(loadedAccount);
+        assertEquals(username, loadedAccount.getUsername());
+        assertEquals(email, loadedAccount.getEmail());
+        assertEquals(address, loadedAccount.getAddress());
+        assertEquals(loyaltyPts, loadedAccount.getLoyaltyPts());
+        assertEquals(password, loadedAccount.getPassword());
 
     }
     

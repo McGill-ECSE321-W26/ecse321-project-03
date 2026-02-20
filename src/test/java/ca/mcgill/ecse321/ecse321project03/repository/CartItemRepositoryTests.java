@@ -49,34 +49,38 @@ public class CartItemRepositoryTests {
 
     @Test
     public void testCreateAndReadCartItem() {
+        // ---------- 1) Create + save customer item ----------
         Item item = new Item("Sunflower", Item.Tag.Dress, 59.99);
         itemRepository.save(item);
         
+        // ---------- 2) Create + save customer item type ----------
         ItemType itemType = new ItemType(ItemType.Size.XS, ItemType.Color.White, 2, item);
         itemTypeRepository.save(itemType);
 
+        // ---------- 3) Create + save customer account ----------
         String username = "Joyanne Smith";
         String email = "joyanne.smith@gmail.com";
         String password = "Password127!";
         String address = "123 Univeristy Street, Montreal, QC";
         int loyaltyPts = 100;
         Account account = new Account(username, email, password, address, loyaltyPts);
-
         accountRepository.save(account);
 
+        // ---------- 4) Create + save customer cart ----------
         Cart cart = new Cart(account);
         cartRepository.save(cart);
 
+        // ---------- 5) Create + save customer cart item ----------
         CartItem.CartItemId cartItemId = new CartItem.CartItemId(itemType, cart, 3);
         CartItem cartItem = new CartItem(cartItemId);
         cartItemRepository.save(cartItem);
         
-         CartItem retrievedCartItem = cartItemRepository.findById(cartItemId).orElse(null);
-
-        assertNotNull(retrievedCartItem);
-        assertEquals(3, retrievedCartItem.getCartItemId().getQuantity());
-        assertEquals(cart, retrievedCartItem.getCartItemId().getCart());
-        assertEquals(itemType, retrievedCartItem.getCartItemId().getItemType());
+        // ---------- 6) Load back & Test ----------
+        CartItem loadedCartItem = cartItemRepository.findById(cartItemId).orElse(null);
+        assertNotNull(loadedCartItem);
+        assertEquals(3, loadedCartItem.getCartItemId().getQuantity());
+        assertEquals(cart.getId(), loadedCartItem.getCartItemId().getCart().getId());
+        assertEquals(itemType.getId(), loadedCartItem.getCartItemId().getItemType().getId());
     }
     
 }
