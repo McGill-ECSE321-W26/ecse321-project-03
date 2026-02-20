@@ -20,7 +20,7 @@ are collaborating to implement a functional and structured system.
 | Victoire Bergeron | Vikivik-19      | Manager, Proof-Reader          |                       |                       |                       |
 | Emily Sun         | EmilySunKI7     | Submitter                      |                       |                       |                       |
 | Sonia Ly          | LySonia         | Manager, Secretary, Note-taker |                       |                       |                       |
-| Zirun Wang        | kana797         | Proof-reader                   |                       |                       |                       |
+| Zirun Wang        | kana797         | Proof-reader                   |           5           |                       |                       |
 | Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |                       |                       |                       |
 | Maria Klinski     | mashaklin       | Manager, Secretary             |                       |                       |                       |
 | Yani Zhang        | yannniiii       | Submitter                      |                       |                       |                       |
@@ -31,5 +31,6 @@ are collaborating to implement a functional and structured system.
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              |                      |
 | 3              |                      | 
+
 
 
