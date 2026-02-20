@@ -17,7 +17,7 @@ are collaborating to implement a functional and structured system.
 
 | Name              | GitHub username | Team roles                     | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
 | ----------------- | --------------- | ------------------------------ | --------------------- | --------------------- | --------------------- |
-| Victoire Bergeron | Vikivik-19      | Manager, Proof-Reader          |                       |                       |                       |
+| Victoire Bergeron | Vikivik-19      | Manager, Proof-Reader          |          13           |                       |                       |
 | Emily Sun         | EmilySunKI7     | Submitter                      |                       |                       |                       |
 | Sonia Ly          | LySonia         | Manager, Secretary, Note-taker |                       |                       |                       |
 | Zirun Wang        | kana797         | Proof-reader                   |           5           |                       |                       |
@@ -31,6 +31,7 @@ are collaborating to implement a functional and structured system.
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              |                      |
 | 3              |                      | 
+
 
 
 
