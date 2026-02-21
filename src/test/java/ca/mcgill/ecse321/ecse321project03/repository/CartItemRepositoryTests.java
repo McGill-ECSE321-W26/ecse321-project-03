@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,10 +31,8 @@ public class CartItemRepositoryTests {
     @Autowired
     private ItemTypeRepository itemTypeRepository;
 
-    @Autowired
+     @Autowired
     private ItemRepository itemRepository;
-
-    @BeforeEach
 
     @AfterEach
     public void clearDatabase() {
@@ -51,7 +48,7 @@ public class CartItemRepositoryTests {
         // ---------- 1) Create + save customer item ----------
         Item item = new Item("Sunflower", Item.Tag.Dress, 59.99);
         itemRepository.save(item);
-
+        
         // ---------- 2) Create + save customer item type ----------
         ItemType itemType = new ItemType(ItemType.Size.XS, ItemType.Color.White, 2, item);
         itemTypeRepository.save(itemType);
@@ -73,7 +70,7 @@ public class CartItemRepositoryTests {
         CartItem.CartItemId cartItemId = new CartItem.CartItemId(itemType, cart, 3);
         CartItem cartItem = new CartItem(cartItemId);
         cartItemRepository.save(cartItem);
-
+        
         // ---------- 6) Load back & Test ----------
         CartItem loadedCartItem = cartItemRepository.findById(cartItemId).orElse(null);
         assertNotNull(loadedCartItem);
@@ -81,5 +78,5 @@ public class CartItemRepositoryTests {
         assertEquals(cart.getId(), loadedCartItem.getCartItemId().getCart().getId());
         assertEquals(itemType.getId(), loadedCartItem.getCartItemId().getItemType().getId());
     }
-
+    
 }

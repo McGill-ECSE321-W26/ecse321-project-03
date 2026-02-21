@@ -33,6 +33,9 @@ public class OrderItemRepositoryTests {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @AfterEach
     public void clearDatabase() {
         orderItemRepository.deleteAll();
@@ -40,6 +43,7 @@ public class OrderItemRepositoryTests {
         itemTypeRepository.deleteAll();
         itemRepository.deleteAll();
         employeeRepository.deleteAll();
+        roleRepository.deleteAll();
         accountRepository.deleteAll();
     }
 

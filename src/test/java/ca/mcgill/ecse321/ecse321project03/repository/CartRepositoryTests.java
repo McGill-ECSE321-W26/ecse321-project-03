@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,14 +15,11 @@ import ca.mcgill.ecse321.ecse321project03.model.Cart;
 @SpringBootTest
 public class CartRepositoryTests {
 
-
     @Autowired
     private CartRepository cartRepository;
 
     @Autowired
     private AccountRepository accountRepository;
-
-    @BeforeEach
 
     @AfterEach
     public void clearDatabase() {
@@ -33,7 +29,7 @@ public class CartRepositoryTests {
 
     @Test
     public void testCreateAndReadCart() {
-        // ---------- 1) Create + save customer account ----------
+         // ---------- 1) Create + save customer account ----------
         String username = "Joyanne Smith";
         String email = "joyanne.smith@gmail.com";
         String password = "Password127!";
