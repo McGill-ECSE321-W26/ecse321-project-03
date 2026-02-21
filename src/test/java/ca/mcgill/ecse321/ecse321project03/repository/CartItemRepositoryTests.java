@@ -18,11 +18,8 @@ import ca.mcgill.ecse321.ecse321project03.model.ItemType;
 @SpringBootTest
 public class CartItemRepositoryTests {
 
-    
     @Autowired
     private CartItemRepository cartItemRepository;
-
-   
 
     @Autowired
     private CartRepository cartRepository;
@@ -42,9 +39,10 @@ public class CartItemRepositoryTests {
     public void clearDatabase() {
         cartItemRepository.deleteAll();
         cartRepository.deleteAll();
-        accountRepository.deleteAll();
         itemTypeRepository.deleteAll();
         itemRepository.deleteAll();
+        accountRepository.deleteAll();
+
     }
 
     @Test

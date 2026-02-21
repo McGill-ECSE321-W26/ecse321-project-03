@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Date;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -26,8 +24,8 @@ public class OrderRepositoryTests {
     @Autowired private OrderRepository orderRepository;
     @Autowired private AccountRepository accountRepository;
 
-    @Autowired(required = false) private RoleRepository roleRepository;
-    @Autowired(required = false) private EmployeeRepository employeeRepository;
+    @Autowired private RoleRepository roleRepository;
+    @Autowired private EmployeeRepository employeeRepository;
 
     @AfterEach
     public void clearDatabase() {

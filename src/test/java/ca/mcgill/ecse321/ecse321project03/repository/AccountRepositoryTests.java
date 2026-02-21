@@ -20,16 +20,17 @@ public class AccountRepositoryTests {
     private AccountRepository accountRepository;
 
     @Autowired
-    private CartRepository cartRepository;
+    private RoleRepository roleRepository;
 
-    @BeforeEach
+    @Autowired
+    private CartRepository cartRepository;
 
     @AfterEach
     public void clearDatabase() {
-        accountRepository.deleteAll();
         cartRepository.deleteAll();
+        roleRepository.deleteAll();
+        accountRepository.deleteAll();
     }
-
     
     @Test
     public void testCreateAndReadAccount() {
