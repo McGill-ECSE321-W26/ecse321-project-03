@@ -4,6 +4,7 @@ import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
 import ca.mcgill.ecse321.ecse321project03.model.Role;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +20,16 @@ public class RoleRepositoryTests {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @AfterEach
+    public void clearDatabase() {
+        roleRepository.deleteAll();
+        cartRepository.deleteAll();
+        accountRepository.deleteAll();
+    }
 
     @Test
     public void testPersistAndLoadRole() {

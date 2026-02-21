@@ -5,7 +5,6 @@ import ca.mcgill.ecse321.ecse321project03.model.Account;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,18 +17,12 @@ public class AccountRepositoryTests {
     @Autowired
     private AccountRepository accountRepository;
 
-    @Autowired
-    private CartRepository cartRepository;
-
-    @BeforeEach
-
     @AfterEach
     public void clearDatabase() {
         accountRepository.deleteAll();
-        cartRepository.deleteAll();
     }
 
-
+    
     @Test
     public void testCreateAndReadAccount() {
         // ---------- 1) Create + save customer account ----------
@@ -55,6 +48,4 @@ public class AccountRepositoryTests {
         assertEquals(password, loadedAccount.getPassword());
 
     }
-
-
 }
