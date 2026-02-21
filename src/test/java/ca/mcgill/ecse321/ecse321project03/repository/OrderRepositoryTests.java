@@ -3,12 +3,6 @@ package ca.mcgill.ecse321.ecse321project03.repository;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
-import ca.mcgill.ecse321.ecse321project03.model.Role;
-
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -16,18 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Date;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
 public class OrderRepositoryTests {
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private AccountRepository accountRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
-    @Autowired(required = false) private RoleRepository roleRepository;
-    @Autowired(required = false) private EmployeeRepository employeeRepository;
+    @Autowired(required = false)
+    private RoleRepository roleRepository;
+    @Autowired(required = false)
+    private EmployeeRepository employeeRepository;
 
     @AfterEach
     public void clearDatabase() {

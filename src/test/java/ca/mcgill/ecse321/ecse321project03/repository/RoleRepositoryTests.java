@@ -21,7 +21,7 @@ public class RoleRepositoryTests {
     private RoleRepository roleRepository;
 
     @Test
-    public void testPersistAndLoadRole(){
+    public void testPersistAndLoadRole() {
         // ---------- 1) Create + save accounts ----------
         String username = "ilovemuffins1234";
         String email = "muffinlove@thebest.com";

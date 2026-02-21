@@ -16,7 +16,7 @@ import ca.mcgill.ecse321.ecse321project03.model.Cart;
 @SpringBootTest
 public class CartRepositoryTests {
 
-    
+
     @Autowired
     private CartRepository cartRepository;
 
@@ -33,7 +33,7 @@ public class CartRepositoryTests {
 
     @Test
     public void testCreateAndReadCart() {
-         // ---------- 1) Create + save customer account ----------
+        // ---------- 1) Create + save customer account ----------
         String username = "Joyanne Smith";
         String email = "joyanne.smith@gmail.com";
         String password = "Password127!";
@@ -55,5 +55,6 @@ public class CartRepositoryTests {
         assertNotNull(loadedCart);
         assertEquals(account.getId(), loadedCart.getAccount().getId());
         assertEquals(cartId, loadedCart.getId());
-    
-}}
+
+    }
+}

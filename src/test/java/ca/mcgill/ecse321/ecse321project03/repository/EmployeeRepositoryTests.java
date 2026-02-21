@@ -24,14 +24,14 @@ public class EmployeeRepositoryTests {
     private EmployeeRepository employeeRepository;
 
     @AfterEach
-    public void clearDatabase(){
+    public void clearDatabase() {
         employeeRepository.deleteAll();
         roleRepository.deleteAll();
         accountRepository.deleteAll();
     }
 
     @Test
-    public void testPersistAndLoadEmployee(){
+    public void testPersistAndLoadEmployee() {
         // ---------- 1) Create + save account ----------
         String username = "ilovemuffins1234";
         String email = "muffinlove@thebest.com";

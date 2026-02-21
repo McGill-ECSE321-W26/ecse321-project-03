@@ -3,7 +3,6 @@ package ca.mcgill.ecse321.ecse321project03.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.sql.Date;
-import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

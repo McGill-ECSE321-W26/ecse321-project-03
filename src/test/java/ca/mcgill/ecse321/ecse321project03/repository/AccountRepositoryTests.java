@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -30,7 +29,7 @@ public class AccountRepositoryTests {
         cartRepository.deleteAll();
     }
 
-    
+
     @Test
     public void testCreateAndReadAccount() {
         // ---------- 1) Create + save customer account ----------
@@ -56,7 +55,6 @@ public class AccountRepositoryTests {
         assertEquals(password, loadedAccount.getPassword());
 
     }
-    
 
 
 }

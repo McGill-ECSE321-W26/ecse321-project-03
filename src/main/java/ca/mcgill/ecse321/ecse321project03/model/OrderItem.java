@@ -1,9 +1,5 @@
 package ca.mcgill.ecse321.ecse321project03.model;
 
-/*PLEASE DO NOT EDIT THIS CODE*/
-/*This code was generated using the UMPLE 1.36.0.8091.03bcab5b3 modeling language!*/
-
-
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -11,21 +7,27 @@ import jakarta.persistence.ManyToOne;
 
 import java.io.Serializable;
 
-// line 53 "model.ump"
-// line 134 "model.ump"
 @Entity
 public class OrderItem {
 
+    //------------------------
+    // Composite primary class for CartItem
+    //------------------------
     @Embeddable
     public static class OrderItemId implements Serializable {
 
+        // Attributes
         private int quantity;
 
+        // Associations
         @ManyToOne
         private ItemType itemType;
         @ManyToOne
         private Order order;
 
+        //------------------------
+        // CONSTRUCTOR
+        //------------------------
         public OrderItemId() {
             super();
         }
@@ -37,6 +39,9 @@ public class OrderItem {
             this.quantity = quantity;
         }
 
+        //------------------------
+        // GETTER
+        //------------------------
         public int getQuantity() {
             return quantity;
         }
@@ -51,6 +56,7 @@ public class OrderItem {
             return order;
         }
 
+        // Comparison method
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -70,6 +76,7 @@ public class OrderItem {
             return thisOrderId == null ? thatOrderId == null : thisOrderId.equals(thatOrderId);
         }
 
+        // hashcode method
         @Override
         public int hashCode() {
             int result = quantity;
@@ -85,7 +92,7 @@ public class OrderItem {
     // MEMBER VARIABLES
     //------------------------
 
-    //Registration Associations
+    // Attributes
     @EmbeddedId
     private OrderItemId orderItemId;
     private int cachedHashCode;
@@ -93,7 +100,8 @@ public class OrderItem {
     //------------------------
     // CONSTRUCTOR
     //------------------------
-    public OrderItem(){}
+    public OrderItem() {
+    }
 
     public OrderItem(OrderItemId orderItemId) {
         cachedHashCode = -1;
@@ -104,14 +112,10 @@ public class OrderItem {
     // INTERFACE
     //------------------------
 
-    public OrderItemId getOrderItemId(){
-        return orderItemId;
-    }
-
-    public boolean setOrderItemId(OrderItemId aNewOrderItemId){
+    // Setter
+    public boolean setOrderItemId(OrderItemId aNewOrderItemId) {
         boolean wasSet = false;
-        if (aNewOrderItemId != null)
-        {
+        if (aNewOrderItemId != null) {
             orderItemId = aNewOrderItemId;
             wasSet = true;
         }
@@ -119,7 +123,12 @@ public class OrderItem {
         return wasSet;
     }
 
+    // Getter method
+    public OrderItemId getOrderItemId() {
+        return orderItemId;
+    }
 
+    // Comparison method
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -139,6 +148,7 @@ public class OrderItem {
         return true;
     }
 
+    // HashCode method
     public int hashCode() {
         if (cachedHashCode != -1) {
             return cachedHashCode;
@@ -153,6 +163,7 @@ public class OrderItem {
         return cachedHashCode;
     }
 
+    // Delete method
     public void delete() {
         orderItemId = null;
     }
