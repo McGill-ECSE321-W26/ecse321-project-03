@@ -7,6 +7,11 @@ import java.sql.Date;
 
 public class OrderResponseDto { // This class is for the attributes that must be displayed to the UI
 
+
+    //------------------------
+    // Attributes important to display in the UI
+    //------------------------
+
     private int id;
     private Date orderDate;
     private Date delivDate;
@@ -21,6 +26,12 @@ public class OrderResponseDto { // This class is for the attributes that must be
     //------------------------
     // CONSTRUCTOR
     //------------------------
+
+    /**
+     * Constructor that retrieves important data from an order object in a transfer object
+     * @author Wissam Abchiche
+     * @param order order to retrieve its important data
+     */
     public OrderResponseDto(Order order) {
         this.id = order.getId();
         this.orderDate = order.getOrderDate();
@@ -31,6 +42,9 @@ public class OrderResponseDto { // This class is for the attributes that must be
     }
 
 
+    //------------------------
+    // Getters
+    //------------------------
     public int getId() {
         return id;
     }
