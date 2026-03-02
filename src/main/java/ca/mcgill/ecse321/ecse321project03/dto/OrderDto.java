@@ -1,36 +1,40 @@
 package ca.mcgill.ecse321.ecse321project03.dto;
 
 
-import ca.mcgill.ecse321.ecse321project03.model.Order;
-import ca.mcgill.ecse321.ecse321project03.model.Order.OrderState;
+import jakarta.validation.constraints.NotNull;
+
 import java.sql.Date;
 
 //Reference: Tutoral 7
 public class OrderDto {
     
     // displayed fields
-    private int id;
-    private AccountResponseDto customer;
-    private Date orderDate;
+
+
+    // no orderDate attribute because it is set when the order object is created (current time)
+
+    // no orderStatus attribute because it is set when the object is created (to Ordered)
+    @NotNull(message = "Customer id linked to the order must not be null")
+    private int customerId;
+
+    @NotNull(message = "Delivery date must not be null")
     private Date delivDate;
-    private OrderState orderState;
-    private EmployeeDto assignee;
+
+    @NotNull(message = "Employee id assigned to the order must not be null")
+    private int assigneeId;
 
 
     //------------------------
     // CONSTRUCTOR
     //------------------------
-    public OrderDto(Order order) {
-        this.id = order.getId();
-        this.customer = new AccountResponseDto(order.getCustomer());
-        this.orderDate = order.getOrderDate();
-        this.delivDate = order.getDelivDate();
-        this.orderState = order.getOrderState();
-        this.assignee = new EmployeeDto(order.getAssignee());
+    public OrderDto(int customerId,  Date delivDate, int assigneeId) {
+        this.customerId = customerId;
+        this.delivDate = delivDate;
+        this.assigneeId = assigneeId;
     }
 
     @SuppressWarnings("unused")
-    public OrderDto() {
+    public OrderDto() { // Needed by Jackson to deserialize JSON
 
     }
 
@@ -40,28 +44,17 @@ public class OrderDto {
 
 
     // Getter methods
-    public int getId() {
-        return id;
-    }
 
-    public AccountResponseDto getCustomer() {
-        return customer;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
+    public int getCustomerId() {
+        return customerId;
     }
 
     public Date getDelivDate() {
         return delivDate;
     }
 
-    public OrderState getOrderState() {
-        return orderState;
-    }
-
-    public EmployeeDto getAssignee() {
-        return assignee;
+    public int getAssigneeId() {
+        return assigneeId;
     }
 
     
