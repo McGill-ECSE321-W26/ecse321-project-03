@@ -41,11 +41,11 @@ public class OrderService {
     /**
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
      * @author Wissam Abchiche
-     * @param orderDto The transfer object
-     * @return the Order object
+     * @param orderDto The transfer object created
+     * @return OrderResponse Dto object
      */
     @Transactional
-    public Order createOrder(@Valid OrderCreationDto orderDto) {
+    public OrderResponseDto createOrder(@Valid OrderCreationDto orderDto) {
 
         // Verify that the customer id entered by the customer when making the order is valid.
         // Otherwise, throw an error
@@ -77,23 +77,9 @@ public class OrderService {
                 null);
 
 
-        return orderRepository.save(newOrder);
+        return new OrderResponseDto(orderRepository.save(newOrder));
     }
 
-    /**
-     * Find an order corresponding to a given id
-     * @author Wissam Abchiche
-     * @param id Order id
-     * @return The order with the given id
-     */
-    @Transactional
-    public Order findOrderById(int id) {
-        Order orderFromDB = orderRepository.findById(id);
-        if (orderFromDB == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + id);
-        }
-        return orderFromDB;
-    }
 
     /**
      * Find an order corresponding to a given id
@@ -103,7 +89,10 @@ public class OrderService {
      */
     @Transactional
     public OrderResponseDto findOrderByIdResponseDto(int id) {
-        Order orderFromDB = findOrderById(id);
+        Order orderFromDB = orderRepository.findById(id);
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + id);
+        }
         return new OrderResponseDto(orderFromDB);
     }
 
@@ -112,13 +101,16 @@ public class OrderService {
      * @author Wissam Abchiche
      * @param orderId OrderId to which an employee is assigned
      * @param employeeId The employee id
-     * @return The modified order (after assigning an employee)
+     * @return The OrderResponse Dto object (after assigning an employee)
      */
     @Transactional
-    public Order assignEmployee(int orderId, int employeeId) {
+    public OrderResponseDto assignEmployee(int orderId, int employeeId) {
 
         // Verify order exists
-        Order order = findOrderById(orderId);
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
+        }
 
         // Verify that the employee with the given id exists and that the employee is not the one who made the order
         Employee assignee = employeeRepository.findById(employeeId);
@@ -131,7 +123,7 @@ public class OrderService {
         // Assign the employee to the order
         order.setAssignee(assignee);
 
-        return orderRepository.save(order);
+        return new OrderResponseDto(orderRepository.save(order));
     }
 
     /**
@@ -199,13 +191,16 @@ public class OrderService {
      * @param orderId Order for which the state must change
      * @param orderStateNew New state of the order
      * @param accountId Account who is making the change
-     * @return the updated order
+     * @return the updated OrderResponse DTO
      */
     @Transactional
-    public Order updateStatus(int orderId, Order.OrderState orderStateNew, int accountId) {
+    public OrderResponseDto updateStatus(int orderId, Order.OrderState orderStateNew, int accountId) {
 
         // Verify order exists
-        Order orderFromDB = findOrderById(orderId);
+        Order orderFromDB = orderRepository.findById(orderId);
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
+        }
 
         // Update status
          if (orderStateNew ==  Order.OrderState.Cancelled) {
@@ -227,7 +222,7 @@ public class OrderService {
              throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
          }
 
-        return orderRepository.save(orderFromDB);
+        return new OrderResponseDto(orderRepository.save(orderFromDB));
     }
 
 
