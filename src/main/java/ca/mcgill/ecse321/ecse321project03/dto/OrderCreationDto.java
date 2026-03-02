@@ -14,6 +14,8 @@ public class OrderCreationDto {
     // no orderDate attribute because it is set when the order object is created (current time)
 
     // no orderStatus attribute because it is set when the object is created (to Ordered)
+
+    // no employee attribute as the employee to the order gets assigned later (either an employee assign themself or a manager assign an employee)
     @NotNull(message = "Customer id linked to the order must not be null")
     private int customerId; // I guess the customer must enter their id when making an order, otherwise no way to know who made the order ?
 
@@ -22,9 +24,6 @@ public class OrderCreationDto {
     @NotNull(message = "Delivery date must not be null")
     private Date delivDate; // The delivery date is chosen by the customer
 
-    @NotNull(message = "Employee id assigned to the order must not be null")
-    private int assigneeId;
-
 
     //------------------------
     // CONSTRUCTOR
@@ -32,7 +31,6 @@ public class OrderCreationDto {
     public OrderCreationDto(int customerId, Date delivDate, int assigneeId) {
         this.customerId = customerId;
         this.delivDate = delivDate;
-        this.assigneeId = assigneeId;
     }
 
     @SuppressWarnings("unused")
@@ -55,9 +53,6 @@ public class OrderCreationDto {
         return delivDate;
     }
 
-    public int getAssigneeId() {
-        return assigneeId;
-    }
 
     
 }

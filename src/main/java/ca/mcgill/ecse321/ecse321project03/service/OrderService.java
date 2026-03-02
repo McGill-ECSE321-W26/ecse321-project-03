@@ -38,14 +38,11 @@ public class OrderService {
     public Order createOrder(@Valid OrderCreationDto orderDto) {
 
         Account customer = accountRepository.findById(orderDto.getCustomerId());
-        Employee assignee = employeeRepository.findByAccount_Id(orderDto.getAssigneeId());
 
         if (customer == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
         }
-        if (customer == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + orderDto.getAssigneeId());
-        }
+
 
         Date orderDate = new Date(System.currentTimeMillis());
 
@@ -62,7 +59,7 @@ public class OrderService {
                 orderDto.getDelivDate(),
                 Order.OrderState.Ordered,
                 customer,
-                assignee);
+                null);
         return orderRepository.save(newOrder);
     }
 
@@ -76,6 +73,17 @@ public class OrderService {
     }
 
 
+    @Transactional
+    public Order assignEmployee(Order order, int employeeId) {
+        Employee assignee = employeeRepository.findById(employeeId);
+
+        if (assignee == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + employeeId);
+        }
+
+        order.setAssignee(assignee);
+        return orderRepository.save(order);
+    }
     private void verifyUpdateStatus(Order orderFromDB, Order.OrderState orderStateOld, Order.OrderState orderStateNew) {
         if (orderFromDB.getOrderState() !=  orderStateOld) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Order with id " + orderFromDB.getId() + " cannot be switched to " + orderStateNew.toString() + " because it is not " + orderStateOld);
