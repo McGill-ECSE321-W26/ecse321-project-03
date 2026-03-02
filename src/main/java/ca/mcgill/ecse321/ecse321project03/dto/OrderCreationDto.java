@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 import java.sql.Date;
 
 //Reference: Tutoral 7
-public class OrderDto {
-    
+public class OrderCreationDto {
+
     // displayed fields
 
 
@@ -15,10 +15,12 @@ public class OrderDto {
 
     // no orderStatus attribute because it is set when the object is created (to Ordered)
     @NotNull(message = "Customer id linked to the order must not be null")
-    private int customerId;
+    private int customerId; // I guess the customer must enter their id when making an order, otherwise no way to know who made the order ?
+
+
 
     @NotNull(message = "Delivery date must not be null")
-    private Date delivDate;
+    private Date delivDate; // The delivery date is chosen by the customer
 
     @NotNull(message = "Employee id assigned to the order must not be null")
     private int assigneeId;
@@ -27,14 +29,14 @@ public class OrderDto {
     //------------------------
     // CONSTRUCTOR
     //------------------------
-    public OrderDto(int customerId,  Date delivDate, int assigneeId) {
+    public OrderCreationDto(int customerId, Date delivDate, int assigneeId) {
         this.customerId = customerId;
         this.delivDate = delivDate;
         this.assigneeId = assigneeId;
     }
 
     @SuppressWarnings("unused")
-    public OrderDto() { // Needed by Jackson to deserialize JSON
+    public OrderCreationDto() { // Needed by Jackson to deserialize JSON
 
     }
 

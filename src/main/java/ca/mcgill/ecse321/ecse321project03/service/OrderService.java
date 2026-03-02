@@ -2,7 +2,7 @@ package ca.mcgill.ecse321.ecse321project03.service;
 
 
 
-import ca.mcgill.ecse321.ecse321project03.dto.OrderDto;
+import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;
@@ -35,7 +35,7 @@ public class OrderService {
     private EmployeeRepository employeeRepository;
 
     @Transactional
-    public Order createOrder(@Valid OrderDto orderDto) {
+    public Order createOrder(@Valid OrderCreationDto orderDto) {
 
         Account customer = accountRepository.findById(orderDto.getCustomerId());
         Employee assignee = employeeRepository.findByAccount_Id(orderDto.getAssigneeId());
@@ -85,6 +85,11 @@ public class OrderService {
     }
 
     private void cancelOrder(Order order) {
+        Date currentDate = new Date(System.currentTimeMillis());
+        if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60 * 60 * 1000)) < 24) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The order cannot be cancelled less " +
+                    "than 24 hours before the delivery date " + order.getDelivDate());
+        }
         order.setOrderState(Order.OrderState.Cancelled);
     }
 
