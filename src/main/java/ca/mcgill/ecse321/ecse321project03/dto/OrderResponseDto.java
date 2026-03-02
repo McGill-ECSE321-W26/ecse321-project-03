@@ -18,6 +18,9 @@ public class OrderResponseDto { // This class is for the attributes that must be
     public OrderResponseDto() {
     }
 
+    //------------------------
+    // CONSTRUCTOR
+    //------------------------
     public OrderResponseDto(Order order) {
         this.id = order.getId();
         this.orderDate = order.getOrderDate();

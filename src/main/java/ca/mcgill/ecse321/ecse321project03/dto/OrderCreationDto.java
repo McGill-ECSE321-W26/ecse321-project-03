@@ -15,9 +15,9 @@ public class OrderCreationDto {
 
     // no orderStatus attribute because it is set when the object is created (to Ordered)
 
-    // no employee attribute as the employee to the order gets assigned later (either an employee assign themself or a manager assign an employee)
+    // no employee attribute as the employee linked to the order gets assigned later (either an employee assigns himself or a manager assigns an employee)
     @NotNull(message = "Customer id linked to the order must not be null")
-    private int customerId; // I guess the customer must enter their id when making an order, otherwise no way to know who made the order ?
+    private int customerId; // The customer must enter their id when making an order, otherwise no way to know who made the order ?
 
 
 
@@ -28,7 +28,7 @@ public class OrderCreationDto {
     //------------------------
     // CONSTRUCTOR
     //------------------------
-    public OrderCreationDto(int customerId, Date delivDate, int assigneeId) {
+    public OrderCreationDto(int customerId, Date delivDate) {
         this.customerId = customerId;
         this.delivDate = delivDate;
     }
