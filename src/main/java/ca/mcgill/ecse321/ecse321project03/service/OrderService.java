@@ -3,6 +3,7 @@ package ca.mcgill.ecse321.ecse321project03.service;
 
 
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
+import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;
@@ -72,6 +73,11 @@ public class OrderService {
         return orderFromDB;
     }
 
+    @Transactional
+    public OrderResponseDto findOrderByIdResponseDto(int id) {
+        Order orderFromDB = findOrderById(id);
+        return new OrderResponseDto(orderFromDB);
+    }
 
     @Transactional
     public Order assignEmployee(Order order, int employeeId) {
