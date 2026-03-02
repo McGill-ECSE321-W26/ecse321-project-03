@@ -189,12 +189,12 @@ public class OrderService {
      * Update the status of an order to a given status and verify if the change is valid
      * @author Wissam Abchiche
      * @param orderId Order for which the state must change
-     * @param orderStateNew New state of the order
+     * @param orderState New state of the order
      * @param accountId Account who is making the change
      * @return the updated OrderResponse DTO
      */
     @Transactional
-    public OrderResponseDto updateStatus(int orderId, Order.OrderState orderStateNew, int accountId) {
+    public OrderResponseDto updateStatus(int orderId, String orderState, int accountId) {
 
         // Verify order exists
         Order orderFromDB = orderRepository.findById(orderId);
@@ -202,6 +202,7 @@ public class OrderService {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
 
+        Order.OrderState orderStateNew = Order.OrderState.valueOf(orderState);
         // Update status
          if (orderStateNew ==  Order.OrderState.Cancelled) {
             cancelOrder(orderFromDB, accountId);
