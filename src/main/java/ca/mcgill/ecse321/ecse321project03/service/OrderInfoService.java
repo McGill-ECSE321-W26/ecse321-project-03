@@ -6,6 +6,7 @@ import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -23,22 +24,13 @@ public class OrderInfoService {
     @Autowired
     private OrderRepository orderRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
 
     /**
      * Get all DTO orders, ready to display
      * @return A list of OrderResponseDto objects
      * @author Sonia Ly
      */
-    @GetMapping("/orders")
+    @Transactional
     public List<OrderResponseDto> viewOrders() {
         return getAllOrders();
     }
@@ -48,7 +40,7 @@ public class OrderInfoService {
      * @return A list of OrderResponseDto objects sorted in ascending order date
      * @author Sonia Ly
      */
-    @GetMapping("/orders/")   // TODO: Unsure of that the uri would be
+    @Transactional
     public List<OrderResponseDto> viewOrdersByOrderDate() {
         List<OrderResponseDto> allOrdersDTO = getAllOrders();
 
@@ -62,8 +54,8 @@ public class OrderInfoService {
      * @return A list of OrderResponseDto objects sorted by order date
      * @author Sonia Ly
      */
-    @GetMapping("/orders/")
-    public List<OrderResponseDto> viewOrdersByOrderDate(@RequestParam String filterDirection) {
+    @Transactional
+    public List<OrderResponseDto> viewOrdersByOrderDate(String filterDirection) {
         List<OrderResponseDto> allOrdersDTO = getAllOrders();
         if (filterDirection.equals("descending")) {
             allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderDate).reversed());
@@ -79,8 +71,8 @@ public class OrderInfoService {
      * @return A list of OrderResponseDto objects sorted in ascending order date
      * @author Sonia Ly
      */
-    @GetMapping("/orders/")
-    public List<OrderResponseDto> viewOrdersByCustomer(@RequestParam String filterDirection) {
+    @Transactional
+    public List<OrderResponseDto> viewOrdersByCustomer(String filterDirection) {
         List<OrderResponseDto> allOrdersDTO = getAllOrders();
         if (filterDirection.equals("descending")) {
             allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getCustomerId).reversed());
@@ -96,8 +88,8 @@ public class OrderInfoService {
      * @return A list of OrderResponseDto objects sorted in ascending order date
      * @author Sonia Ly
      */
-    @GetMapping("/orders/")
-    public List<OrderResponseDto> viewOrdersByStatus(@RequestParam String filterDirection) {
+    @Transactional
+    public List<OrderResponseDto> viewOrdersByStatus(String filterDirection) {
         List<OrderResponseDto> allOrdersDTO = getAllOrders();
         if (filterDirection.equals("descending")) {
             allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderState).reversed());
