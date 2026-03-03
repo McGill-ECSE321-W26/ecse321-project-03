@@ -39,5 +39,5 @@ public interface OrderRepository extends CrudRepository<Order, Integer> {
     /**
      * Find an order by id.
      */
-    Order findById(int id);
+   // Order findById(int id);
 }

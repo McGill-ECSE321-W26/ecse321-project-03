@@ -42,14 +42,14 @@ public class OrderService {
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
      * @author Wissam Abchiche
      * @param orderDto The transfer object created
-     * @return OrderResponse Dto object
+     * @return the order
      */
     @Transactional
-    public OrderResponseDto createOrder(@Valid OrderCreationDto orderDto) {
+    public Order createOrder(@Valid OrderCreationDto orderDto) {
 
         // Verify that the customer id entered by the customer when making the order is valid.
         // Otherwise, throw an error
-        Account customer = accountRepository.findById(orderDto.getCustomerId());
+        Account customer = accountRepository.findById(orderDto.getCustomerId()).orElse(null);
         if (customer == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
         }
@@ -77,7 +77,7 @@ public class OrderService {
                 null);
 
 
-        return new OrderResponseDto(orderRepository.save(newOrder));
+        return orderRepository.save(newOrder);
     }
 
 
@@ -85,15 +85,15 @@ public class OrderService {
      * Find an order corresponding to a given id
      * @author Wissam Abchiche
      * @param id Order id
-     * @return The OrderResponse Dto object that is used to display the order information in the UI
+     * @return The found order object
      */
     @Transactional
-    public OrderResponseDto findOrderByIdResponseDto(int id) {
-        Order orderFromDB = orderRepository.findById(id);
+    public Order findOrderByIdResponseDto(int id) {
+        Order orderFromDB = orderRepository.findById(id).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + id);
         }
-        return new OrderResponseDto(orderFromDB);
+        return orderFromDB;
     }
 
     /**
@@ -101,19 +101,19 @@ public class OrderService {
      * @author Wissam Abchiche
      * @param orderId OrderId to which an employee is assigned
      * @param employeeId The employee id
-     * @return The OrderResponse Dto object (after assigning an employee)
+     * @return The modified order object (after assigning an employee)
      */
     @Transactional
-    public OrderResponseDto assignEmployee(int orderId, int employeeId) {
+    public Order assignEmployee(int orderId, int employeeId) {
 
         // Verify order exists
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
 
         // Verify that the employee with the given id exists and that the employee is not the one who made the order
-        Employee assignee = employeeRepository.findById(employeeId);
+        Employee assignee = employeeRepository.findById(employeeId).orElse(null);
         if (assignee == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + employeeId);
         } else if (assignee.getAccount().getId() == order.getCustomer().getId() ) {
@@ -123,7 +123,7 @@ public class OrderService {
         // Assign the employee to the order
         order.setAssignee(assignee);
 
-        return new OrderResponseDto(orderRepository.save(order));
+        return orderRepository.save(order);
     }
 
     /**
@@ -156,7 +156,7 @@ public class OrderService {
 
 
         // Verify that the account who is cancelling the order exists
-        Account account = accountRepository.findById(accountId);
+        Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + accountId);
         }
@@ -191,13 +191,13 @@ public class OrderService {
      * @param orderId Order for which the state must change
      * @param orderState New state of the order
      * @param accountId Account who is making the change
-     * @return the updated OrderResponse DTO
+     * @return the updated Order object
      */
     @Transactional
-    public OrderResponseDto updateStatus(int orderId, String orderState, int accountId) {
+    public Order updateStatus(int orderId, String orderState, int accountId) {
 
         // Verify order exists
-        Order orderFromDB = orderRepository.findById(orderId);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
@@ -223,7 +223,7 @@ public class OrderService {
              throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
          }
 
-        return new OrderResponseDto(orderRepository.save(orderFromDB));
+        return orderRepository.save(orderFromDB);
     }
 
 

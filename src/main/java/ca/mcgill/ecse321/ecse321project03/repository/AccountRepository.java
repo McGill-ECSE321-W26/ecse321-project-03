@@ -19,5 +19,5 @@ public interface AccountRepository extends CrudRepository<Account, Integer> {
     /**
      * Find an account by id.
      */
-    Account findById(int id);
+   // Account findById(int id);
 }
