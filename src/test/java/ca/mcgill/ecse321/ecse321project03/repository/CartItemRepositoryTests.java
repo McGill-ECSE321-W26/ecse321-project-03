@@ -67,14 +67,14 @@ public class CartItemRepositoryTests {
         cartRepository.save(cart);
 
         // ---------- 5) Create + save customer cart item ----------
-        CartItem.CartItemId cartItemId = new CartItem.CartItemId(itemType, cart, 3);
-        CartItem cartItem = new CartItem(cartItemId);
+        CartItem.CartItemId cartItemId = new CartItem.CartItemId(itemType, cart);
+        CartItem cartItem = new CartItem(cartItemId, 3);
         cartItemRepository.save(cartItem);
         
         // ---------- 6) Load back & Test ----------
         CartItem loadedCartItem = cartItemRepository.findById(cartItemId).orElse(null);
         assertNotNull(loadedCartItem);
-        assertEquals(3, loadedCartItem.getCartItemId().getQuantity());
+        assertEquals(3, loadedCartItem.getQuantity());
         assertEquals(cart.getId(), loadedCartItem.getCartItemId().getCart().getId());
         assertEquals(itemType.getId(), loadedCartItem.getCartItemId().getItemType().getId());
     }

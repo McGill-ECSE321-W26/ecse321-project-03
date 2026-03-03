@@ -6,10 +6,7 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.*;
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +17,7 @@ import jakarta.validation.Valid;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @Validated
@@ -37,19 +35,43 @@ public class OrderService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ItemTypeRepository itemTypeRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
 
     /**
-     * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
+     * Create an order and perform checkout based on the OrderCreationDTO transfer object
+     * (where only the customer id and the chosen delivery date are provided in the UI).
+     *
+     * This method retrieves the customer's current cart, validates the cart contents
+     * (including item quantities and stock availability), creates the Order entity,
+     * converts each CartItem into an OrderItem, updates the stock of the corresponding
+     * ItemType, and finally clears the cart after a successful checkout.
+     *
+     * The created Order and its corresponding OrderItems are returned in an
+     * OrderResponseDto so the UI can display the purchased items and quantities.
+     *
      * @author Wissam Abchiche
-     * @param orderDto The transfer object created
-     * @return OrderResponse Dto object
+     * @author Yani Zhang
+     *
+     * @param orderDto the transfer object containing the customer id and delivery date
+     * @return OrderResponseDto containing the created order and its order items
      */
     @Transactional
-    public OrderResponseDto createOrder(@Valid OrderCreationDto orderDto) {
+    public OrderResponseDto createOrderCheckout(@Valid OrderCreationDto orderDto) {
 
         // Verify that the customer id entered by the customer when making the order is valid.
         // Otherwise, throw an error
-        Account customer = accountRepository.findById(orderDto.getCustomerId());
+        Account customer = accountRepository.findById(orderDto.getCustomerId()).orElse(null);
         if (customer == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
         }
@@ -76,8 +98,63 @@ public class OrderService {
                 customer,
                 null);
 
+        // ------------------------
+        // Checkout --> Build order items from the customer's current cart
+        // ------------------------
 
-        return new OrderResponseDto(orderRepository.save(newOrder));
+        // 1) Find the customer's cart
+        Cart cart = cartRepository.findByAccount_Id(customer.getId());
+        if (cart == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No cart found for customer with id " + customer.getId());
+        }
+
+        // 2) Load all cart items
+        List<CartItem> cartItems = cartItemRepository.findByCartItemId_Cart(cart);
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot checkout with an empty cart");
+        }
+
+        // 3) Validate stock first (fail fast before saving anything)
+        for (CartItem cartItem : cartItems) {
+            int qty = cartItem.getQuantity();
+            if (qty <= 0) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cart contains an invalid quantity: " + qty);
+            }
+
+            ItemType itemType = cartItem.getCartItemId().getItemType();
+            if (itemType == null) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cart contains an item with no item type");
+            }
+
+            if (itemType.getStock() < qty) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
+                        "Not enough stock for itemType id " + itemType.getId() + ". Requested " + qty + ", available " + itemType.getStock());
+            }
+        }
+
+        // 4) Save the order first so we can reference it from OrderItem composite keys
+        Order savedOrder = orderRepository.save(newOrder);
+        List<OrderItem> createdOrderItems = new ArrayList<>();
+
+        // 5) Create OrderItems + decrement stock
+        for (CartItem cartItem : cartItems) {
+            int qty = cartItem.getQuantity();
+            ItemType itemType = cartItem.getCartItemId().getItemType();
+
+            OrderItem.OrderItemId orderItemId = new OrderItem.OrderItemId(itemType, savedOrder);
+            OrderItem orderItem = new OrderItem(orderItemId, qty);
+            OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+            createdOrderItems.add(savedOrderItem);
+
+            itemType.setStock(itemType.getStock() - qty);
+            itemTypeRepository.save(itemType);
+        }
+
+        // 6) Clear the cart after successful checkout
+        cartItemRepository.deleteAll(cartItems);
+
+        return new OrderResponseDto(savedOrder, createdOrderItems);
     }
 
 
@@ -89,11 +166,13 @@ public class OrderService {
      */
     @Transactional
     public OrderResponseDto findOrderByIdResponseDto(int id) {
-        Order orderFromDB = orderRepository.findById(id);
+        Order orderFromDB = orderRepository.findById(id).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + id);
         }
-        return new OrderResponseDto(orderFromDB);
+//        return new OrderResponseDto(orderFromDB);
+        List<OrderItem> items = orderItemRepository.findByOrderItemId_Order(orderFromDB);
+        return new OrderResponseDto(orderFromDB, items);
     }
 
     /**
@@ -107,13 +186,13 @@ public class OrderService {
     public OrderResponseDto assignEmployee(int orderId, int employeeId) {
 
         // Verify order exists
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
 
         // Verify that the employee with the given id exists and that the employee is not the one who made the order
-        Employee assignee = employeeRepository.findById(employeeId);
+        Employee assignee = employeeRepository.findById(employeeId).orElse(null);
         if (assignee == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + employeeId);
         } else if (assignee.getAccount().getId() == order.getCustomer().getId() ) {
@@ -123,7 +202,10 @@ public class OrderService {
         // Assign the employee to the order
         order.setAssignee(assignee);
 
-        return new OrderResponseDto(orderRepository.save(order));
+//        return new OrderResponseDto(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        List<OrderItem> items = orderItemRepository.findByOrderItemId_Order(saved);
+        return new OrderResponseDto(saved, items);
     }
 
     /**
@@ -146,9 +228,13 @@ public class OrderService {
 
 
     /**
-     * Verify that the cancellation of an order made by an account is valid (i.e. either a customer or a manager has made the cancellation)
-     * Also, verify that, if a customer made a cancellation, it is more than 24 hours from the delivery date
+     * Verify that the cancellation of an order made by an account is valid (i.e., either a customer or a manager has made the cancellation).
+     * Also verify that, if a customer made a cancellation, it is more than 24 hours from the delivery date.
+     * If the cancellation is valid, mark the order as Cancelled and restock the corresponding ItemType stock based on the order's OrderItems.
+     *
      * @author Wissam Abchiche
+     * @author Yani Zhang
+     *
      * @param order The order to cancel
      * @param accountId The accountId who made the cancellation
      */
@@ -156,7 +242,7 @@ public class OrderService {
 
 
         // Verify that the account who is cancelling the order exists
-        Account account = accountRepository.findById(accountId);
+        Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + accountId);
         }
@@ -182,6 +268,26 @@ public class OrderService {
         } else  if (role instanceof Manager){ // If account is a manager, set the state of the order to Cancelled
             order.setOrderState(Order.OrderState.Cancelled);
         }
+
+
+        // ------------------------
+        // Restock inventory on successful cancellation
+        // ------------------------
+        List<OrderItem> orderItems = orderItemRepository.findByOrderItemId_Order(order);
+        if (orderItems != null) {
+            for (OrderItem oi : orderItems) {
+                int qty = oi.getQuantity();
+                if (qty <= 0) {
+                    continue;
+                }
+                ItemType itemType = oi.getOrderItemId().getItemType();
+                if (itemType == null) {
+                    continue;
+                }
+                itemType.setStock(itemType.getStock() + qty);
+                itemTypeRepository.save(itemType);
+            }
+        }
     }
 
 
@@ -197,7 +303,7 @@ public class OrderService {
     public OrderResponseDto updateStatus(int orderId, String orderState, int accountId) {
 
         // Verify order exists
-        Order orderFromDB = orderRepository.findById(orderId);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
@@ -223,7 +329,9 @@ public class OrderService {
              throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
          }
 
-        return new OrderResponseDto(orderRepository.save(orderFromDB));
+        Order saved = orderRepository.save(orderFromDB);
+        List<OrderItem> items = orderItemRepository.findByOrderItemId_Order(saved);
+        return new OrderResponseDto(saved, items);
     }
 
 
