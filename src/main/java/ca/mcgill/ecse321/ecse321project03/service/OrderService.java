@@ -6,10 +6,7 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.*;
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +24,9 @@ public class OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -49,7 +49,7 @@ public class OrderService {
 
         // Verify that the customer id entered by the customer when making the order is valid.
         // Otherwise, throw an error
-        Account customer = accountRepository.findById(orderDto.getCustomerId());
+        Account customer = accountRepository.findById(orderDto.getCustomerId()).orElse(null);
         if (customer == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
         }
@@ -89,7 +89,7 @@ public class OrderService {
      */
     @Transactional
     public OrderResponseDto findOrderByIdResponseDto(int id) {
-        Order orderFromDB = orderRepository.findById(id);
+        Order orderFromDB = orderRepository.findById(id).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + id);
         }
@@ -107,13 +107,13 @@ public class OrderService {
     public OrderResponseDto assignEmployee(int orderId, int employeeId) {
 
         // Verify order exists
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
 
         // Verify that the employee with the given id exists and that the employee is not the one who made the order
-        Employee assignee = employeeRepository.findById(employeeId);
+        Employee assignee = employeeRepository.findById(employeeId).orElse(null);
         if (assignee == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + employeeId);
         } else if (assignee.getAccount().getId() == order.getCustomer().getId() ) {
@@ -156,7 +156,7 @@ public class OrderService {
 
 
         // Verify that the account who is cancelling the order exists
-        Account account = accountRepository.findById(accountId);
+        Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + accountId);
         }
@@ -197,7 +197,7 @@ public class OrderService {
     public OrderResponseDto updateStatus(int orderId, String orderState, int accountId) {
 
         // Verify order exists
-        Order orderFromDB = orderRepository.findById(orderId);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
@@ -272,5 +272,22 @@ public class OrderService {
                 }
             }
         }
+    }
+
+    public double findOrderPrice(Order orderFromDB){
+        List <OrderItem> orderItemList = orderItemRepository.findByOrderItemId_Order(orderFromDB);
+        double price = 0.00;
+
+        for (OrderItem orderItem : orderItemList){
+            //get the item, but im not sure if we have to find it from the database or if this is ok??
+            ItemType itemType = orderItem.getOrderItemId().getItemType();
+            Item item = itemType.getGeneralItem();
+            double itemPrice = item.getPrice();
+            int quantity = orderItem.getOrderItemId().getQuantity();
+
+            price += itemPrice*quantity;
+        }
+
+        return price;
     }
 }
