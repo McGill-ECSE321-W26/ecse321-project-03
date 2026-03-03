@@ -36,8 +36,4 @@ public interface OrderRepository extends CrudRepository<Order, Integer> {
      */
     List<Order> findByOrderDate(Date orderDate);
 
-    /**
-     * Find an order by id.
-     */
-    //Order findById(int id);
 }

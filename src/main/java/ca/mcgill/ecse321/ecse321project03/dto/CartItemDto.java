@@ -11,7 +11,7 @@ public class CartItemDto {
     private CartDto cart;
 
     public CartItemDto(CartItem cartItem) {
-        this.quantity = cartItem.getCartItemId().getQuantity();
+        this.quantity = cartItem.getQuantity();
         this.itemType = new ItemTypeDto(cartItem.getCartItemId().getItemType());
         this.cart = new CartDto(cartItem.getCartItemId().getCart());
     }

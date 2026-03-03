@@ -86,8 +86,8 @@ public class OrderItemRepositoryTests {
 
         // ---------- 5) Create OrderItem (composite key) ----------
         int qty = 2;
-        OrderItem.OrderItemId id = new OrderItem.OrderItemId(itemType, order, qty);
-        OrderItem orderItem = new OrderItem(id);
+        OrderItem.OrderItemId id = new OrderItem.OrderItemId(itemType, order);
+        OrderItem orderItem = new OrderItem(id, qty);
         orderItem = orderItemRepository.save(orderItem);
 
         // ---------- 6) Load back & Test ----------
@@ -105,8 +105,8 @@ public class OrderItemRepositoryTests {
         OrderItemId idFromDb = orderItemFromDb.getOrderItemId();
         assertNotNull(idFromDb);
 
-        // Check quantity (Attribute from OrderItemId)
-        assertEquals(qty, idFromDb.getQuantity());
+        // Check quantity
+        assertEquals(qty, orderItemFromDb.getQuantity());
 
         // Check linked ItemType
         assertNotNull(idFromDb.getItemType());

@@ -16,9 +16,6 @@ public class CartItem {
     @Embeddable
     public static class CartItemId implements Serializable {
 
-        // Attributes
-        private int quantity;
-
         // Associations
         @ManyToOne
         private ItemType itemType;
@@ -32,26 +29,50 @@ public class CartItem {
             super();
         }
 
-        public CartItemId(ItemType itemType, Cart cart, int quantity) {
+        public CartItemId(ItemType itemType, Cart cart) {
             super();
             this.itemType = itemType;
             this.cart = cart;
-            this.quantity = quantity;
         }
 
         //------------------------
         // Getters
         //------------------------
-        public int getQuantity() {
-            return quantity;
-        }
-
         public ItemType getItemType() {
             return itemType;
         }
 
         public Cart getCart() {
             return cart;
+        }
+
+
+        // Comparison method
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            CartItemId that = (CartItemId) o;
+
+            Integer thisItemTypeId = (itemType == null) ? null : itemType.getId();
+            Integer thatItemTypeId = (that.itemType == null) ? null : that.itemType.getId();
+            if (thisItemTypeId == null ? thatItemTypeId != null : !thisItemTypeId.equals(thatItemTypeId)) return false;
+
+            Integer thisCartId = (cart == null) ? null : cart.getId();
+            Integer thatCartId = (that.cart == null) ? null : that.cart.getId();
+            return thisCartId == null ? thatCartId == null : thisCartId.equals(thatCartId);
+        }
+
+        // hashcode method
+        @Override
+        public int hashCode() {
+            Integer itemTypeId = (itemType == null) ? null : itemType.getId();
+            Integer cartId = (cart == null) ? null : cart.getId();
+            int result = 17;
+            result = 31 * result + (itemTypeId == null ? 0 : itemTypeId.hashCode());
+            result = 31 * result + (cartId == null ? 0 : cartId.hashCode());
+            return result;
         }
     }
 
@@ -60,6 +81,7 @@ public class CartItem {
     //------------------------
 
     //Registration attributes
+    private int quantity;
     @EmbeddedId
     private CartItemId cartItemId;
     private int cachedHashCode;
@@ -72,9 +94,10 @@ public class CartItem {
 
     }
 
-    public CartItem(CartItemId cartItemId) {
+    public CartItem(CartItemId cartItemId, int quantity) {
         cachedHashCode = -1;
         this.cartItemId = cartItemId;
+        this.quantity = quantity;
     }
 
 
@@ -93,10 +116,15 @@ public class CartItem {
         return wasSet;
     }
 
+    public void setQuantity(int quantity) {this.quantity = quantity;}
+
     // Getter method
     public CartItemId getCartItemId() {
         return cartItemId;
     }
+
+    public int getQuantity() {return quantity;}
+
 
 
     // Comparison method
@@ -140,6 +168,3 @@ public class CartItem {
     }
 
 }
-
-
-
