@@ -239,7 +239,7 @@ public class OrderService {
         if (orderFromDB.getOrderState() !=  Order.OrderState.Prepared && orderFromDB.getOrderState() !=  Order.OrderState.Delivered) {
             orderFromDB.setOrderState(Order.OrderState.Cancelled);
             orderRepository.save(orderFromDB);
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Order with id " + orderFromDB.getId() + " cannot be switched to Delivered automatically because it is not Prepared.");
+            //throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Order with id " + orderFromDB.getId() + " cannot be switched to Delivered automatically because it is not Prepared.");
 
        // If the order is Prepared by the delivered date, switch its state to Delivered
         } else if (orderFromDB.getOrderState() == Order.OrderState.Prepared) {
