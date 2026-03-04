@@ -26,16 +26,21 @@ import java.util.Set;
 /**
  * Service for creating items and their variants.
  *
- * A) Entry point: createItem(int accountId, ItemCreationDto dto) returns ItemResponseDto. Annotated with @Transactional for a single unit of work.
- * B) Authorization: ensureManager(accountId) — 401 if account not found, 403 if account is not a manager (using ManagerRepository.findByAccount_Id).
- * C) Validation (400):
+ * createItem(int accountId, ItemCreationDto dto) 
+ * returns ItemResponseDto. Annotated with @Transactional for a single unit of work.
+ * - Authorization: 
+ * ensureManager(accountId) — 401 if account not found, 403 if account is not a manager (using ManagerRepository.findByAccount_Id).
+ * - Validation (400):
  * Item: name not null/blank, length 1–100; tag parsed to Item.Tag (case‑insensitive); price not null and ≥ 0.
  * Variants: list not null and not empty; each variant: color/size valid enums (case‑insensitive), initialStock not null, ≥ 0, and capped at 100,000.
  * Duplicates: no duplicate (color, size) pairs; message e.g. "duplicate variant Black/M".
- * D) Business rule: Item name uniqueness → 409 Conflict (using ItemRepository.findByName).
- * E) Persistence: persistItem creates and saves Item; persistVariants creates and saves each ItemType linked to that item.
- * F) Parsing: parseTag, parseColor, parseSize do case‑insensitive enum parsing and return null for invalid values so the service can throw 400 with field-level messages (e.g. variants[0].color: invalid value).
- * G) Design choices:
+ * - Business rule: 
+ * Item name uniqueness → 409 Conflict (using ItemRepository.findByName).
+ * - Persistence: 
+ * persistItem creates and saves Item; persistVariants creates and saves each ItemType linked to that item.
+ * - Parsing: 
+ * parseTag, parseColor, parseSize do case‑insensitive enum parsing and return null for invalid values so the service can throw 400 with field-level messages (e.g. variants[0].color: invalid value).
+ * - Design choices:
  * Validation is done in the service and reported via Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "field: message") so the existing exception handler returns a structured error body.
  * One validation failure is reported at a time; extending to multiple messages would mean collecting errors and then throwing once with a list.
  * Manager check uses findByAccount_Id and null checks (no separate existsByAccount_Id), consistent with the rest of the codebase.
