@@ -12,9 +12,4 @@ public interface EmployeeRepository extends CrudRepository<Employee, Integer> {
     Employee findByAccount_Id(int accountId);
 
 
-
-    /**
-     * Find an employee by its employee ID.
-     */
-    //Employee findById(int id);
 }

@@ -1,7 +1,6 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
 
-
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
@@ -40,9 +39,10 @@ public class OrderService {
 
     /**
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
-     * @author Wissam Abchiche
+     *
      * @param orderDto The transfer object created
      * @return the order
+     * @author Wissam Abchiche
      */
     @Transactional
     public Order createOrder(@Valid OrderCreationDto orderDto) {
@@ -83,9 +83,10 @@ public class OrderService {
 
     /**
      * Find an order corresponding to a given id
-     * @author Wissam Abchiche
+     *
      * @param id Order id
      * @return The found order object
+     * @author Wissam Abchiche
      */
     @Transactional
     public Order findOrderByIdResponseDto(int id) {
@@ -97,14 +98,18 @@ public class OrderService {
     }
 
     /**
-     * Assign the order to an employee and ensure the employee is not the customer
-     * @author Wissam Abchiche
-     * @param orderId OrderId to which an employee is assigned
+     * Assign the order to an employee, ensure the employee is not the customer
+     * Ensure it's not a customer who is making the change and ensure an employee is not assigning an order to another employee except himself
+     *
+     * @param orderId    OrderId to which an employee is assigned
      * @param employeeId The employee id
+     * @param accountId  The person assigning an employee to the order
      * @return The modified order object (after assigning an employee)
+     * @author Wissam Abchiche
      */
     @Transactional
-    public Order assignEmployee(int orderId, int employeeId) {
+    public Order assignEmployee(int orderId, int employeeId, int accountId) {
+
 
         // Verify order exists
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -112,12 +117,31 @@ public class OrderService {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
         }
 
+        Account account = accountRepository.findById(accountId).orElse(null);
+
+        // Verify account making the change exists
+        if (account == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account doing the action found with id " + accountId);
+            // If the account is not associated to a role, it means a customer is making the change. Throw an error
+        } else if (roleRepository.findByAccount_Id(accountId) == null) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee with id " + employeeId + " as a customer is making the change.");
+        }
+
+
         // Verify that the employee with the given id exists and that the employee is not the one who made the order
         Employee assignee = employeeRepository.findById(employeeId).orElse(null);
         if (assignee == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No employee found with id " + employeeId);
-        } else if (assignee.getAccount().getId() == order.getCustomer().getId() ) {
+        } else if (assignee.getAccount().getId() == order.getCustomer().getId()) {
             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee with id " + employeeId + " as he is the customer.");
+        }
+
+        // Verify that, if the account trying to make the change is an employee, he is not assigning the order to another employee than himself
+        Role role = roleRepository.findByAccount_Id(accountId);
+        if (role instanceof Employee) {
+            if (roleRepository.findByAccount_Id(assignee.getAccount().getId()).getId() != role.getId()) {
+                throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee by another employee.");
+            }
         }
 
         // Assign the employee to the order
@@ -129,14 +153,15 @@ public class OrderService {
     /**
      * Verify that the order status is at a certain state before changing its status to the new state.
      * If everything is respected, change the state of the order
-     * @param orderFromDB Order for which the state must be changed
+     *
+     * @param orderFromDB   Order for which the state must be changed
      * @param orderStateOld State that the order must be in to change its state to a new one
      * @param orderStateNew New state the order must change to
      */
     private void verifyUpdateStatus(Order orderFromDB, Order.OrderState orderStateOld, Order.OrderState orderStateNew) {
 
         // Check that the state of the order corresponds to what it must be given a new state. Otherwise, throw an error
-        if (orderFromDB.getOrderState() !=  orderStateOld) {
+        if (orderFromDB.getOrderState() != orderStateOld) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Order with id " + orderFromDB.getId() + " cannot be switched to " + orderStateNew.toString() + " because it is not " + orderStateOld);
         }
 
@@ -148,9 +173,10 @@ public class OrderService {
     /**
      * Verify that the cancellation of an order made by an account is valid (i.e. either a customer or a manager has made the cancellation)
      * Also, verify that, if a customer made a cancellation, it is more than 24 hours from the delivery date
-     * @author Wissam Abchiche
-     * @param order The order to cancel
+     *
+     * @param order     The order to cancel
      * @param accountId The accountId who made the cancellation
+     * @author Wissam Abchiche
      */
     private void cancelOrder(Order order, int accountId) {
 
@@ -161,7 +187,7 @@ public class OrderService {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + accountId);
         }
 
-        // Verify if account is a role (i.e. an employee or a manager
+        // Verify if account is a role (i.e. an employee or a manager)
         Role role = roleRepository.findByAccount_Id(accountId);
 
         if (role == null) { // If role is null, that means a customer made a cancellation
@@ -179,7 +205,7 @@ public class OrderService {
         } else if (role instanceof Employee) { // If account is an employee, throw an error
             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order cannot be cancelled by an employee");
 
-        } else  if (role instanceof Manager){ // If account is a manager, set the state of the order to Cancelled
+        } else if (role instanceof Manager) { // If account is a manager, set the state of the order to Cancelled
             order.setOrderState(Order.OrderState.Cancelled);
         }
     }
@@ -187,11 +213,12 @@ public class OrderService {
 
     /**
      * Update the status of an order to a given status and verify if the change is valid
-     * @author Wissam Abchiche
-     * @param orderId Order for which the state must change
+     *
+     * @param orderId    Order for which the state must change
      * @param orderState New state of the order
-     * @param accountId Account who is making the change
+     * @param accountId  Account who is making the change
      * @return the updated Order object
+     * @author Wissam Abchiche
      */
     @Transactional
     public Order updateStatus(int orderId, String orderState, int accountId) {
@@ -204,24 +231,24 @@ public class OrderService {
 
         Order.OrderState orderStateNew = Order.OrderState.valueOf(orderState);
         // Update status
-         if (orderStateNew ==  Order.OrderState.Cancelled) {
+        if (orderStateNew == Order.OrderState.Cancelled) {
             cancelOrder(orderFromDB, accountId);
 
             // Verify that the one making the state change is either a Manager or an Employee
-        } else if (roleRepository.findByAccount_Id(accountId) != null){
-             if (orderStateNew == Order.OrderState.InPreparation) {
-                 verifyUpdateStatus(orderFromDB, Order.OrderState.Ordered, orderStateNew);
-             } else if (orderStateNew ==  Order.OrderState.Prepared) {
-                 verifyUpdateStatus(orderFromDB, Order.OrderState.InPreparation, orderStateNew);
-             } else if (orderStateNew ==  Order.OrderState.Delivered) {
-                 verifyUpdateStatus(orderFromDB, Order.OrderState.Prepared, orderStateNew);
-             }
+        } else if (roleRepository.findByAccount_Id(accountId) != null) {
+            if (orderStateNew == Order.OrderState.InPreparation) {
+                verifyUpdateStatus(orderFromDB, Order.OrderState.Ordered, orderStateNew);
+            } else if (orderStateNew == Order.OrderState.Prepared) {
+                verifyUpdateStatus(orderFromDB, Order.OrderState.InPreparation, orderStateNew);
+            } else if (orderStateNew == Order.OrderState.Delivered) {
+                verifyUpdateStatus(orderFromDB, Order.OrderState.Prepared, orderStateNew);
+            }
 
-             // if the account is not a role, it means the customer is trying to update the state of the order
-             // So throw an error
-         } else if (roleRepository.findByAccount_Id(accountId) == null) {
-             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
-         }
+            // if the account is not a role, it means the customer is trying to update the state of the order
+            // So throw an error
+        } else if (roleRepository.findByAccount_Id(accountId) == null) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
+        }
 
         return orderRepository.save(orderFromDB);
     }
@@ -229,23 +256,23 @@ public class OrderService {
 
     /**
      * Change the state of an order automatically to Delivered when its delivery date is reached
-     * @author Wissam Abchiche
+     *
      * @param orderFromDB order for which to update the state
+     * @author Wissam Abchiche
      */
     private void prepareOrderToDeliveryAutomatically(Order orderFromDB) {
 
         // Verify that order is either in the Prepared or Delivered state when delivered date is reached.
         // Otherwise, cancel the order and throw an error
-        if (orderFromDB.getOrderState() !=  Order.OrderState.Prepared && orderFromDB.getOrderState() !=  Order.OrderState.Delivered) {
+        if (orderFromDB.getOrderState() != Order.OrderState.Prepared && orderFromDB.getOrderState() != Order.OrderState.Delivered) {
             orderFromDB.setOrderState(Order.OrderState.Cancelled);
-            orderRepository.save(orderFromDB);
             //throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Order with id " + orderFromDB.getId() + " cannot be switched to Delivered automatically because it is not Prepared.");
 
-       // If the order is Prepared by the delivered date, switch its state to Delivered
+            // If the order is Prepared by the delivered date, switch its state to Delivered
         } else if (orderFromDB.getOrderState() == Order.OrderState.Prepared) {
             orderFromDB.setOrderState(Order.OrderState.Delivered);
-            orderRepository.save(orderFromDB);
         }
+        orderRepository.save(orderFromDB);
     }
 
     /**
@@ -260,17 +287,16 @@ public class OrderService {
         Date currentTime = new Date(System.currentTimeMillis());
 
         // Get all orders
-        List<Order> allOrders = orderRepository.findAll();
+        Iterable<Order> allOrders = orderRepository.findAll();
 
-        if (allOrders != null) {
 
-            for (Order order : allOrders) {
+        for (Order order : allOrders) {
 
-                // if the current time is equal or exceeds the delivery date, change its state to Delivered
-                if (order.getDelivDate().getTime() <= currentTime.getTime())  {
-                    prepareOrderToDeliveryAutomatically(order);
-                }
+            // if the current time is equal or exceeds the delivery date, change its state to Delivered
+            if (order.getDelivDate().getTime() <= currentTime.getTime()) {
+                prepareOrderToDeliveryAutomatically(order);
             }
         }
+        
     }
 }
