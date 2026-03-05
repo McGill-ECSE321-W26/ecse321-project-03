@@ -2,7 +2,7 @@ package ca.mcgill.ecse321.ecse321project03.dto;
 
 import java.util.List;
 
-public class ErrorDto {
+public class ErrorDto { // tutorial 6
     private List<String> errors;
 
     // Needed by Jackson to deserialize JSON

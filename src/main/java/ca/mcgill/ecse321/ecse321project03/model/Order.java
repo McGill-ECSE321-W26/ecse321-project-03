@@ -29,6 +29,8 @@ public class Order {
     private int id;
     private Date orderDate;
     private Date delivDate;
+
+    @Enumerated(EnumType.STRING)
     private OrderState orderState;
 
     //Order Associations

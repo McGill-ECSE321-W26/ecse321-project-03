@@ -10,12 +10,12 @@ public class OrderItemDto {
     // displayed fields
     private int quantity;       
     private ItemTypeDto itemType;
-    private OrderDto order;
+    private int orderId;
 
-    public OrderItemDto(OrderItem orderItem) {
+    public OrderItemDto(OrderItem orderItem, int orderId) {
         this.quantity = orderItem.getOrderItemId().getQuantity();
         this.itemType = new ItemTypeDto(orderItem.getOrderItemId().getItemType());
-        this.order = new OrderDto(orderItem.getOrderItemId().getOrder());
+        this.orderId = orderId;
     }
 
     @SuppressWarnings("unused")
@@ -29,7 +29,7 @@ public class OrderItemDto {
     public ItemTypeDto getItemType() {
         return itemType;
     }
-    public OrderDto getOrder() {
-        return order;
+    public int getOrderId() {
+        return orderId;
     }
 }
