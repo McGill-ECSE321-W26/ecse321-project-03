@@ -30,7 +30,7 @@ public class Order {
     private Date orderDate;
     private Date delivDate;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private OrderState orderState;
 
     //Order Associations

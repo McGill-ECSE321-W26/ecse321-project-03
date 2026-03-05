@@ -13,7 +13,7 @@ public class OrderItemDto {
     private int orderId;
 
     public OrderItemDto(OrderItem orderItem, int orderId) {
-        this.quantity = orderItem.getOrderItemId().getQuantity();
+        this.quantity = orderItem.getQuantity();
         this.itemType = new ItemTypeDto(orderItem.getOrderItemId().getItemType());
         this.orderId = orderId;
     }

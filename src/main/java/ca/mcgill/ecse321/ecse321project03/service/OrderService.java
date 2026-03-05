@@ -5,10 +5,7 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.*;
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
-import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +16,7 @@ import jakarta.validation.Valid;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @Validated
@@ -35,6 +33,18 @@ public class OrderService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ItemTypeRepository itemTypeRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
 
     /**
@@ -76,8 +86,90 @@ public class OrderService {
                 customer,
                 null);
 
-
         return orderRepository.save(newOrder);
+    }
+
+
+    /**
+     * Perform the checkout process for a customer's cart.
+     *
+     * This method retrieves the customer's current cart, validates that the cart
+     * contains items and that each item has sufficient stock available, then
+     * converts each CartItem into an OrderItem linked to the given Order.
+     * The stock of each corresponding ItemType is decreased accordingly.
+     * After the OrderItems are created successfully, the customer's cart is cleared.
+     *
+     * This method is intended to be called after an Order entity has been created.
+     * This corresponds to the "Checkout" use case.
+     *
+     * @author Yani Zhang
+     * @param orderDto contains the customer id and chosen delivery date
+     * @return a list of OrderItems created from the customer's cart
+     */
+    @Transactional
+    public List<OrderItem> checkout(@Valid OrderCreationDto orderDto) {
+
+        Order order = createOrder(orderDto); // saves order
+        Account customer = order.getCustomer();
+
+        // 1) Find the customer's cart
+        Cart cart = cartRepository.findByAccount_Id(customer.getId());
+        if (cart == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No cart found for customer with id " + customer.getId());
+        }
+
+        // 2) Load all cart items
+        List<CartItem> cartItems = cartItemRepository.findByCartItemId_Cart(cart);
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot checkout with an empty cart");
+        }
+
+        // 3) Validate stock first
+        for (CartItem cartItem : cartItems) {
+            int qty = cartItem.getQuantity();
+
+            if (qty <= 0) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
+                        "Cart contains an invalid quantity: " + qty);
+            }
+
+            ItemType itemType = cartItem.getCartItemId().getItemType();
+
+            if (itemType == null) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
+                        "Cart contains an item with no item type");
+            }
+
+            if (itemType.getStock() < qty) {
+                throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
+                        "Not enough stock for itemType id " + itemType.getId() +
+                                ". Requested " + qty + ", available " + itemType.getStock());
+            }
+        }
+
+        // 4) Create OrderItems + decrement stock
+        List<OrderItem> createdOrderItems = new ArrayList<>();
+
+        for (CartItem cartItem : cartItems) {
+
+            int qty = cartItem.getQuantity();
+            ItemType itemType = cartItem.getCartItemId().getItemType();
+
+            OrderItem.OrderItemId orderItemId = new OrderItem.OrderItemId(itemType, order);
+            OrderItem orderItem = new OrderItem(orderItemId, qty);
+
+            OrderItem savedOrderItem = orderItemRepository.save(orderItem);
+            createdOrderItems.add(savedOrderItem);
+
+            itemType.setStock(itemType.getStock() - qty);
+            itemTypeRepository.save(itemType);
+        }
+
+        // 5) Clear cart
+        cartItemRepository.deleteAll(cartItems);
+
+        return createdOrderItems;
     }
 
 
@@ -96,6 +188,7 @@ public class OrderService {
         }
         return orderFromDB;
     }
+
 
     /**
      * Assign the order to an employee, ensure the employee is not the customer
@@ -150,6 +243,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+
     /**
      * Verify that the order status is at a certain state before changing its status to the new state.
      * If everything is respected, change the state of the order
@@ -171,6 +265,14 @@ public class OrderService {
 
 
     /**
+     * Verify that the cancellation of an order made by an account is valid (i.e., either a customer or a manager has made the cancellation).
+     * Also verify that, if a customer made a cancellation, it is more than 24 hours from the delivery date.
+     * If the cancellation is valid, mark the order as Cancelled and restock the corresponding ItemType stock based on the order's OrderItems.
+     *
+     * @author Wissam Abchiche
+     * @author Yani Zhang
+     *
+     * @param order The order to cancel
      * Verify that the cancellation of an order made by an account is valid (i.e. either a customer or a manager has made the cancellation)
      * Also, verify that, if a customer made a cancellation, it is more than 24 hours from the delivery date
      *
@@ -207,6 +309,25 @@ public class OrderService {
 
         } else if (role instanceof Manager) { // If account is a manager, set the state of the order to Cancelled
             order.setOrderState(Order.OrderState.Cancelled);
+        }
+
+        // ------------------------
+        // Restock inventory on successful cancellation
+        // ------------------------
+        List<OrderItem> orderItems = orderItemRepository.findByOrderItemId_Order(order);
+        if (orderItems != null) {
+            for (OrderItem oi : orderItems) {
+                int qty = oi.getQuantity();
+                if (qty <= 0) {
+                    continue;
+                }
+                ItemType itemType = oi.getOrderItemId().getItemType();
+                if (itemType == null) {
+                    continue;
+                }
+                itemType.setStock(itemType.getStock() + qty);
+                itemTypeRepository.save(itemType);
+            }
         }
     }
 
@@ -274,6 +395,7 @@ public class OrderService {
         }
         orderRepository.save(orderFromDB);
     }
+
 
     /**
      * @author Wissam Abchiche

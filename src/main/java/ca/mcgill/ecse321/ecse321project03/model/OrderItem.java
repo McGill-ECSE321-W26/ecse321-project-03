@@ -10,14 +10,13 @@ import java.io.Serializable;
 @Entity
 public class OrderItem {
 
+
     //------------------------
     // Composite primary class for CartItem
     //------------------------
     @Embeddable
     public static class OrderItemId implements Serializable {
 
-        // Attributes
-        private int quantity;
 
         // Associations
         @ManyToOne
@@ -32,19 +31,15 @@ public class OrderItem {
             super();
         }
 
-        public OrderItemId(ItemType itemType, Order order, int quantity) {
+        public OrderItemId(ItemType itemType, Order order) {
             super();
             this.itemType = itemType;
             this.order = order;
-            this.quantity = quantity;
         }
 
         //------------------------
         // GETTER
         //------------------------
-        public int getQuantity() {
-            return quantity;
-        }
 
         /* Code from template association_GetOne */
         public ItemType getItemType() {
@@ -64,8 +59,6 @@ public class OrderItem {
 
             OrderItemId that = (OrderItemId) o;
 
-            if (quantity != that.quantity) return false;
-
             // Compare by referenced IDs if possible (safer than comparing whole objects)
             Integer thisItemTypeId = (itemType == null) ? null : itemType.getId();
             Integer thatItemTypeId = (that.itemType == null) ? null : that.itemType.getId();
@@ -79,9 +72,9 @@ public class OrderItem {
         // hashcode method
         @Override
         public int hashCode() {
-            int result = quantity;
             Integer itemTypeId = (itemType == null) ? null : itemType.getId();
             Integer orderId = (order == null) ? null : order.getId();
+            int result = 17;
             result = 31 * result + (itemTypeId == null ? 0 : itemTypeId.hashCode());
             result = 31 * result + (orderId == null ? 0 : orderId.hashCode());
             return result;
@@ -93,6 +86,7 @@ public class OrderItem {
     //------------------------
 
     // Attributes
+    private int quantity;
     @EmbeddedId
     private OrderItemId orderItemId;
     private int cachedHashCode;
@@ -103,9 +97,10 @@ public class OrderItem {
     public OrderItem() {
     }
 
-    public OrderItem(OrderItemId orderItemId) {
+    public OrderItem(OrderItemId orderItemId, int quantity) {
         cachedHashCode = -1;
         this.orderItemId = orderItemId;
+        this.quantity = quantity;
     }
 
     //------------------------
@@ -123,12 +118,17 @@ public class OrderItem {
         return wasSet;
     }
 
+    public void setQuantity(int quantity) {this.quantity = quantity;}
+
     // Getter method
     public OrderItemId getOrderItemId() {
         return orderItemId;
     }
 
+    public int getQuantity() {return quantity;}
+
     // Comparison method
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
@@ -149,6 +149,7 @@ public class OrderItem {
     }
 
     // HashCode method
+    @Override
     public int hashCode() {
         if (cachedHashCode != -1) {
             return cachedHashCode;
