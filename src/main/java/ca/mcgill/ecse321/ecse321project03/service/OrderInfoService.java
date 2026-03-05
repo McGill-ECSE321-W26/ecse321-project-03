@@ -24,110 +24,77 @@ public class OrderInfoService {
     private RoleRepository roleRepository;
 
     /**
-     * Get all DTO orders, ready to display
+     * Get all orders, ready to display
      *
-     * @return A list of OrderResponseDto objects
+     * @return A list of order objects
      * @author Sonia Ly
      */
     @Transactional
-    public List<OrderResponseDto> viewOrders(int userID) {
+    public List<Order> viewOrders(int userID) {
         checkIfStaffMember(userID);
         
-        return getAllOrders();
+        return (List<Order>) orderRepository.findAll();
     }
+    
 
     /**
-     * Filter the DTO orders, in ascending or descending order date
+     * Filter the orders, by order date
      *
-     * @return A list of OrderResponseDto objects sorted in ascending order date
+     * @return A list of Order objects sorted by order date
      * @author Sonia Ly
      */
     @Transactional
-    public List<OrderResponseDto> viewOrdersByOrderDate(int userID) {
+    public List<Order> viewOrdersByOrderDate(int userID, String filterDirection) {
         checkIfStaffMember(userID);
 
-        List<OrderResponseDto> allOrdersDTO = getAllOrders();
-        allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderDate));
-
-        return allOrdersDTO;
-    }
-
-    /**
-     * Filter the DTO orders, by order date
-     *
-     * @return A list of OrderResponseDto objects sorted by order date
-     * @author Sonia Ly
-     */
-    @Transactional
-    public List<OrderResponseDto> viewOrdersByOrderDate(int userID, String filterDirection) {
-        checkIfStaffMember(userID);
-
-        List<OrderResponseDto> allOrdersDTO = getAllOrders();
-        if (filterDirection.equals("descending")) {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderDate).reversed());
-        } else {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderDate));
-        }
-
-        return allOrdersDTO;
-    }
-
-    /**
-     * Filter the DTO orders, by customer
-     *
-     * @return A list of OrderResponseDto objects sorted in ascending order date
-     * @author Sonia Ly
-     */
-    @Transactional
-    public List<OrderResponseDto> viewOrdersByCustomer(int userID, String filterDirection) {
-        checkIfStaffMember(userID);
-
-        List<OrderResponseDto> allOrdersDTO = getAllOrders();
-        if (filterDirection.equals("descending")) {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getCustomerId).reversed());
-        } else {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getCustomerId));
-        }
-
-        return allOrdersDTO;
-    }
-
-    /**
-     * Filter the DTO orders, by status
-     *
-     * @return A list of OrderResponseDto objects sorted in ascending order date
-     * @author Sonia Ly
-     */
-    @Transactional
-    public List<OrderResponseDto> viewOrdersByStatus(int userID, String filterDirection) {
-        checkIfStaffMember(userID);
-
-        List<OrderResponseDto> allOrdersDTO = getAllOrders();
-        if (filterDirection.equals("descending")) {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderState).reversed());
-        } else {
-            allOrdersDTO.sort(Comparator.comparing(OrderResponseDto::getOrderState));
-        }
-
-        return allOrdersDTO;
-    }
-
-    /**
-     * Service method to get all orders in DTO form
-     *
-     * @return A list of OrderResponseDto objects corresponding to all the orders in the system
-     * @author Sonia Ly
-     */
-    private List<OrderResponseDto> getAllOrders() {
         List<Order> allOrders = (List<Order>) orderRepository.findAll();
-        List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
-
-        for (Order order : allOrders) {
-            OrderResponseDto currentOrder = new OrderResponseDto(order);
-            allOrdersDTO.add(currentOrder);
+        if (filterDirection.equals("descending")) {
+            allOrders.sort(Comparator.comparing(Order::getOrderDate).reversed());
+        } else {
+            allOrders.sort(Comparator.comparing(Order::getOrderDate));
         }
 
-        return allOrdersDTO;
+        return allOrders;
+    }
+
+    /**
+     * Filter the orders, by customer
+     *
+     * @return A list of Order objects sorted in ascending order date
+     * @author Sonia Ly
+     */
+    @Transactional
+    public List<Order> viewOrdersByCustomer(int userID, String filterDirection) {
+        checkIfStaffMember(userID);
+
+        List<Order> allOrders = (List<Order>) orderRepository.findAll();
+        if (filterDirection.equals("descending")) {
+            allOrders.sort(Comparator.comparing((Order o) -> o.getCustomer().getId()).reversed());
+        } else {
+            allOrders.sort(Comparator.comparing((Order o) -> o.getCustomer().getId()));
+        }
+
+        return allOrders;
+    }
+
+    /**
+     * Filter the  orders, by status
+     *
+     * @return A list of Order objects sorted in ascending order date
+     * @author Sonia Ly
+     */
+    @Transactional
+    public List<Order> viewOrdersByStatus(int userID, String filterDirection) {
+        checkIfStaffMember(userID);
+
+        List<Order> allOrders = (List<Order>) orderRepository.findAll();
+        if (filterDirection.equals("descending")) {
+            allOrders.sort(Comparator.comparing(Order::getOrderState).reversed());
+        } else {
+            allOrders.sort(Comparator.comparing(Order::getOrderState));
+        }
+
+        return allOrders;
     }
 
     /**
@@ -136,10 +103,8 @@ public class OrderInfoService {
      * @return
      */
     private void checkIfStaffMember(int userID) {
-        if(roleRepository.findByAccount_Id(userID) != null){
+        if(roleRepository.findByAccount_Id(userID) == null){
             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
         }
     }
-
-
 }
