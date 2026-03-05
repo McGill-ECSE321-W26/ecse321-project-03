@@ -98,6 +98,25 @@ public class OrderInfoService {
     }
 
     /**
+     * Service method to get all orders in DTO form
+     * Probably need to delete that (Wissam)
+     * @return A list of OrderResponseDto objects corresponding to all the orders in the system
+     * @author Sonia Ly
+     */
+    private List<OrderResponseDto> getAllOrders() {
+        List<Order> allOrders = (List<Order>) orderRepository.findAll();
+        List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
+
+        for (Order order : allOrders) {
+            OrderResponseDto currentOrder = new OrderResponseDto(order);
+            allOrdersDTO.add(currentOrder);
+        }
+
+        return allOrdersDTO;
+    }
+
+
+    /**
      * Helper method to determine if a user is a Staff member from their user ID. Throws an error if it isn't the case.
      * @param userID
      * @return
