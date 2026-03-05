@@ -39,9 +39,6 @@ public class OrderService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
     private ItemTypeRepository itemTypeRepository;
 
     @Autowired
@@ -394,7 +391,7 @@ public class OrderService {
             ItemType itemType = orderItem.getOrderItemId().getItemType();
             Item item = itemType.getGeneralItem();
             double itemPrice = item.getPrice();
-            int quantity = orderItem.getOrderItemId().getQuantity();
+            int quantity = orderItem.getQuantity();
 
             price += itemPrice*quantity;
         }
