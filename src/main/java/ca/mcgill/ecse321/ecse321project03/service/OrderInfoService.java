@@ -119,7 +119,7 @@ public class OrderInfoService {
      * @author Sonia Ly
      */
     private List<OrderResponseDto> getAllOrders() {
-        List<Order> allOrders = orderRepository.findAll();
+        List<Order> allOrders = (List<Order>) orderRepository.findAll();
         List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
 
         for (Order order : allOrders) {
