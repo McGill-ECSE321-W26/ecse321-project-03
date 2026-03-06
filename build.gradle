@@ -10,7 +10,7 @@ description = 'Ecse321 project 03 backend'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(23)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 

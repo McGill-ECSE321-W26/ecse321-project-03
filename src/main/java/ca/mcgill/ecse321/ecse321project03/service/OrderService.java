@@ -26,6 +26,9 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
@@ -420,5 +423,22 @@ public class OrderService {
             }
         }
         
+    }
+
+    public double findOrderPrice(Order orderFromDB){
+        List <OrderItem> orderItemList = orderItemRepository.findByOrderItemId_Order(orderFromDB);
+        double price = 0.00;
+
+        for (OrderItem orderItem : orderItemList){
+            //get the item, but im not sure if we have to find it from the database or if this is ok??
+            ItemType itemType = orderItem.getOrderItemId().getItemType();
+            Item item = itemType.getGeneralItem();
+            double itemPrice = item.getPrice();
+            int quantity = orderItem.getQuantity();
+
+            price += itemPrice*quantity;
+        }
+
+        return price;
     }
 }

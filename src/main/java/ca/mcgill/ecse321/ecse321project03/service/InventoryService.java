@@ -27,9 +27,10 @@ public class InventoryService {
 
     @Autowired
     private RoleRepository roleRepository;
-
+  
     @Autowired
     private AccountRepository accountRepository;
+
 
     /**
      * Restock inventory for a specific ItemType by increasing its stock.
