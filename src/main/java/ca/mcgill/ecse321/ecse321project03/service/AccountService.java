@@ -1,6 +1,7 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
+import ca.mcgill.ecse321.ecse321project03.model.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -9,8 +10,11 @@ import jakarta.validation.Valid;
 
 import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
+
+import java.util.List;
 
 
 // Tutorial 7

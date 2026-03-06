@@ -38,9 +38,6 @@ public class OrderService {
     private RoleRepository roleRepository;
 
     @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
     private ItemTypeRepository itemTypeRepository;
 
     @Autowired
