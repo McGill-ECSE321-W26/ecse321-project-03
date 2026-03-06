@@ -92,7 +92,7 @@ public class ImageService {
     }
 
     private void ensureManager(int accountId) {
-        Account account = accountRepository.findById(accountId);
+        Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
             throw new Ecse321Project03Exception(HttpStatus.UNAUTHORIZED, "User not logged in.");
         }

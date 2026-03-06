@@ -99,21 +99,21 @@ public class OrderInfoService {
 
     /**
      * Service method to get all orders in DTO form
-     * Probably need to delete that (Wissam)
+     * Should to delete that * should be implemented in controller(Wissam)
      * @return A list of OrderResponseDto objects corresponding to all the orders in the system
      * @author Sonia Ly
      */
-    private List<OrderResponseDto> getAllOrders() {
-        List<Order> allOrders = (List<Order>) orderRepository.findAll();
-        List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
+    //private List<OrderResponseDto> getAllOrders() {
+      //  List<Order> allOrders = (List<Order>) orderRepository.findAll();
+       // List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
 
-        for (Order order : allOrders) {
-            OrderResponseDto currentOrder = new OrderResponseDto(order);
-            allOrdersDTO.add(currentOrder);
-        }
+     //   for (Order order : allOrders) {
+         //   OrderResponseDto currentOrder = new OrderResponseDto(order);
+        //    allOrdersDTO.add(currentOrder);
+       // }//
 
-        return allOrdersDTO;
-    }
+     //   return allOrdersDTO;
+   // }
 
 
     /**
