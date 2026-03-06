@@ -48,6 +48,7 @@ public class AccountService {
         return accountFromDB;
     }
 
+    @Transactional
     public Account awardLoyaltyPts(int accountID){
         //using the find method from above
         Account accountFromDB = findAccountById(accountID);
@@ -58,17 +59,23 @@ public class AccountService {
             //if so, award points
             addLoyaltyPtsForOrder(accountFromDB);
         }
-        return accountFromDB;
+        return accountRepository.save(accountFromDB);
     }
 
-    public void addLoyaltyPtsForOrder(Account accountFromDB ){
+    public void addLoyaltyPtsForOrder(Account accountFromDB){
         int pts = accountFromDB.getLoyaltyPts();
         pts += 1;
         accountFromDB.setLoyaltyPts(pts);
     }
 
-    public Account redeemLoyaltyPtsInOrder(int accountID, Order order, int pointsUsed){
+    @Transactional
+    public Account redeemLoyaltyPtsInOrder(int accountID, int orderId, int pointsUsed){
         Account accountFromDB = findAccountById(accountID);
+
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null){
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
+        }
         double orderPrice = orderService.findOrderPrice(order);
         //round up the int -> if order price is $67.67
         //since 1 point = $1 off, then you would need a full point to cover the $0.67 extra
@@ -82,7 +89,7 @@ public class AccountService {
             return accountFromDB;
         }
         useLoyaltyPoints(accountFromDB, Math.min(pointsUsed, intPrice));
-        return accountFromDB;
+        return accountRepository.save(accountFromDB);
     }
 
     public void useLoyaltyPoints(Account account, int pts){

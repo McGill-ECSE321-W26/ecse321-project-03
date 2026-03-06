@@ -423,6 +423,7 @@ public class OrderService {
     }
 
     public double findOrderPrice(Order orderFromDB){
+        
         List <OrderItem> orderItemList = orderItemRepository.findByOrderItemId_Order(orderFromDB);
         double price = 0.00;
 
