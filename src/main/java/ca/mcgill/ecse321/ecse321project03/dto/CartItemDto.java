@@ -2,7 +2,7 @@ package ca.mcgill.ecse321.ecse321project03.dto;
 import ca.mcgill.ecse321.ecse321project03.model.CartItem;
 
 
-//Reference: Tutoral 7
+//Reference: Tutorial 7
 public class CartItemDto {
     
     // diplayed fields
@@ -25,5 +25,10 @@ public class CartItemDto {
     }
     public CartDto getCart() {
         return cart;
+    }
+
+    // Setter methods
+    public void setCart(CartDto cartDto) {
+
     }
 }

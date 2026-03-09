@@ -4,6 +4,7 @@ import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.Role;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
+import org.hibernate.annotations.processing.Find;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -214,10 +215,31 @@ public class AccountService {
         accountFromDB.setLoyaltyPts(pts);
     }
 
+    /**
+     * Redeem your loyalty points
+     * @param accountId id of the user
+     * @param orderId id of the order for which you want to redeem the points
+     * @param pointsUsed
+     * @author Emily Sun and Sonia Ly
+     * @return
+     */
     @Transactional
-    public Account redeemLoyaltyPtsInOrder(int accountID, int orderId, int pointsUsed){
-        Account accountFromDB = findAccountById(accountID);
+    public Account redeemLoyaltyPts (int accountId, int orderId, int pointsUsed){
+        Account accountFromDB = findAccountById(accountId);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
 
+        if (accountFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "No person with id " + accountId + " found.");
+        }
+
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "No order with id " + orderId + " found.");
+        }
+
+        int orderPrice = (int) orderService.findOrderPrice(orderFromDB);
+        useLoyaltyPoints(accountFromDB, Math.min(pointsUsed, orderPrice));
+
+        /* Emily's code:
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order == null){
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
@@ -236,8 +258,19 @@ public class AccountService {
         }
         useLoyaltyPoints(accountFromDB, Math.min(pointsUsed, intPrice));
         return accountRepository.save(accountFromDB);
+
+         */
+
+        return accountRepository.save(accountFromDB);
+
     }
 
+    /**
+     * Use up loyalty points
+     * @param account account that's uing up the loyalty points
+     * @param pts amount of points to redeem
+     * @author Emily Sun
+     */
     public void useLoyaltyPoints(Account account, int pts){
         int loyaltyPts = account.getLoyaltyPts();
         if(loyaltyPts <= pts){
