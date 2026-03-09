@@ -195,6 +195,11 @@ public class AccountService {
     }
 
 
+    /**
+     * Awards Loyalty points
+     * @param accountID id of the user receiving the loyalty points
+     * @author Emily Sun
+     */
     @Transactional
     public Account awardLoyaltyPts(int accountID){
         //using the find method from above
@@ -221,7 +226,6 @@ public class AccountService {
      * @param orderId id of the order for which you want to redeem the points
      * @param pointsUsed
      * @author Emily Sun and Sonia Ly
-     * @return
      */
     @Transactional
     public Account redeemLoyaltyPts (int accountId, int orderId, int pointsUsed){

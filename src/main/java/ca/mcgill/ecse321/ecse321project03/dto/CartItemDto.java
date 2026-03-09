@@ -27,8 +27,4 @@ public class CartItemDto {
         return cart;
     }
 
-    // Setter methods
-    public void setCart(CartDto cartDto) {
-
-    }
 }

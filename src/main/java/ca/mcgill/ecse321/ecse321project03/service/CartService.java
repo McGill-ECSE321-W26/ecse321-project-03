@@ -84,7 +84,7 @@ public class CartService {
      * @param cartItemDto
      * @author Sonia Ly
      */
-    public void addItemToCart(int id, CartItemDto cartItemDto) {
+    public void addItemToCart(int id, CartItemDto cartItemDto, CartDto cartDto) {
         Account customer = accountRepository.findById(id).orElse(null);
 
         if (customer == null) {
@@ -96,9 +96,6 @@ public class CartService {
                 throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Cannot add an item to the cart. This customer doesn't have a cart!");
             }
 
-            // TODO: Unsure of the two following lines
-            // I'm unsure about how I create a new cartDto...
-            CartDto cartDto = new CartDto(customerCart);
             cartItemDto.setCart(cartDto);
         }
     }
