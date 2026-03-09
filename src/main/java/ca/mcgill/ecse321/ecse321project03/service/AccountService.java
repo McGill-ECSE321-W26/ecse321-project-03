@@ -134,6 +134,7 @@ public class AccountService {
      * @param id The id of the account to delete
      * @author Maria Klinski
      */
+    @Transactional
     public void deleteAccount (int id) {
         Account accountFromDB = accountRepository.findById(id).orElse(null);
         
@@ -158,6 +159,8 @@ public class AccountService {
      * @return the updated account
      * @author Maria Klinski
      */
+
+    @Transactional
     public Account updateAccount (int id, @Valid AccountCreationDto accountCreationDto) {
         Account accountFromDB = accountRepository.findById(id).orElse(null);
         
@@ -177,6 +180,8 @@ public class AccountService {
         if (accountWithSameUsername != null && accountWithSameUsername.getId() != id) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "An account with username " + accountCreationDto.getUsername() + " already exists");
         }
+
+        
 
         // Update the fields of the existing account
         accountFromDB.setUsername(accountCreationDto.getUsername());
