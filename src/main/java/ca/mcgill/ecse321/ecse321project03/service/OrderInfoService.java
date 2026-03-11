@@ -78,13 +78,13 @@ public class OrderInfoService {
     }
 
     /**
-     * Filter the  orders, by status
+     * sort the orders, by status
      *
      * @return A list of Order objects sorted in ascending order date
      * @author Sonia Ly
      */
     @Transactional
-    public List<Order> viewOrdersByStatus(int userID, String filterDirection) {
+    public List<Order> sortOrdersByStatus(int userID, String filterDirection) {
         checkIfStaffMember(userID);
 
         List<Order> allOrders = (List<Order>) orderRepository.findAll();
@@ -96,25 +96,6 @@ public class OrderInfoService {
 
         return allOrders;
     }
-
-    /**
-     * Service method to get all orders in DTO form
-     * Should to delete that * should be implemented in controller(Wissam)
-     * @return A list of OrderResponseDto objects corresponding to all the orders in the system
-     * @author Sonia Ly
-     */
-    //private List<OrderResponseDto> getAllOrders() {
-      //  List<Order> allOrders = (List<Order>) orderRepository.findAll();
-       // List<OrderResponseDto> allOrdersDTO = new ArrayList<>();
-
-     //   for (Order order : allOrders) {
-         //   OrderResponseDto currentOrder = new OrderResponseDto(order);
-        //    allOrdersDTO.add(currentOrder);
-       // }//
-
-     //   return allOrdersDTO;
-   // }
-
 
     /**
      * Helper method to determine if a user is a Staff member from their user ID. Throws an error if it isn't the case.

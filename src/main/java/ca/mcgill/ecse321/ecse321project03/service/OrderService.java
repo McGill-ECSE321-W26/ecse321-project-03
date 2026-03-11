@@ -439,4 +439,15 @@ public class OrderService {
 
         return price;
     }
+
+    /**
+     * Retrieves all OrderItems associated with a given Order.
+     * This is used by controllers when constructing OrderResponseDto.
+     *
+     * @param order the order whose items should be retrieved
+     * @return list of OrderItem objects belonging to the order
+     */
+    public List<OrderItem> findOrderItems(Order order) {
+        return orderItemRepository.findByOrderItemId_Order(order);
+    }
 }
