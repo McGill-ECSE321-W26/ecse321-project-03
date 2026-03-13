@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-//Reference: Tutoral 7
+//Reference: Tutorial 7
 public class AccountCreationDto {
 
     //------------------------
