@@ -1,4 +1,6 @@
 # ECSE321 Online Fashion Boutique: Team 3
+# Papa's Fashionistaria
+
 ## Main scope of the project
 
 The project consists of designing and implementing an online clothing store system. 
@@ -12,18 +14,53 @@ The team consists of 7 members, all majoring in Software or Computer Engineering
 With backgroungs in domain modeling, state machines and software development, we 
 are collaborating to implement a functional and structured system.
 
+## Roles 
+**Non-technical**: 
+- Manager: The person who reminds the team what each member should
+do and by when. Preferably, 2 people will be needed in case one person
+forgets to send reminders
+- Secretary: The person who initiates/announces and plans the group
+meetings. Keep note of what was said during each meeting. (Write the
+meeting minutes)
+- Note-taker: Taking notes when meeting/brainstorming
+- Submitter: Person that submits the deliverables
+- Proof-Reader (preferably at least 2 people): Meticulous people who check
+all of the deliverables before submission and contact the rest of the team
+in case of mistakes/modifications, making sure that our submission fulfills
+all the criteria and the submission files are consistent in terms of
+formatting.
+- Contact person: The person who contacts the teacher in case of
+questions or regrading
+
+**Technical**: 
+- Scrum master : 
+- Developper : 
 
 ## Team Members
 
-| Name              | GitHub username | Team roles                     | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
-| ----------------- | --------------- | ------------------------------ | --------------------- | --------------------- | --------------------- |
-| Victoire Bergeron | Vikivik-19      | Manager, Proof-Reader          |          13           |                       |                       |
-| Emily Sun         | EmilySunKI7     | Submitter                      |           4           |                       |                       |
-| Sonia Ly          | LySonia         | Manager, Secretary, Note-taker |           5           |                       |                       |
-| Zirun Wang        | kana797         | Proof-reader                   |           5           |                       |                       |
-| Wissam Abchiche   | wissamabcc      | Submitter, Contact person      |           7           |                       |                       |
-| Maria Klinski     | mashaklin       | Manager, Secretary             |           6           |                       |                       |
-| Yani Zhang        | yannniiii       | Submitter                      |           6           |                       |                       |
+| Name              | GitHub username | Team roles                              | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
+|-------------------|----------------|------------------------------------------|-----------------------|-----------------------|-----------------------|
+| Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |                       |                       |
+| Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |                       |                       |
+| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |                       |                       |
+| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |                       |                       |
+| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |                       |                       |
+| Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |                       |                       |
+| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |                       |                       |
+
+## Task breakdown 
+
+**Deliverable 2** 
+| Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zang |
+|--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|-----------|
+| Unit testing of service layer  |                   |           |          |            |                 |               |           |
+| Project management             |                   |           |          |            |                 |               |           |
+| QA plan and report             |                   |           |          |            |                 |               |           |
+| Integration testing of backend |                   |           |          |            |                 |               |           |
+| Build system                   |                   |           |          |            |                 |               |           |
+| Business methods               |                   |           |          |            |                 |               |           |
+| Add your own tasks             |                   |           |          |            |                 |               |           |
+| Total                          |                   |           |          |            |                 |               |           |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
@@ -31,6 +68,7 @@ are collaborating to implement a functional and structured system.
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              |                      |
 | 3              |                      | 
+
 
 
 
