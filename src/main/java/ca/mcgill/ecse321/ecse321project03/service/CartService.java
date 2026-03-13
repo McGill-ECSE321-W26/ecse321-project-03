@@ -84,21 +84,21 @@ public class CartService {
      * @param cartItemDto
      * @author Sonia Ly
      */
-    public void addItemToCart(int id, CartItemDto cartItemDto, CartDto cartDto) {
-        Account customer = accountRepository.findById(id).orElse(null);
-
-        if (customer == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No person with id " + id + " found.");
-        } else {
-            // See if the user already has a cart
-            Cart customerCart = cartRepository.findByAccount_Id(id);
-            if (customerCart == null) {
-                throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Cannot add an item to the cart. This customer doesn't have a cart!");
-            }
-
-            cartItemDto.setCart(cartDto);
-        }
-    }
+//    public void addItemToCart(int id, CartItemDto cartItemDto, CartDto cartDto) {
+//        Account customer = accountRepository.findById(id).orElse(null);
+//
+//        if (customer == null) {
+//            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No person with id " + id + " found.");
+//        } else {
+//            // See if the user already has a cart
+//            Cart customerCart = cartRepository.findByAccount_Id(id);
+//            if (customerCart == null) {
+//                throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Cannot add an item to the cart. This customer doesn't have a cart!");
+//            }
+//
+//            cartItemDto.setCart(cartDto);
+//        }
+//    }
 
     /**
      * Given a user's id, find their cart's total

@@ -177,13 +177,13 @@ public class AccountController {
      *         or an ErrorDto if redemption fails
      */
     @PostMapping("/{id}/redeem-loyalty")
-    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
-            @RequestParam int orderId, @RequestParam int pointsUsed) {
-        try {
-            Account account = accountService.redeemLoyaltyPtsInOrder(id, orderId, pointsUsed);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
+//    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
+//            @RequestParam int orderId, @RequestParam int pointsUsed) {
+//        try {
+//            Account account = accountService.redeemLoyaltyPtsInOrder(id, orderId, pointsUsed);
+//            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+//        } catch (Ecse321Project03Exception e) {
+//            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+//        }
+//    }
 }
