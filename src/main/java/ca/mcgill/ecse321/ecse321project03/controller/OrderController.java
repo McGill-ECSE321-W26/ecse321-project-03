@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.ecse321project03.controller;
 
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.OrderItemDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Order;

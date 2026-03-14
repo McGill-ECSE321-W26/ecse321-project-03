@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.ecse321project03.repository;
 
-import ca.mcgill.ecse321.ecse321project03.model.Account;
 import org.springframework.data.repository.CrudRepository;
 
 import ca.mcgill.ecse321.ecse321project03.model.Order;

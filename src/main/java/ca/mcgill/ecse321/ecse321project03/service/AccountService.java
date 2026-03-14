@@ -4,7 +4,6 @@ import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.Role;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
-import org.hibernate.annotations.processing.Find;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
