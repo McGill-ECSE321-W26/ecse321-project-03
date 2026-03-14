@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.ecse321project03.service;
 
 import ca.mcgill.ecse321.ecse321project03.dto.ItemCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemCreationDto.VariantSpec;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.model.Item;
@@ -23,31 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Service for creating items and their variants.
- *
- * createItem(int accountId, ItemCreationDto dto) 
- * returns ItemResponseDto. Annotated with @Transactional for a single unit of work.
- * - Authorization: 
- * ensureManager(accountId) — 401 if account not found, 403 if account is not a manager (using ManagerRepository.findByAccount_Id).
- * - Validation (400):
- * Item: name not null/blank, length 1–100; tag parsed to Item.Tag (case‑insensitive); price not null and ≥ 0.
- * Variants: list not null and not empty; each variant: color/size valid enums (case‑insensitive), initialStock not null, ≥ 0, and capped at 100,000.
- * Duplicates: no duplicate (color, size) pairs; message e.g. "duplicate variant Black/M".
- * - Business rule: 
- * Item name uniqueness → 409 Conflict (using ItemRepository.findByName).
- * - Persistence: 
- * persistItem creates and saves Item; persistVariants creates and saves each ItemType linked to that item.
- * - Parsing: 
- * parseTag, parseColor, parseSize do case‑insensitive enum parsing and return null for invalid values so the service can throw 400 with field-level messages (e.g. variants[0].color: invalid value).
- * - Design choices:
- * Validation is done in the service and reported via Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "field: message") so the existing exception handler returns a structured error body.
- * One validation failure is reported at a time; extending to multiple messages would mean collecting errors and then throwing once with a list.
- * Manager check uses findByAccount_Id and null checks (no separate existsByAccount_Id), consistent with the rest of the codebase.
- */
 
 @Service
-public class ItemCreationService {
+public class ItemDefinitionService {
 
     private static final int NAME_MIN_LENGTH = 1;
     private static final int NAME_MAX_LENGTH = 100;
@@ -70,17 +47,27 @@ public class ItemCreationService {
      *
      * @param accountId authenticated account id (must be a manager)
      * @param dto       item and variant specs
-     * @return created item response
+     * @return the created and persisted Item
      */
     @Transactional
-    public ItemResponseDto createItem(int accountId, ItemCreationDto dto) {
+    public Item createItem(int accountId, ItemCreationDto dto) {
         ensureManager(accountId);
         validateItemFields(dto);
         validateVariants(dto);
         checkItemNameUnique(dto.getName());
         Item item = persistItem(dto);
-        List<ItemType> types = persistVariants(item, dto.getVariants());
-        return new ItemResponseDto(item, types);
+        persistVariants(item, dto.getVariants());
+        return item;
+    }
+
+    /**
+     * Returns all item types (variants) for the given item.
+     *
+     * @param itemId the item id
+     * @return list of ItemType for that item (empty if none)
+     */
+    public List<ItemType> getItemTypesForItem(int itemId) {
+        return itemTypeRepository.findByGeneralItem_Id(itemId);
     }
 
     private void ensureManager(int accountId) {

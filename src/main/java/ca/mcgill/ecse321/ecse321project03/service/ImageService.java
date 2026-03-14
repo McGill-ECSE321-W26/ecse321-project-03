@@ -23,30 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-/**
- * ImageService
- * uploadItemImages(int accountId, int itemId, List<MultipartFile> files)
- * Returns List<ItemImage> (entities only; DTO mapping in controller).
- * 
- * - Authorization: 
- * ensureManager(accountId) → 401 if no account, 403 if not manager.
- * - Item exists: 
- * getItemOrThrow(itemId) → 404 if item not found.
- * - Validation (400):
- * files not null and not empty.
- * At most 10 files.
- * Each file: content type in image/jpeg, image/png, image/webp; size ≤ 5MB; non-empty.
- * - Build records: 
- * for each file, key items/{itemId}/{uuid}.{ext} and bytes from MultipartFile.getBytes().
- * - Transactional: 
- * persist all ItemImage rows (same order as files), then write bytes to disk under uploads/.
- * on write failure, delete any files already written in this request, then throw 500.
- * - Design choices:
- * DB then disk: Persist ItemImage first, then write files. If a file write fails, the transaction rolls back (no orphan DB rows); any files already written are removed in a catch block.
- * Single transaction: One @Transactional method so all inserts commit together; file I/O is best-effort cleanup on failure.
- * pathFromKey(String key): Static helper so controllers (or other code) can resolve key → Path for serving or deletion.
- * Constants: MAX_FILE_SIZE_BYTES = 5MB, MAX_FILES = 10, ALLOWED_CONTENT_TYPES = image/jpeg, image/png, image/webp.
- */
+
 @Service
 public class ImageService {
 
