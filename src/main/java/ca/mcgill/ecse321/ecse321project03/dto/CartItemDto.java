@@ -16,6 +16,10 @@ public class CartItemDto {
         this.cart = new CartDto(cartItem.getCartItemId().getCart());
     }
 
+    public CartItemDto(){
+        
+    }
+
     // Getter methods
     public int getQuantity() {
         return quantity;
@@ -25,6 +29,16 @@ public class CartItemDto {
     }
     public CartDto getCart() {
         return cart;
+    }
+    // setter methods
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    public void setItemType(ItemTypeDto itemType) {
+        this.itemType = itemType;
+    }
+    public void setCart(CartDto cart) {
+        this.cart = cart;
     }
 
 }

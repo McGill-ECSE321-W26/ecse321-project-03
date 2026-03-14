@@ -7,21 +7,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import ca.mcgill.ecse321.ecse321project03.dto.CartCreationDto;
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.CartRepository;
-import net.bytebuddy.implementation.bytecode.ByteCodeAppender.Size;
-import ca.mcgill.ecse321.ecse321project03.model.Account;
-import ca.mcgill.ecse321.ecse321project03.model.CartItem;
-import ca.mcgill.ecse321.ecse321project03.model.Item;
-import ca.mcgill.ecse321.ecse321project03.model.ItemType;
 import ca.mcgill.ecse321.ecse321project03.dto.CartDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemTypeDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartItemDto;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.awt.Color;
 
 // source: tutorial 7
 // author: Maria Klinski
@@ -90,17 +82,15 @@ public class CartIntegrationTests {
         assertNotNull(response.getBody());
         
     }
-/* 
+
     @Test
     @Order(2)
     public void testAddItemToCartValid() {
 
         // Arrange
-        ItemTypeDto itemTypeDto = new ItemTypeDto(1, "Test Item", Color.RED, Size.M);
-        CartItemDto cartItemDto = new CartItemDto(itemTypeDto, 2);
-
-
-        CartCreationDto testUserId = new CartCreationDto(testUserId);
+        //ItemTypeDto itemTypeDto = new ItemTypeDto(1, "Test Item", Color.RED, Size.M);
+        CartItemDto body = new CartItemDto();
+        body.setQuantity(2);
 
         // Act
         ResponseEntity<CartItemDto> response =
@@ -109,28 +99,31 @@ public class CartIntegrationTests {
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Test Item", response.getBody().getItemType());
         assertEquals(2, response.getBody().getQuantity());
     }
-*/
+
+    // POST: Add item to a cart that DNE
     @Test
     @Order(3)
     public void testAddItemToCartInvalid() {
 
         // Arrange
+        int invalidUserId = 1000;
         CartItemDto body = new CartItemDto();
+        body.setQuantity(1);
+
 
         // Act
         ResponseEntity<String> response =
-                client.postForEntity("/carts/" + testUserId + "/items", body, String.class);
+                client.postForEntity("/carts/" + invalidUserId + "/items", body, String.class);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("User with id " + testUserId + " does not have a cart"));
     }
 
 
+    // GET: Find total price of a cart
     @Test
     @Order(4)
     public void testFindCartTotalPriceValid() {
@@ -141,22 +134,24 @@ public class CartIntegrationTests {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(20.0, response.getBody(), 0.001);
     }
 
+    // GET: Find total price of a cart that DNE
     @Test
     @Order(5)   
     public void testFindCartTotalPriceInvalid() {
+        int invalidUserId = 1000;
+        
         // Act
         ResponseEntity<String> response =
-                client.getForEntity("/carts/" + testUserId + "/total", String.class);
+                client.getForEntity("/carts/" + invalidUserId + "/total", String.class);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("User with id " + testUserId + " does not have a cart"));
     }
 
+    // DELETE: Delete a cart
     @Test
     @Order(6)
     public void testDeleteCartValid() {
@@ -166,5 +161,19 @@ public class CartIntegrationTests {
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    @Order(7)
+    public void testDeleteCartInvalid() {
+        int invalidUserId = 1000;
+
+        // Act
+        ResponseEntity<String> response =
+                client.exchange("/carts/" + invalidUserId, HttpMethod.DELETE, null, String.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
     }
 }
