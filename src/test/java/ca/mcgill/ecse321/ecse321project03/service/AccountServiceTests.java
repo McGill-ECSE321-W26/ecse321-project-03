@@ -8,17 +8,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.sql.Date;
-import java.time.LocalDate;
+import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
+import ca.mcgill.ecse321.ecse321project03.model.Account;
+import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
+import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-
-//import ca.mcgill.ecse321.eventregistration.exception.EventRegistrationException;
-//import ca.mcgill.ecse321.eventregistration.model.Person;
-//import ca.mcgill.ecse321.eventregistration.repository.PersonRepository;
+import org.springframework.http.HttpStatus;
 
 @SpringBootTest
 public class AccountServiceTests {
@@ -31,45 +32,43 @@ public class AccountServiceTests {
     private String email;
     private String password;
     private String address;
+    private int loyaltyPts;
     private AccountCreationDto dto;
+    private Account account;
 
     @BeforeEach
     void setup() {
         username = "user1";
-        email = "email1@mail.com"
+        email = "email1@mail.com";
         password = "p";
         address = "123 Street";
         loyaltyPts = 0;
-        dto = new AccounCreationDto(username, email, password, address);
 
+        dto = new AccountCreationDto(username, email, password, address);
+        account = new Account(username, password, email, address, loyaltyPts);
     }
 
     @Test
     public void testCreateValidAccount() {
-        //Arrange
-        Account account = new Account(username, password, email, address, loyaltyPts, Date.valueOf(LocalDate.now()));
         when(repo.save(any(Account.class))).thenReturn(account);
 
-        //Act
         Account accountCreated = accountService.createAccount(dto);
 
-        //Assert
         assertNotNull(accountCreated);
         assertEquals(accountCreated.getUsername(), username);
-        assertEquals(accountCreat.getEmail(), email);
+        assertEquals(accountCreated.getEmail(), email);
         assertEquals(accountCreated.getPassword(), password);
         assertEquals(accountCreated.getAddress(), address);
         assertEquals(accountCreated.getLoyaltyPts(), 0);
 
-        assertEquals(Date.valueOf(LocalDate.now(), accountCreated.getCreationDate()));
         verify(repo, times(1)).save(account);
     }
 
     @Test
     public void testCreateAccountDuplicateEmail() {
         //Arrange
-        Account accountDuplicate = new Account("user2", "password", email, "456 Street", 1);
-        when(repo.findByEmail(email).thenReturn(accountDuplicate));
+        Account accountDuplicate = new Account("user2", email, "password", "456 Street", 1);
+        when(repo.findByEmail(email)).thenReturn(accountDuplicate);
 
         // Act
         Ecse321Project03Exception e =
@@ -84,8 +83,8 @@ public class AccountServiceTests {
     @Test
     public void testCreateAccountDuplicateUsername() {
         //Arrange
-        Account accountDuplicate = new Account("user1", "password", "email2@mail.com", "456 Street", 1);
-        when(repo.findByUsername(username).thenReturn(accountDuplicate));
+        Account accountDuplicate = new Account(username, "email2@mail.com", "password", "456 Street", 1);
+        when(repo.findByUsername(username)).thenReturn(accountDuplicate);
 
         // Act
         Ecse321Project03Exception e =
@@ -97,20 +96,79 @@ public class AccountServiceTests {
         assertEquals("An account with username " + username + " already exists", e.getMessage());
     }
 
-    public void testFindAccountByValidId() {
-        //Arrange
-        int id = 5;
-        Date date =
-        Account account = new Account(username, password, email, address, loyaltyPts, Date.valueOf(LocalDate.now()));
-        when(repo.findById(id)).thenReturn(account);
+    @Nested
+    class findAccountByTests() {
+        public void testFindAccountByValidId() {
+            //Arrange
+            int id = 5;
+            when(repo.findById(id)).thenReturn(account);
 
-        Account foundAccount = accountService.findAccountById(id);
+            Account foundAccount = accountService.findAccountById(id);
 
-        assertNotNull(foundAccount);
-        assertEquals(foundAccount.getUsername(), username);
-        assertEquals(foundAccount.getPassword(), password);
-        assertEquals(foundAccount.getEmail(), email);
-        assertEquals(foundAccount.getAddress(), address);
-        assertEquals(foundAccount.getCreationDate(), LocalDate.now());
+            assertNotNull(foundAccount);
+            assertEquals(foundAccount.getUsername(), username);
+            assertEquals(foundAccount.getPassword(), password);
+            assertEquals(foundAccount.getEmail(), email);
+            assertEquals(foundAccount.getAddress(), address);
+            assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        }
+
+        public void testFindAccountByInvalidId() {
+            //Arrange
+            int id = 5;
+
+            Ecse321Project03Exception e =
+                    assertThrows(Ecse321Project03Exception.class,
+                            () -> accountService.findAccountById(id));
+
+            assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+            assertEquals("No person found with id " + id, e.getMessage());
+        }
+
+        public void testFindAccountByValidUsername() {
+            when(repo.findByUsername(username)).thenReturn(account);
+
+            Account foundAccount = accountService.findAccountByUsername(username);
+
+            assertNotNull(foundAccount);
+            assertEquals(foundAccount.getUsername(), username);
+            assertEquals(foundAccount.getPassword(), password);
+            assertEquals(foundAccount.getEmail(), email);
+            assertEquals(foundAccount.getAddress(), address);
+            assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        }
+
+        public void testFindAccountByInValidUsername() {
+            Ecse321Project03Exception e =
+                    assertThrows(Ecse321Project03Exception.class,
+                            () -> accountService.findAccountByUsername(username));
+
+            assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+            assertEquals("No account found with username " + username, e.getMessage());
+        }
+
+        public void testFindAccountByValidEmail() {
+            when(repo.findByEmail(email)).thenReturn(account);
+
+            Account foundAccount = accountService.findAccountByEmail(email);
+
+            assertNotNull(foundAccount);
+            assertEquals(foundAccount.getUsername(), username);
+            assertEquals(foundAccount.getPassword(), password);
+            assertEquals(foundAccount.getEmail(), email);
+            assertEquals(foundAccount.getAddress(), address);
+            assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        }
+
+        public void testFindAccountByInValidEmail() {
+            Ecse321Project03Exception e =
+                    assertThrows(Ecse321Project03Exception.class,
+                            () -> accountService.findAccountByEmail(email));
+
+            assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+            assertEquals("No account found with email " + email, e.getMessage());
+        }
     }
+
+
 }
