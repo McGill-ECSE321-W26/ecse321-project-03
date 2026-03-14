@@ -177,5 +177,46 @@ public class AccountServiceTests {
         }
     }
 
+    @Test
+    public void loginValidCredentials() {
+        when(repo.findByEmail(email)).thenReturn(account);
+
+        Account loggedInAccount = accountService.login(email, password);
+
+        assertNotNull(loggedInAccount);
+        assertEquals(loggedInAccount.getUsername(), username);
+        assertEquals(loggedInAccount.getPassword(), password);
+        assertEquals(loggedInAccount.getEmail(), email);
+        assertEquals(loggedInAccount.getAddress(), address);
+        assertEquals(loggedInAccount.getLoyaltyPts(), loyaltyPts);
+    }
+
+    @Test
+    public void loginInvalidEmail() {
+        String invalidEmail = "invalid@email.com";
+
+        Ecse321Project03Exception e =
+                assertThrows(Ecse321Project03Exception.class,
+                        () -> accountService.login(invalidEmail, password));
+
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("No account found with email " + email, e.getMessage());
+    }
+
+    @Test
+    public void loginInvalidPassword() {
+        String invalidPassword = "wrongPassword";
+        when(repo.findByEmail(email)).thenReturn(account);
+
+        Ecse321Project03Exception e =
+                assertThrows(Ecse321Project03Exception.class,
+                        () -> accountService.login(email, invalidPassword));
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals("Incorrect password for email " + email, e.getMessage());
+    }
+
+
+
 
 }
