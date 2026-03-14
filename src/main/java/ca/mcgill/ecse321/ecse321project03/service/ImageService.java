@@ -60,9 +60,9 @@ public class ImageService {
     @Transactional
     public List<ItemImage> uploadItemImages(int accountId, int itemId, List<MultipartFile> files) {
         ensureManager(accountId);
-        Item item = getItemOrThrow(itemId);
-        validateFiles(files);
-        List<ImageRecord> records = buildImageRecords(itemId, files);
+        Item item = getItemOrThrow(itemId); // Check item exists for the item id
+        validateFiles(files); // Validate size and type of the image
+        List<ImageRecord> records = buildImageRecords(itemId, files); // generate name
         List<ItemImage> saved = persistImageRecords(item, records);
         writeFilesToDisk(records);
         return saved;
@@ -109,6 +109,12 @@ public class ImageService {
         }
     }
 
+    /**
+     * Private helper for generating a key (a partial file path) for the image
+     * in the form: KEY_PREFIX + "/" + itemId + "/" + UUID.randomUUID() + "." + ext
+     * Ex. items/1/73wfbe-283dw-73bd3-dnh238gue2.png
+     * Then builds up an image record
+     */
     private List<ImageRecord> buildImageRecords(int itemId, List<MultipartFile> files) {
         List<ImageRecord> records = new ArrayList<>();
         for (MultipartFile f : files) {
@@ -142,6 +148,7 @@ public class ImageService {
                 written.add(path);
             }
         } catch (IOException e) {
+            // If an error occurs during writing to disk, all previously written files will be deleted
             deletePathsQuietly(written);
             throw new Ecse321Project03Exception(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Failed to write image to disk: " + e.getMessage());
@@ -158,7 +165,7 @@ public class ImageService {
     }
 
     private static String extensionFromContentType(String contentType) {
-        if (contentType == null) return "jpg";
+        if (contentType == null) return "jpg"; //default to jpg
         return switch (contentType) {
             case "image/jpeg" -> "jpg";
             case "image/png" -> "png";
