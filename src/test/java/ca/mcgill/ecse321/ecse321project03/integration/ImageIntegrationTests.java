@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.ecse321project03.integration;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,13 +6,8 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
-import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemImageRepository;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.LinkedMultiValueMap;
@@ -41,9 +35,6 @@ public class ImageIntegrationTests {
 
     @Autowired
     private ItemImageRepository itemImageRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
     
 
     @BeforeAll
