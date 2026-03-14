@@ -178,16 +178,16 @@ public class AccountController {
      *
      * @param id the ID of the account using loyalty points
      * @param orderId the ID of the order where points are redeemed
-     * @param pointsUsed the number of loyalty points to redeem
+     * @param usePoints the choice of redeeming loyalty points
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if redemption fails
      */
     @PostMapping("/{id}/redeem-loyalty")
     public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
-            @RequestParam int orderId, @RequestParam int pointsUsed) {
+            @RequestParam int orderId, @RequestParam boolean usePoints) {
         try {
-            Account account = accountService.redeemLoyaltyPts(id, orderId, pointsUsed);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            String message = accountService.redeemLoyaltyPts(id, orderId, usePoints);
+            return new ResponseEntity<>(message, HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
