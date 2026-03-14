@@ -1,12 +1,12 @@
 package ca.mcgill.ecse321.ecse321project03.integration;
-// import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // embedded server will start at a random port
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 
-// testsd will be run based on @Order
+// tests will be run based on @Order
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 
 // instance will be shared across all methods
@@ -35,9 +35,9 @@ public class AccountIntegrationTests {
 
     private int createdAccountId;
 
-    private static final String VALID_USERNAME = "Maria Klinski";
-    private static final String VALID_EMAIL = "mariaklinski@gmail.com";
-    private static final String VALID_PASSWORD = "Maria123#";
+    private static final String VALID_USERNAME = "Bob_1";
+    private static final String VALID_EMAIL = "bob1@gmail.com";
+    private static final String VALID_PASSWORD = "Bob123#";
     private static final String VALID_ADDRESS = "123 Peel St, Montreal, QC";
 
     @Autowired
@@ -50,6 +50,7 @@ public class AccountIntegrationTests {
     }
 
 
+    // POST: valid create Account
     @Test
     @Order(0)
     public void testCreateValidAccount() {
@@ -57,7 +58,7 @@ public class AccountIntegrationTests {
         AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, VALID_PASSWORD, VALID_ADDRESS);
 
         // Act
-        ResponseEntity<AccountResponseDto> response = client.postForEntity("/account", body, AccountResponseDto.class);
+        ResponseEntity<AccountResponseDto> response = client.postForEntity("/accounts", body, AccountResponseDto.class);
         
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -70,99 +71,28 @@ public class AccountIntegrationTests {
 
     }
 
-    // password too short
+    // POST: invalid account creation: duplicate email
     @Test
     @Order(1)
-    public void testCreateAccountWithShortPassword() {
+    public void testCreateAccountDuplicateEmail() {
         // Arrange
-        String shortPassword = "Short1!";
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, shortPassword, VALID_ADDRESS);
+        AccountCreationDto body = new AccountCreationDto("NotBob", VALID_EMAIL, VALID_PASSWORD, VALID_ADDRESS);
 
         // Act
-        ResponseEntity<ErrorDto> response = client.postForEntity("/account", body, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.postForEntity("/accounts", body, ErrorDto.class);
         
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Password must be at least 8 characters long."), response.getBody().getErrors());
-
+        assertIterableEquals(List.of("An account with the same email already exists."), response.getBody().getErrors());
     }
-
-    // password without number
+    
+    // GET: find account by id
     @Test
     @Order(2)
-    public void testCreateAccountPasswordWithoutNumber() {
-        // Arrange
-        String shortPassword = "ShortPass!";
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, shortPassword, VALID_ADDRESS);
-
-        // Act
-        ResponseEntity<ErrorDto> response = client.postForEntity("/account", body, ErrorDto.class);
-        
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Password must be at least 8 characters long."), response.getBody().getErrors());
-
-    }
-
-    // password without special character
-    @Test
-    @Order(3)
-    public void testCreateAccountPasswordWithoutSpecialCharacter() {
-        // Arrange
-        String shortPassword = "ShortPass1";
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, shortPassword, VALID_ADDRESS);
-
-        // Act
-        ResponseEntity<ErrorDto> response = client.postForEntity("/account", body, ErrorDto.class);
-        
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Password must contain at least one special character."), response.getBody().getErrors());
-    }
-
-    // password without uppercase letter
-    @Test
-    @Order(4)
-    public void testCreateAccountPasswordWithoutUppercaseLetter() {
-        // Arrange
-        String shortPassword = "shortpass1!";
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, shortPassword, VALID_ADDRESS);
-
-        // Act
-        ResponseEntity<ErrorDto> response = client.postForEntity("/account", body, ErrorDto.class);
-        
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Password must contain at least one uppercase letter."), response.getBody().getErrors());
-    }
-
-    //password without lowercase letter
-    @Test
-    @Order(5)
-    public void testCreateAccountPasswordWithoutLowercaseLetter() {
-        // Arrange
-        String shortPassword = "SHORTPASS1!";
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, shortPassword, VALID_ADDRESS);
-
-        // Act
-        ResponseEntity<ErrorDto> response = client.postForEntity("/account", body, ErrorDto.class);
-        
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Password must contain at least one lowercase letter."), response.getBody().getErrors());
-    }
-
-
-    @Test
-    @Order(6)
     public void testFindAccountByValidId() {
         // Arrange
-        String url = String.format("/account/%d", this.createdAccountId);
+        String url = String.format("/accounts/%d", this.createdAccountId);
 
         // Act
         ResponseEntity<AccountResponseDto> response = client.getForEntity(url, AccountResponseDto.class);
@@ -175,4 +105,165 @@ public class AccountIntegrationTests {
         assertEquals(VALID_EMAIL, response.getBody().getEmail());
         assertEquals(VALID_ADDRESS, response.getBody().getAddress());
     }
+
+    // GET: find account by invalid id
+    @Test
+    @Order(3)
+    public void testFindAccountByInvalidId() {
+        // Arrange
+        int invalidId = -1;
+        String url = String.format("/accounts/%d", invalidId);
+
+        // Act
+        ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("No account found with id " + invalidId), response.getBody().getErrors());
+
+}
+
+    // GET: find account by username
+    @Test
+    @Order(4)
+    public void testFindAccountByValidUsername() {
+        // Arrange
+        String url = String.format("/accounts/username/%s", VALID_USERNAME);
+
+        // Act
+        ResponseEntity<AccountResponseDto> response = client.getForEntity(url, AccountResponseDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(this.createdAccountId, response.getBody().getId());
+        assertEquals(VALID_USERNAME, response.getBody().getUsername());
+        assertEquals(VALID_EMAIL, response.getBody().getEmail());
+        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+    }
+
+    // GET: find account by invalid username
+    @Test
+    @Order(5)
+    public void testFindAccountByInvalidUsername() {
+        // Arrange
+        String invalidUsername = "1";
+        String url = String.format("/accounts/username/%s", invalidUsername);
+
+        // Act
+        ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("No account found with username " + invalidUsername), response.getBody().getErrors());
+    
+}
+
+    // GET: find account by email
+    @Test
+    @Order(6)
+    public void testFindAccountByValidEmail() {
+        // Arrange
+        String url = String.format("/accounts/email/%s", VALID_EMAIL);
+
+        // Act
+        ResponseEntity<AccountResponseDto> response = client.getForEntity(url, AccountResponseDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(this.createdAccountId, response.getBody().getId());
+        assertEquals(VALID_USERNAME, response.getBody().getUsername());
+        assertEquals(VALID_EMAIL, response.getBody().getEmail());
+        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+    }
+
+    // GET: find account by invalid email
+    @Test
+    @Order(7)
+    public void testFindAccountByInvalidEmail() {
+        // Arrange
+        String invalidEmail = "invalid@something.com";
+        String url = String.format("/accounts/email/%s", invalidEmail);
+
+        // Act
+        ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("No account found with email " + invalidEmail), response.getBody().getErrors());
+    }
+
+    // POST: login
+    @Test
+    @Order(8)
+    public void testLoginValid() {
+
+        // Act
+        String url = String.format("/accounts/login?email=%s&password=%s", VALID_EMAIL, VALID_PASSWORD);
+        ResponseEntity<AccountResponseDto> response = client.postForEntity(url, null, AccountResponseDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(this.createdAccountId, response.getBody().getId());
+        assertEquals(VALID_USERNAME, response.getBody().getUsername());
+        assertEquals(VALID_EMAIL, response.getBody().getEmail());
+        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+    }
+
+    // POST: login with invalid password
+    @Test
+    @Order(9)
+    public void testLoginInvalidPassword() {
+        // Arrange
+        String invalidPassword = "WrongPass!";
+
+        // Act
+        String url = String.format("/accounts/login?email=%s&password=%s", VALID_EMAIL, invalidPassword);
+        ResponseEntity<ErrorDto> response = client.postForEntity(url, null, ErrorDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("Invalid password."), response.getBody().getErrors());
+    }
+
+    // PUT: update account
+    @Test
+    @Order(10)
+    public void testUpdateAccountValid() {
+        // Arrange
+        String newAddress = "272 Bob St. , Montreal, QC";
+
+        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, VALID_PASSWORD, newAddress);
+
+        // Act
+        ResponseEntity<AccountResponseDto> response = client.exchange("/accounts/" + this.createdAccountId, HttpMethod.PUT, new HttpEntity<>(body), AccountResponseDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(this.createdAccountId, response.getBody().getId());
+        assertEquals(VALID_USERNAME, response.getBody().getUsername());
+        assertEquals(VALID_EMAIL, response.getBody().getEmail());
+        assertEquals(newAddress, response.getBody().getAddress());
+
+    }
+
+    // DELETE: delete account
+    @Test
+    @Order(11)
+    public void testDeleteAccountValid() {
+        // Arrange
+        String url = String.format("/accounts/%d", this.createdAccountId);
+
+        // Act
+        ResponseEntity<Void> response = client.exchange(url, HttpMethod.DELETE, null, Void.class);
+
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+}
 }
