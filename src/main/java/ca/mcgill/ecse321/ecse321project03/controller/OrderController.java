@@ -51,17 +51,13 @@ public class OrderController {
      *         or an ErrorDto if checkout fails
      */
     @PostMapping("/checkout")
-    public ResponseEntity<?> createOrderAndCheckout(@RequestBody OrderCreationDto orderCreationDto) {
-        try {
+    public OrderResponseDto createOrderAndCheckout(@RequestBody OrderCreationDto orderCreationDto) {
             List<OrderItem> orderItems = orderService.checkout(orderCreationDto);
             // Retrieve the created order from the first OrderItem
             Order order = orderItems.get(0).getOrderItemId().getOrder();
 
-            return new ResponseEntity<>(new OrderResponseDto(order, orderItems), HttpStatus.CREATED);
+            return new OrderResponseDto(order, orderItems);
 
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
     }
 
     /**
@@ -71,15 +67,12 @@ public class OrderController {
      * @return a ResponseEntity containing the OrderResponseDto if the order exists,
      *         or an ErrorDto if the order cannot be found
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findOrderById(@PathVariable int id) {
-        try {
+    @GetMapping("/order/{id}")
+    public OrderResponseDto findOrderById(@PathVariable int id) {
             Order order = orderService.findOrderByIdResponseDto(id);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return new ResponseEntity<>(new OrderResponseDto(order, orderItems), HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return (new OrderResponseDto(order, orderItems));
+
     }
 
     /**
@@ -91,16 +84,14 @@ public class OrderController {
      * @return a ResponseEntity containing the updated OrderResponseDto if successful,
      *         or an ErrorDto if the assignment fails
      */
-    @PutMapping("/{orderId}/assign")
-    public ResponseEntity<?> assignEmployee(@PathVariable int orderId,
+    @PutMapping("/order/{orderId}/assign")
+    public OrderResponseDto assignEmployee(@PathVariable int orderId,
             @RequestParam int employeeId, @RequestParam int accountId) {
-        try {
+
             Order order = orderService.assignEmployee(orderId, employeeId, accountId);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return new ResponseEntity<>(new OrderResponseDto(order, orderItems), HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return new OrderResponseDto(order, orderItems);
+
     }
 
     /**
@@ -112,16 +103,12 @@ public class OrderController {
      * @return a ResponseEntity containing the updated OrderResponseDto if successful,
      *         or an ErrorDto if the update fails
      */
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable int orderId,
+    @PutMapping("/order/{orderId}/status")
+    public OrderResponseDto updateStatus(@PathVariable int orderId,
             @RequestParam String orderState, @RequestParam int accountId) {
-        try {
             Order order = orderService.updateStatus(orderId, orderState, accountId);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return new ResponseEntity<>(new OrderResponseDto(order, orderItems), HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return (new OrderResponseDto(order, orderItems));
     }
 
 
@@ -132,17 +119,14 @@ public class OrderController {
      * @return a ResponseEntity containing a list of OrderResponseDto objects if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping
-    public ResponseEntity<?> viewOrders(@RequestParam int userID) {
-        try {
+    @GetMapping("/order")
+    public List<OrderResponseDto> viewOrders(@RequestParam int userID) {
+
             List<Order> orders = orderInfoService.viewOrders(userID);
             List<OrderResponseDto> orderDtos = orders.stream()
                     .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
                     .toList();
-            return new ResponseEntity<>(orderDtos, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return orderDtos;
     }
 
     /**
@@ -154,16 +138,14 @@ public class OrderController {
      *         or an ErrorDto if the request fails
      */
     @GetMapping("/order-date")
-    public ResponseEntity<?> viewOrdersByOrderDate(@RequestParam int userID, @RequestParam String filterDirection) {
-        try {
+    public List<OrderResponseDto> viewOrdersByOrderDate(@RequestParam int userID, @RequestParam String filterDirection) {
+
             List<Order> orders = orderInfoService.viewOrdersByOrderDate(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
                     .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
                     .toList();
-            return new ResponseEntity<>(orderDtos, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return orderDtos;
+
     }
 
     /**
@@ -175,16 +157,14 @@ public class OrderController {
      *         or an ErrorDto if the request fails
      */
     @GetMapping("/customer")
-    public ResponseEntity<?> viewOrdersByCustomer(@RequestParam int userID, @RequestParam String filterDirection) {
-        try {
+    public List<OrderResponseDto> viewOrdersByCustomer(@RequestParam int userID, @RequestParam String filterDirection) {
+
             List<Order> orders = orderInfoService.viewOrdersByCustomer(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
                     .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
                     .toList();
-            return new ResponseEntity<>(orderDtos, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return orderDtos;
+
     }
 
     /**
@@ -196,15 +176,11 @@ public class OrderController {
      *         or an ErrorDto if the request fails
      */
     @GetMapping("/status")
-    public ResponseEntity<?> sortOrdersByStatus(@RequestParam int userID, @RequestParam String filterDirection) {
-        try {
+    public List<OrderResponseDto> sortOrdersByStatus(@RequestParam int userID, @RequestParam String filterDirection) {
             List<Order> orders = orderInfoService.sortOrdersByStatus(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
                     .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
                     .toList();
-            return new ResponseEntity<>(orderDtos, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return orderDtos;
     }
 }
