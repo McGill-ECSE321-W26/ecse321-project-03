@@ -35,7 +35,7 @@ public class ItemCreationController {
      * @return a ResponseEntity containing the created ItemResponseDto if successful,
      *         or an ErrorDto if item creation fails
      */
-    @PostMapping
+    @PostMapping("/itemCreation")
     public ResponseEntity<?> createItem(@RequestParam int accountId, @RequestBody ItemCreationDto itemCreationDto) {
         try {
             ItemResponseDto createdItem = itemCreationService.createItem(accountId, itemCreationDto);

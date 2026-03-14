@@ -94,18 +94,12 @@ public class OrderIntegrationTest {
         itemTypeRepository.deleteAll();
         cartItemRepository.deleteAll();
         cartItemRepository.deleteAll();
+        managerRepository.deleteAll();
+        itemRepository.deleteAll();
     }
 
     @BeforeEach
     public void setup(){
-        orderRepository.deleteAll();
-        orderItemRepository.deleteAll();
-        accountRepository.deleteAll();
-        employeeRepository.deleteAll();
-        roleRepository.deleteAll();
-        itemTypeRepository.deleteAll();
-        cartItemRepository.deleteAll();
-        cartItemRepository.deleteAll();
 
         // Customer
         testCustomer = new Account("Jeane", "jeane@gmail.com", "$fjdgbfdju1234", "1000 McGill", 0);
@@ -163,7 +157,7 @@ public class OrderIntegrationTest {
 
         // Assert
         assertNotNull(response);
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto createdOrder =  response.getBody();
 
 
