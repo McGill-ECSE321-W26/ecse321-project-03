@@ -45,6 +45,9 @@ public class OrderService {
     @Autowired
     private CartItemRepository cartItemRepository;
 
+    @Autowired
+    private AccountService accountService;
+
 
     /**
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
@@ -84,7 +87,7 @@ public class OrderService {
                 Order.OrderState.Ordered,
                 customer,
                 null);
-
+        accountService.awardLoyaltyPts(customer.getId(), newOrder.getId());
         return orderRepository.save(newOrder);
     }
 

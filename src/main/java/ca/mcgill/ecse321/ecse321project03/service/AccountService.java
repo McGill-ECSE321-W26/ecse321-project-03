@@ -217,26 +217,13 @@ public class AccountService {
                     "This order does not belong to the account with id " + accountId + ".");
         }
 
-        addLoyaltyPtsForOrder(accountFromDB);
+        List<Order> orderList = orderRepository.findByCustomer_Id(accountId);
+        if(orderList.size() > 1){
+           addLoyaltyPtsForOrder(accountFromDB);
+        }
         return accountRepository.save(accountFromDB);
     }
-    // The old version seems to award loyalty points multiple times just because the customer has any past order
-    // without checking which order triggered the reward or whether points were already awarded before.
-    // Need Discussion about this
 
-    //    @Transactional
-//    public Account awardLoyaltyPts(int accountID){
-//        //using the find method from above
-//        Account accountFromDB = findAccountById(accountID);
-//        //find order list for account
-//        List<Order> orderList = orderRepository.findByCustomer_Id(accountID);
-//        //check if customer is returning customer
-//        if(!orderList.isEmpty()){
-//            //if so, award points
-//            addLoyaltyPtsForOrder(accountFromDB);
-//        }
-//        return accountRepository.save(accountFromDB);
-//    }
 
     public void addLoyaltyPtsForOrder(Account accountFromDB){
         int pts = accountFromDB.getLoyaltyPts();
@@ -248,11 +235,10 @@ public class AccountService {
      * Redeem your loyalty points
      * @param accountId id of the user
      * @param orderId id of the order for which you want to redeem the points
-     * @param pointsUsed
      * @author Emily Sun and Sonia Ly
      */
     @Transactional
-    public Account redeemLoyaltyPts (int accountId, int orderId, int pointsUsed){
+    public String redeemLoyaltyPts (int accountId, int orderId, boolean usePts){
         Account accountFromDB = findAccountById(accountId);
         Order orderFromDB = orderRepository.findById(orderId).orElse(null);
 
@@ -262,46 +248,49 @@ public class AccountService {
         if (orderFromDB == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order with id " + orderId + " found.");
         }
-        if (pointsUsed < 0) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
-                    "Points used must be non-negative.");
-        }
         if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
                     "This order does not belong to the account with id " + accountId + ".");
         }
 
-        double orderPrice = orderService.findOrderPrice(orderFromDB);
-        int redeemableAmount = (int) Math.ceil(orderPrice);
-        int actualPointsToUse = Math.min(pointsUsed,
-                Math.min(redeemableAmount, accountFromDB.getLoyaltyPts()));
-        useLoyaltyPoints(accountFromDB, actualPointsToUse);
-
-        return accountRepository.save(accountFromDB);
+        double price = orderService.findOrderPrice(orderFromDB);
+        double moneySaved = useLoyaltyPoints(accountFromDB) * price;
+        if(moneySaved == 0.0){
+            return "";
+        }
+        return "You saved " + String.format("%.2f", moneySaved) + " on this order!";
 
     }
 
     /**
      * Use up loyalty points
-     * @param account account that's uing up the loyalty points
-     * @param pts amount of points to redeem
+     * @param account account that's using the loyalty points
      * @author Emily Sun
      */
-    public void useLoyaltyPoints(Account account, int pts){
-
-        if (pts < 0) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
-                    "Points to redeem must be non-negative.");
+    public double useLoyaltyPoints(Account account){
+        int lytPts = account.getLoyaltyPts();
+        if(lytPts < 10){
+            //no discount
+            return 0.0;
         }
-
-        int loyaltyPts = account.getLoyaltyPts();
-        if(loyaltyPts <= pts){
-            //if the number of points they want to use is greater or equal to the number they have
-            //just use all the points
-            account.setLoyaltyPts(0);
+        else if (lytPts < 15){
+            // 10-14 pts -> 10% off
+            return 0.1;
         }
-        else{
-            account.setLoyaltyPts(loyaltyPts - pts);
+        else if (lytPts < 20){
+            //15-19 pts -> 20% off
+            return 0.2;
+        }
+        else if (lytPts < 25){
+            //20-24 pts -> 30% off
+            return 0.3;
+        }
+        else if (lytPts < 35){
+            //25-34 pts -> 40% off
+            return 0.4;
+        }else{
+            // lytpts >= 35 -> 50% off (caps off at 50%)
+            return 0.5;
         }
     }
 

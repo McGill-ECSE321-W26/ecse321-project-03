@@ -4,32 +4,42 @@ import ca.mcgill.ecse321.ecse321project03.model.Item;
 import ca.mcgill.ecse321.ecse321project03.model.Item.Tag;
 import ca.mcgill.ecse321.ecse321project03.model.ItemType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Response DTO for item creation; mirrors request fields and adds persisted ids.
+ * Response DTO for item creation. Contains item fields, variant info, and
+ * image URLs that the frontend can use to load and render images (e.g. via
+ * GET /images/... endpoints).
  */
-public class ItemResponseDto {
+public class ItemDefinitionResponseDto {
 
     private int id;
     private String name;
     private Tag tag;
     private double price;
     private List<VariantResponse> variants;
+    private List<String> imageUrls;
 
-    public ItemResponseDto(Item item, List<ItemType> itemTypes) {
+    /**
+     * Builds the response from an Item, its types, and a list of image URL paths.
+     * Image URLs should be paths like "/images/items/1/uuid.jpg" that the frontend
+     * can use to load images.
+     */
+    public ItemDefinitionResponseDto(Item item, List<ItemType> itemTypes, List<String> imageUrls) {
         this.id = item.getId();
         this.name = item.getName();
         this.tag = item.getTag();
         this.price = item.getPrice();
-        this.variants = itemTypes.stream()
+        this.variants = itemTypes == null ? List.of() : itemTypes.stream()
                 .map(VariantResponse::new)
                 .collect(Collectors.toList());
+        this.imageUrls = imageUrls == null ? Collections.emptyList() : List.copyOf(imageUrls);
     }
 
     @SuppressWarnings("unused")
-    public ItemResponseDto() {
+    public ItemDefinitionResponseDto() {
     }
 
     public int getId() {
@@ -70,6 +80,14 @@ public class ItemResponseDto {
 
     public void setVariants(List<VariantResponse> variants) {
         this.variants = variants;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls;
     }
 
     public static class VariantResponse {
