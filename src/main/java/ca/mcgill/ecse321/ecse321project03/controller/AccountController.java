@@ -176,7 +176,7 @@ public class AccountController {
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if redemption fails
      */
-    @PostMapping("/{id}/redeem-loyalty")
+//    @PostMapping("/{id}/redeem-loyalty")
 //    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
 //            @RequestParam int orderId, @RequestParam int pointsUsed) {
 //        try {
