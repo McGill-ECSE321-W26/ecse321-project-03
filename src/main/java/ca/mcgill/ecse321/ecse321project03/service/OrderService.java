@@ -46,9 +46,6 @@ public class OrderService {
     @Autowired
     private CartItemRepository cartItemRepository;
 
-    @Autowired
-    private AccountService accountService;
-
 
     /**
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
@@ -87,7 +84,7 @@ public class OrderService {
                 Order.OrderState.Ordered,
                 customer,
                 null);
-        accountService.awardLoyaltyPts(customer.getId(), newOrder.getId());
+        awardLoyaltyPts(customer.getId(), newOrder.getId());
         return orderRepository.save(newOrder);
     }
 
@@ -424,10 +421,130 @@ public class OrderService {
         
     }
 
+    //------------------------
+    // Related to Loyalty Points
+    //------------------------
+
+    /**
+     * Awards Loyalty points
+     * @param accountId id of the user receiving the loyalty points
+     * @param orderId the ID of the order that triggers the loyalty-point award
+     * @author Emily Sun
+     */
+    @Transactional
+    public void awardLoyaltyPts(int accountId, int orderId) {
+        Account accountFromDB = accountRepository.findById(accountId).orElse(null);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
+
+        if (accountFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No customer found with id " + accountId);
+        }
+
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No order found with id " + orderId);
+        }
+
+        if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
+                    "This order does not belong to the account with id " + accountId + ".");
+        }
+
+        List<Order> orderList = orderRepository.findByCustomer_Id(accountId);
+        if(orderList.size() > 1){
+            addLoyaltyPts(accountFromDB);
+        }
+        accountRepository.save(accountFromDB);
+    }
+
+
+    public void addLoyaltyPts(Account account){
+        int pts = account.getLoyaltyPts();
+        pts += 1;
+        account.setLoyaltyPts(pts);
+    }
+
+    /**
+     * Redeem your loyalty points
+     * @param accountId id of the user
+     * @param orderId id of the order for which you want to redeem the points
+     * @author Emily Sun and Sonia Ly
+     */
+    @Transactional
+    public String redeemLoyaltyPts (int accountId, int orderId, boolean usePts){
+        Account accountFromDB = accountRepository.findById(accountId).orElse(null);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
+
+        if (accountFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No person with id " + accountId + " found.");
+        }
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order with id " + orderId + " found.");
+        }
+        if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
+                    "This order does not belong to the account with id " + accountId + ".");
+        }
+
+        if (!usePts){
+            return "";
+        }
+
+        double price = findOrderPrice(orderFromDB);
+        double moneySaved = useLoyaltyPoints(accountFromDB) * price;
+        if(useLoyaltyPoints(accountFromDB) == 0.0){
+            return "You don't have enough points to get a discount :(";
+        }
+        return "You saved $" + String.format("%.2f", moneySaved) + " on this order!";
+
+    }
+
+    /**
+     * Use loyalty points
+     * @param account account that's using the loyalty points
+     * @author Emily Sun
+     */
+    public double useLoyaltyPoints(Account account){
+        int lytPts = account.getLoyaltyPts();
+        if(lytPts < 10){
+            //no discount
+            return 0.0;
+        }
+        else if (lytPts < 15){
+            // 10-14 pts -> 10% off
+            return 0.1;
+        }
+        else if (lytPts < 20){
+            //15-19 pts -> 20% off
+            return 0.2;
+        }
+        else if (lytPts < 25){
+            //20-24 pts -> 30% off
+            return 0.3;
+        }
+        else if (lytPts < 35){
+            //25-34 pts -> 40% off
+            return 0.4;
+        }else{
+            // lytpts >= 35 -> 50% off (caps off at 50%)
+            return 0.5;
+        }
+    }
+
+    /**
+     * Find the total price of an order
+     * @param orderFromDB the order for which we want to find the price
+     * @author Emily Sun
+     */
     public double findOrderPrice(Order orderFromDB){
         
-        List <OrderItem> orderItemList = orderItemRepository.findByOrderItemId_Order(orderFromDB);
+        List <OrderItem> orderItemList = findOrderItems(orderFromDB);
         double price = 0.00;
+
+        if(orderItemList.isEmpty()){
+            return price;
+        }
 
         for (OrderItem orderItem : orderItemList){
             //get the item, but im not sure if we have to find it from the database or if this is ok??
