@@ -2,10 +2,9 @@ package ca.mcgill.ecse321.ecse321project03.integration;
 
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemTypeDto;
-import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
+
 import ca.mcgill.ecse321.ecse321project03.model.*;
-import ca.mcgill.ecse321.ecse321project03.model.Order;
+
 import ca.mcgill.ecse321.ecse321project03.repository.*;
 import static org.junit.jupiter.api.Assertions.*;
 import  org.junit.jupiter.api.*;
@@ -15,14 +14,9 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpMethod;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.sql.Date;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,19 +30,11 @@ public class InventoryIntegrationTest {
 
 
     @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
-    private OrderItemRepository orderItemRepository;
-
-    @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private ItemTypeRepository itemTypeRepository;
@@ -79,17 +65,14 @@ public class InventoryIntegrationTest {
     private CartItem testCartItem1;
     private CartItem testCartItem2;
 
-    private int validOrderId;
 
 
     @BeforeEach
     @AfterEach
     public void clearDatabaseSetup() {
-        orderRepository.deleteAll();
-        orderItemRepository.deleteAll();
+        cartRepository.deleteAll();
         accountRepository.deleteAll();
         employeeRepository.deleteAll();
-        roleRepository.deleteAll();
         itemTypeRepository.deleteAll();
         cartItemRepository.deleteAll();
         cartItemRepository.deleteAll();

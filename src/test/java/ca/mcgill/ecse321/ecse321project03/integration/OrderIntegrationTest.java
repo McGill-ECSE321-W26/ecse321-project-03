@@ -85,9 +85,9 @@ public class OrderIntegrationTest {
         roleRepository.deleteAll();
         itemTypeRepository.deleteAll();
         cartItemRepository.deleteAll();
-        cartItemRepository.deleteAll();
         managerRepository.deleteAll();
         itemRepository.deleteAll();
+        cartRepository.deleteAll();
     }
 
     @BeforeEach
