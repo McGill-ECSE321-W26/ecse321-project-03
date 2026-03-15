@@ -77,8 +77,7 @@ public class OrderService {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No delivery date found");
 
         } else if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60 * 60 * 1000)) < 24) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date " + orderDto.getDelivDate() +
-                    " can not be placed less than 24 hours after the order date " + orderDate);
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
         }
 
         // Create the Order object. For now, the employee assigned is null and the state is Ordered.
@@ -301,7 +300,7 @@ public class OrderService {
             Date currentDate = new Date(System.currentTimeMillis());
             if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60 * 60 * 1000)) < 24) {
                 throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The order cannot be cancelled less " +
-                        "than 24 hours before the delivery date " + order.getDelivDate());
+                        "than 24 hours before the delivery date");
             }
 
             // Set the state of order to Cancelled if no error was found

@@ -3,16 +3,10 @@ package ca.mcgill.ecse321.ecse321project03.integration;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
-import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
+import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.repository.*;
-import org.junit.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-import  org.junit.jupiter.api.*;
-
-
-import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -21,9 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.sql.Date;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -79,8 +73,6 @@ public class OrderIntegrationTest {
 
     private CartItem testCartItem1;
     private CartItem testCartItem2;
-
-    private int validOrderId;
 
 
     @BeforeEach
@@ -139,25 +131,28 @@ public class OrderIntegrationTest {
     }
 
 
+    // ORDER CREATION AND CHECKOUT
 
-
+    /**
+     * Method that validates that creating a valid order correctly creates the object and checkout the cart items
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(0)
     public void testValidCreateAndCheckoutOrder() {
 
         // Valid date
         Date orderDate = new Date(System.currentTimeMillis());
-        Date delivDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
+        Date delivDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
 
-        // Arrange
+        // Create the order
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), delivDate);
 
         // Act
         ResponseEntity<OrderResponseDto> response = client.postForEntity("/checkout", request, OrderResponseDto.class);
 
-        // Assert
+        // Assert the HTTP status
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         OrderResponseDto createdOrder =  response.getBody();
 
 
@@ -183,407 +178,459 @@ public class OrderIntegrationTest {
         ItemType createdItemType1 = itemTypeRepository.findById(testItemType1.getId()).orElse(null);
         assertEquals(8, createdItemType1.getStock());
         ItemType createdItemType2 = itemTypeRepository.findById(testItemType2.getId()).orElse(null);
-        assertEquals(4, createdItemType1.getStock());
-
-        this.validOrderId = createdOrder.getId();
-
+        assertEquals(4, createdItemType2.getStock());
     }
 
-    @Test
-    @org.junit.jupiter.api.Order(1)
-    public void testCreateOrderAndCheckoutInvalidCustomerId() {
-        Date deliveryDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-        OrderCreationDto request = new OrderCreationDto(99, deliveryDate);
 
+    /**
+     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
+     * @author Wissam Abchiche
+     * @param request the OrderCreationDto to send in the request body
+     * @param expectedHttpStatus    the expected HTTP status code of the response
+     * @param expectedErrorMessage  the expected error message in the response body
+     */
+    private void invalidTestForCreateOrderAndCheckout(OrderCreationDto request, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
+        // Verify the status code is the expected one
         ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", request, ErrorDto.class);
+        assertEquals(expectedHttpStatus, response.getStatusCode());
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        // Verify that the error message returned is what is expected
         ErrorDto responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals("No customer found with id 99", responseBody.getErrors().toString());
+        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
     }
 
+    /**
+     * Method that invalidates the creation of an order when given an invalid id
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(2)
+    public void testCreateOrderAndCheckoutInvalidCustomerId() {
+        // Create order with invalid customer id
+        Date deliveryDate = new Date(System.currentTimeMillis() + 30 * 60 * 60 * 1000);
+        OrderCreationDto request = new OrderCreationDto(-1, deliveryDate);
+
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No customer found with id -1" );
+    }
+
+    /**
+     * Method that invalidates the creation of an order when given null delivery date
+     * @author Wissam Abchiche
+     */
+    @Test
     public void testCreateOrderAndCheckoutNullDelivDate() {
+        // Create order with null delivery date
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), null);
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", request, ErrorDto.class);
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No delivery date found" );
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No delivery date found", responseBody.getErrors().toString());
     }
 
+
+    /**
+     * Method that invalidates the creation of an order when given an invalid delivery date (less than 24 hours from order date)
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(3)
     public void testCreateOrderAndCheckoutInvalidDelivDate() {
+        // Create order with a delivery date representing the current date, which is also the current order date
         Date currentDate = new Date(System.currentTimeMillis());
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), currentDate);
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", request, ErrorDto.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The delivery date " + request.getDelivDate() + " can not be placed less than 24 hours after the order date " + currentDate, responseBody.getErrors().toString());
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
     }
 
+    /**
+     * Method that invalidates the checkout of an order when given an empty cart
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(4)
     public void testCreateOrderAndCheckoutInvalidCart() {
-        Date deliveryDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
+        // Create a valid order
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
-        Cart cart = cartRepository.findByAccount_Id(testCart.getId());
+
+        // Delete all the cart items of cart
+        Cart cart = cartRepository.findByAccount_Id(testCustomer.getId());
         cartItemRepository.deleteAll(cartItemRepository.findByCartItemId_Cart(cart));
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", request, ErrorDto.class);
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Cannot checkout with an empty cart");
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Cannot checkout with an empty cart", responseBody.getErrors().toString());
     }
 
+    /**
+     * Method that invalidates the checkout of an order when given an invalid quantity of cart items
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(5)
     public void testCreateOrderAndCheckoutInvalidQuantity() {
+        // Create an invalid cartItem quantity (less or equal to 0) and save in the repo
         testCartItem1.setQuantity(0);
         cartItemRepository.save(testCartItem1);
 
-        Date deliveryDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-        OrderCreationDto dto = new OrderCreationDto(testCustomer.getId(), deliveryDate);
+        // Create a valid order
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", dto, ErrorDto.class);
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Cart contains an invalid quantity: 0");
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Cart contains an invalid quantity: 0", responseBody.getErrors().toString());
     }
 
+    /**
+     * Method that invalidates the checkout of an order when given a quantity of cartItems in the cart higher than the stock
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(6)
-    public void testCreateOrderAndCheckoutItemTypeNull() {
-        testItemType1 = null;
-        itemTypeRepository.save(testItemType1);
-
-        Date deliveryDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-        OrderCreationDto dto = new OrderCreationDto(testCustomer.getId(), deliveryDate);
-
-        ResponseEntity<ErrorDto> response = client.postForEntity("checkout", dto, ErrorDto.class);
-
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Cart contains an item with no item type", responseBody.getErrors().toString());
-    }
-
-    @Test
-    @org.junit.jupiter.api.Order(7)
     public void testCreateOrderAndCheckoutNotEnoughStock() {
+        // Create an invalid cartItem quantity due to not enough stock and save in the repo
         testCartItem1.setQuantity(testItemType1.getStock() + 5); // too many
         cartItemRepository.save(testCartItem1);
 
-        Date deliveryDate = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
-        OrderCreationDto dto = new OrderCreationDto(testCustomer.getId(), deliveryDate);
+        // Create a valid order
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", dto, ErrorDto.class);
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Not enough stock for itemType id " + testItemType1.getId() +
+                 ". Requested " + (testItemType1.getStock() + 5) + ", available " + (testItemType1.getStock()));
 
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Not enough stock for itemType id " + testItemType1.getId() +
-        ". Requested " + testItemType1.getStock() + 5 + ", available " + testItemType1.getStock() + 5,responseBody.getErrors().toString()) ;
     }
 
+    // FIND BY ID
+
+    /**
+     * Method which verifies that the order was found when given a valid id
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(8)
     public void testValidFindOrderById() {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-
-        // Act
-        ResponseEntity<OrderResponseDto> response = client.getForEntity("/order/" + validOrderId, OrderResponseDto.class);
+        // Verify that the status code is OK
+        ResponseEntity<OrderResponseDto> response = client.getForEntity("/orders/" + order.getId(), OrderResponseDto.class);
         assertNotNull(response);
-
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
 
         // Verify the correct data is returned
-
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+        OrderResponseDto responseBody = response.getBody();
+        assertNotNull(responseBody);
         assertEquals(responseBody.getDelivDate(), order.getDelivDate());
         assertEquals(responseBody.getOrderDate(), order.getOrderDate());
-        assertEquals(responseBody.getOrderState(), order.getOrderState());
+        assertEquals(responseBody.getOrderState(), order.getOrderState().toString());
         assertEquals(responseBody.getId(), order.getId());
         assertEquals(responseBody.getCustomerId(), order.getCustomer().getId());
-        assertEquals(responseBody.getAssigneeId(), order.getAssignee().getId());
+        if (order.getAssignee() == null) {
+            assertEquals(0, responseBody.getAssigneeId());
+        } else {
+            assertEquals(responseBody.getAssigneeId(), order.getAssignee().getId());
+        }
     }
 
-    @Test
-    @org.junit.jupiter.api.Order(9)
-    public void testValidAssignEmployeeByManager() {
 
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+    // ASSIGN EMPLOYEE TO ORDER
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + testEmployee.getId()
-                + "&accountId=" + testManager.getAccount().getId();
-
-        ResponseEntity<OrderResponseDto> response = client.exchange(
-                url, HttpMethod.PUT, null, OrderResponseDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the assignment was successful
-        assertNotNull(order.getAssignee());
-        assertEquals(testEmployee.getId(), order.getId());
-
-    }
-
-    @Test
-    @org.junit.jupiter.api.Order(10)
-    public void testValidAssignEmployeeByEmployee() {
-
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-
-
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + testEmployee.getId()
-                + "&accountId=" + testEmployee.getAccount().getId();
-
-        ResponseEntity<OrderResponseDto> response = client.exchange(
-                url, HttpMethod.PUT, null, OrderResponseDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the assignment was successful
-        assertNotNull(order.getAssignee());
-        assertEquals(testEmployee.getId(), order.getId());
-
-    }
-
-    @Test
-    @org.junit.jupiter.api.Order(11)
-    public void testAssignEmployeeOrderNull() {
-
-        // Act
-        String url = "/order/" + 9999 + "/assign"
-                + "?employeeId=" + testEmployee.getId()
-                + "&accountId=" + testEmployee.getAccount().getId();
-
+    /**
+     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
+     * @author Wissam Abchiche
+     * @param url the url to verify
+     * @param expectedHttpStatus    the expected HTTP status code of the response
+     * @param expectedErrorMessage  the expected error message in the response body
+     */
+    private void invalidTestForAssignEmployee(String url, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
+        // Verify the status code is the expected one
         ResponseEntity<ErrorDto> response = client.exchange(
                 url, HttpMethod.PUT, null, ErrorDto.class);
-
         assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(expectedHttpStatus, response.getStatusCode());
+
+        // Verify that the error message returned is what is expected
         ErrorDto responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals("No order found with id 9999", responseBody.getErrors().toString());
+        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
     }
 
+    /**
+     * Method which returns the url of assignEmployee
+     * @author Wissam Abchiche
+     */
+    private String assignEmployeeUrl(int orderId, int employeeId, int accountId){
+        return "/orders/" + orderId + "/assign-employee"
+                + "?employeeId=" + employeeId
+                + "&accountId=" + accountId;
+    }
+
+    /**
+     * Method which verifies that the employee was successfully assigned
+     * @author Wissam Abchiche
+     */
+    private void testValidAssignEmployee(int accountId) {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
+
+
+        ResponseEntity<OrderResponseDto> response = client.exchange(
+                assignEmployeeUrl(order.getId(), testEmployee.getId(), accountId),
+                HttpMethod.PUT, null, OrderResponseDto.class);
+
+
+        // Verify the status code is Http.OK
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verify the assignment was successful
+        OrderResponseDto responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(testEmployee.getId(), responseBody.getAssigneeId());
+    }
+
+    /**
+     * Method which verifies that the employee was successfully assigned by a manager to an order
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(12)
+    public void testValidAssignEmployeeByManager() {
+        testValidAssignEmployee(testManager.getAccount().getId());
+    }
+
+    /**
+     * Method which verifies that the employee successfully assigned himself
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testValidAssignEmployeeByEmployee() {
+        testValidAssignEmployee(testEmployee.getAccount().getId());
+
+    }
+
+    /**
+     * Method which verifies that the employee is not assigned when passing an invalid order
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testAssignEmployeeOrderNull() {
+        invalidTestForAssignEmployee(assignEmployeeUrl(-1, testEmployee.getId(), testEmployee.getAccount().getId()),
+                HttpStatus.NOT_FOUND, "No order found with id -1");
+    }
+
+    /**
+     * Method which verifies that the employee is not assigned when passing an invalid account
+     * @author Wissam Abchiche
+     */
+    @Test
     public void testAssignEmployeeAccountNull() {
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + testEmployee.getId()
-                + "&accountId=" + 9999;
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No account doing the action found with id 9999", responseBody.getErrors().toString());
+        invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), testEmployee.getId(), -1),
+                HttpStatus.NOT_FOUND, "No account doing the action found with id -1");
     }
 
+    /**
+     * Method which verifies that the employee is not assigned when customer is making the change
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(13)
     public void testAssignEmployeeCustomerMakingTheChange() {
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + testEmployee.getId()
-                + "&accountId=" + testCustomer.getId();
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The order cannot be assigned to the employee with id " + testEmployee.getId() + " as a customer is making the change.", responseBody.getErrors().toString());
+        invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), testEmployee.getId(), testCustomer.getId()),
+                HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee with id " + testEmployee.getId() + " as a customer is making the change.");
     }
 
+
+    /**
+     * Method which verifies that the employee is not assigned when he doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(14)
     public void testAssignEmployeeEmployeeNotFound() {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + 9999
-                + "&accountId=" + testManager.getAccount().getId();
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No employee found with id 9999", responseBody.getErrors().toString());
+        invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), -1, testManager.getAccount().getId()),
+                HttpStatus.NOT_FOUND, "No employee found with id -1");
     }
 
+    /**
+     * Method which verifies that the employee is not assigned when he assigns himself to the order he ordered
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(15)
     public void testAssignEmployeeEmployeeIsCustomer() {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
+        // Create an employee attached to the customer
         Employee employeeIsCustomer = new Employee(testCustomer);
         employeeRepository.save(employeeIsCustomer);
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + employeeIsCustomer.getId()
-                + "&accountId=" + testManager.getAccount().getId();
 
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
+        invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), employeeIsCustomer.getId(), testManager.getAccount().getId()),
+                HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee with id " + employeeIsCustomer.getId() + " as he is the customer.");
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The order cannot be assigned to the employee with id " + employeeIsCustomer.getId() + " as he is the customer.", responseBody.getErrors().toString());
     }
 
+    /**
+     * Method which verifies that the employee is not assigned when he assigns someone else than himself
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(16)
     public void testAssignEmployeeByAnotherEmployee() {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
+        // Create a new employee for test
         Account accountNewEmployee = new Account("Dora", "dora@gmail.com", "ewffce3f%%0", "4000 McGill", 0);
         accountRepository.save(accountNewEmployee);
         Employee newEmployee = new Employee(accountNewEmployee);
         employeeRepository.save(newEmployee);
 
-        // Act
-        String url = "/order/" + validOrderId + "/assign"
-                + "?employeeId=" + newEmployee.getId()
-                + "&accountId=" + testEmployee.getAccount().getId();
 
+        invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), newEmployee.getId(), testEmployee.getAccount().getId()),
+                HttpStatus.FORBIDDEN, "The order cannot be assigned to the employee by another employee.");
+    }
+
+
+
+
+    // UPDATE ORDER STATUS
+
+    /**
+     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
+     * @author Wissam Abchiche
+     * @param url the url to verify
+     * @param expectedHttpStatus    the expected HTTP status code of the response
+     * @param expectedErrorMessage  the expected error message in the response body
+     */
+    private void invalidTestUpdateStatus(String url, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
+        // Verify the status code is the expected one
         ResponseEntity<ErrorDto> response = client.exchange(
                 url, HttpMethod.PUT, null, ErrorDto.class);
-
         assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(expectedHttpStatus, response.getStatusCode());
+
+        // Verify that the error message returned is what is expected
         ErrorDto responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals("The order cannot be assigned to the employee by another employee.", responseBody.getErrors().toString());
+        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
     }
 
+    /**
+     * Method which returns the url of updateStatus
+     * @author Wissam Abchiche
+     */
+    private String updateStatusUrl(int orderId, String status, int accountId){
+        return "/orders/" + orderId + "/status"
+                + "?orderState=" + status
+                + "&accountId=" + accountId;
+    }
+
+
+    /**
+     * Method which verifies that the valid assignment updates the order state
+     * @author Wissam Abchiche
+     * @param orderState current state of the order
+     * @param updatedOrderState expected new order state
+     */
+    private void testValidUpdateStatus(Order.OrderState orderState, String updatedOrderState) {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, orderState, testCustomer,null);
+        orderRepository.save(order);
+
+        ResponseEntity<OrderResponseDto> response = client.exchange(
+                updateStatusUrl(order.getId(), updatedOrderState, testEmployee.getAccount().getId()),
+                HttpMethod.PUT, null, OrderResponseDto.class);
+
+        // Verify the status code is HTTP.OK
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verify the assignment was successful
+        OrderResponseDto responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(updatedOrderState, responseBody.getOrderState());
+    }
+
+    /**
+     * Method which verifies the valid update from Ordered to InPreparation
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(17)
     public void testValidUpdateStatusOrderedToInPreparation() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "InPreparation"
-                + "&accountId=" + testEmployee.getAccount().getId();
-
-
-        ResponseEntity<OrderResponseDto> response = client.exchange(
-                url,
-                HttpMethod.PUT, null, OrderResponseDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals(Order.OrderState.InPreparation, order.getOrderState());
+        testValidUpdateStatus(Order.OrderState.Ordered, "InPreparation");
     }
 
+    /**
+     * Method which verifies the valid update from InPreparation to Prepared
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(18)
     public void testValidUpdateStatusInPreparationToPrepared() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Prepared"
-                + "&accountId=" + testEmployee.getAccount().getId();
-
-
-        ResponseEntity<OrderResponseDto> response = client.exchange(
-                url,
-                HttpMethod.PUT, null, OrderResponseDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals(Order.OrderState.Prepared, order.getOrderState());
+        testValidUpdateStatus(Order.OrderState.InPreparation, "Prepared");
     }
 
 
+    /**
+     * Method which verifies the valid update from Prepared to Delivered
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(19)
     public void testValidUpdateStatusPreparedToDelivered() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Delivered"
-                + "&accountId=" + testEmployee.getAccount().getId();
-
-
-        ResponseEntity<OrderResponseDto> response = client.exchange(
-                url,
-                HttpMethod.PUT, null, OrderResponseDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals(Order.OrderState.Delivered, order.getOrderState());
+        testValidUpdateStatus(Order.OrderState.Prepared, "Delivered");
     }
 
+    /**
+     * Method which verifies the valid update to Cancelled (and the cartItems are removed and put back to stock)
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(20)
     public void testValidUpdateStatusToCancelled() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Cancelled"
-                + "&accountId=" + testManager.getAccount().getId();
-
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
         ResponseEntity<OrderResponseDto> response = client.exchange(
-                url,
+                updateStatusUrl(order.getId(), "Cancelled", testEmployee.getAccount().getId()),
                 HttpMethod.PUT, null, OrderResponseDto.class);
 
+        // Verify the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verify the assignment was successful
         OrderResponseDto responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals(Order.OrderState.Cancelled, order.getOrderState());
-
-        Date currentDate = new Date(System.currentTimeMillis());
-        assertTrue((((order.getDelivDate().getTime() - currentDate.getTime()) / (60 * 60 * 1000)) >= 24));
+        assertEquals("Cancelled", responseBody.getOrderState());
 
         // Verify it updates the stock of all itemTypes that were in the cart
         ItemType itemType1 = itemTypeRepository.findById(testItemType1.getId()).orElse(null);
@@ -599,413 +646,456 @@ public class OrderIntegrationTest {
         assertTrue(cartItems.isEmpty());
     }
 
+
+    /**
+     * Method which invalid the update when order doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(21)
     public void testUpdateStatusForOrderThatDoesNotExist() {
 
-
-        String url = "/order/" + 999999 + "/status"
-                + "?orderState=" + "Delivered"
-                + "&accountId=" + testManager.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No order found with id 999999", responseBody.getErrors().toString());
+        invalidTestUpdateStatus(updateStatusUrl(-1, "Delivered", testManager.getAccount().getId()),
+                HttpStatus.NOT_FOUND, "No order found with id -1");
     }
 
+    /**
+     * Method which invalidates the update when account doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(22)
     public void testUpdateStatusToCancellationByAccountThatDoesNotExist() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Cancelled"
-                + "&accountId=" + 99999;
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No account found with id 9999", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() != Order.OrderState.Cancelled);
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", -1),
+                HttpStatus.NOT_FOUND, "No account found with id -1");
     }
 
+    /**
+     * Method which invalidates the cancellation when less than 24 hours from delivery date
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(23)
     public void testUpdateStatusToCancellationLess24HoursToDelivery() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-        order.setDelivDate(new Date(System.currentTimeMillis() + 12 * 60 * 60 * 1000));
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 12 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Cancelled"
-                + "&accountId=" + testManager.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The order cannot be cancelled less than 24 hours before the delivery date " + order.getDelivDate(), responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() != Order.OrderState.Cancelled);
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", testManager.getAccount().getId()),
+                HttpStatus.BAD_REQUEST, "The order cannot be cancelled less than 24 hours before the delivery date");
 
     }
 
+    /**
+     * Method which invalidates the cancellation by an employee
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(24)
     public void testUpdateStatusToCancellationByEmployee() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Cancelled"
-                + "&accountId=" + testEmployee.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The order cannot be cancelled by an employee", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() != Order.OrderState.Cancelled);
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", testEmployee.getAccount().getId()),
+                HttpStatus.FORBIDDEN, "The order cannot be cancelled by an employee");
 
     }
 
+
+    /**
+     * Method which invalidates the update by a customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(25)
     public void testUpdateStatusByCustomer() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "InPreparation"
-                + "&accountId=" + testCustomer;
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("The order state cannot be updated by a customer", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() == Order.OrderState.Ordered);
-
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "InPreparation", testCustomer.getId()),
+                HttpStatus.FORBIDDEN, "The order state cannot be updated by a customer");
     }
 
+    /**
+     * Method which invalidates the update from Ordered to Prepared
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(26)
     public void testUpdateStatusFromOrderedToPrepared() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
 
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Prepared"
-                + "&accountId=" + testManager.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Order with id " + validOrderId + " cannot be switched to " + Order.OrderState.Prepared.toString() + " because it is not InPreparation", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() == Order.OrderState.Ordered);
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Prepared", testManager.getAccount().getId()),
+                HttpStatus.BAD_REQUEST, "Order with id " + order.getId() + " cannot be switched to Prepared because it is not InPreparation");
 
     }
 
+    /**
+     * Method which invalidates the update from Ordered to Delivered
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(27)
     public void testUpdateStatusFromOrderedToDelivered() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
-
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Delivered"
-                + "&accountId=" + testManager.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Order with id " + validOrderId + " cannot be switched to " + Order.OrderState.Delivered.toString() + " because it is not Prepared", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() == Order.OrderState.Ordered);
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Delivered", testManager.getAccount().getId()),
+                HttpStatus.BAD_REQUEST, "Order with id " + order.getId() + " cannot be switched to Delivered because it is not Prepared");
 
     }
 
-
+    /**
+     * Method which invalidates the update from InPreparation to Delivered
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(28)
     public void testUpdateStatusFromInPreparationToDelivered() {
-        Order order = orderRepository.findById(validOrderId).orElse(null);
-        order.setOrderState(Order.OrderState.InPreparation);
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.InPreparation, testCustomer,null);
+        orderRepository.save(order);
+
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Delivered", testManager.getAccount().getId()),
+                HttpStatus.BAD_REQUEST, "Order with id " + order.getId() + " cannot be switched to Delivered because it is not Prepared");
+
+    }
+
+    // VIEW ORDERS
+
+    /**
+     * Method which validates the view of orders
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testValidViewOrders() {
+        // Create a valid order and save it in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
 
-        String url = "/order/" + validOrderId + "/status"
-                + "?orderState=" + "Delivered"
-                + "&accountId=" + testManager.getAccount().getId();
-
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                url, HttpMethod.PUT, null, ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Order with id " + validOrderId + " cannot be switched to " + Order.OrderState.Delivered.toString() + " because it is not Prepared", responseBody.getErrors().toString());
-        assertTrue(order.getOrderState() == Order.OrderState.InPreparation);
-
-    }
-
-    @Test
-    @org.junit.jupiter.api.Order(29)
-    public void testValidViewOrders() {
-        // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/order?userId=" + testManager.getAccount().getId(), OrderResponseDto[].class);
+                "/orders?userID=" + testManager.getAccount().getId(), OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(1, responseBody.length);
-        assertEquals(validOrderId, responseBody[0].getId());
+        assertEquals(order.getId(), responseBody[0].getId());
     }
 
+
+    /**
+     * Method which invalidates the view of orders if done by customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(30)
     public void testInvalidViewOrders() {
 
         ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/order?userId=" + testCustomer.getId(), null, ErrorDto.class);
+                "/orders?userID=" + testCustomer.getId(), ErrorDto.class);
 
         assertNotNull(response);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
         assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().toString());
+        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().get(0));
     }
 
 
+
+    /**
+     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
+     * @author Wissam Abchiche
+     * @param url the url to verify
+     * @param expectedHttpStatus    the expected HTTP status code of the response
+     * @param expectedErrorMessage  the expected error message in the response body
+     */
+    private void invalidViewOrders(String url, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
+        // Verify the status code is the expected one
+        ResponseEntity<ErrorDto> response = client.getForEntity(
+                url, ErrorDto.class);
+        assertNotNull(response);
+        assertEquals(expectedHttpStatus, response.getStatusCode());
+
+        // Verify that the error message returned is what is expected
+        ErrorDto responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
+
+    }
+
+
+
+    /**
+     * Method which verifies that the valid view of orders by date ascending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(31)
     public void testValidViewOrdersByDateAscending() {
 
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
+
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
         Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/order-date?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "ASC", OrderResponseDto[].class);
+                "/orders-date?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "ASC", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[0].getId());
+        assertEquals(order.getId(), responseBody[0].getId());
         assertEquals(order2.getId(), responseBody[1].getId());
     }
 
+
+
+    /**
+     * Method which verifies that the valid view of orders by date descending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(32)
-    public void testValidViewOrdersByDateADescending() {
+    public void testValidViewOrdersByDateDescending() {
+
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
         Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/order-date?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
+                "/orders-date?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[1].getId());
+        assertEquals(order.getId(), responseBody[1].getId());
         assertEquals(order2.getId(), responseBody[0].getId());
     }
 
+
+    /**
+     * Method which invalidates the view of orders by date descending by customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(33)
     public void testInvalidViewOrdersByDate() {
-
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/order-date?userId=" + testCustomer.getId()  +"&filterDirection=" + "descending", ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().toString());
+        invalidViewOrders("/orders-date?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
     }
 
+    /**
+     * Method which verifies that the valid view of orders by customer descending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(34)
     public void testValidViewOrdersByCustomerDescending() {
 
+        // Create second customer
         Account customer2 = new Account("albert", "albert@gmail.com", "revfgnr33e!10", "6000 McGill", 0);
         accountRepository.save(customer2);
 
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
+
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
         Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/customer?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
+                "/orders-customer?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[1].getId());
+        assertEquals(order.getId(), responseBody[1].getId());
         assertEquals(order2.getId(), responseBody[0].getId());
     }
 
 
+
+    /**
+     * Method which verifies that the valid view of orders by customer ascending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(35)
     public void testValidViewOrdersByCustomerAscending() {
 
+        // Create second customer
         Account customer2 = new Account("albert", "albert@gmail.com", "revfgnr33e!10", "6000 McGill", 0);
         accountRepository.save(customer2);
 
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
+
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
         Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/customer?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
+                "/orders-customer?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[0].getId());
+        assertEquals(order.getId(), responseBody[0].getId());
         assertEquals(order2.getId(), responseBody[1].getId());
     }
 
+
+    /**
+     * Method which invalidates the view of orders by customer descending by customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(36)
     public void testInvalidViewOrdersByCustomer() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/customer?userId=" + testCustomer.getId()  +"&filterDirection=" + "descending", ErrorDto.class);
+        invalidViewOrders("/orders-customer?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().toString());
     }
 
+    /**
+     * Method which verifies that the valid view of orders by order state descending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(37)
     public void testValidViewOrdersByOrderStateDescending() {
+
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Prepared, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/status?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
+                "/orders-status?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[1].getId());
+        assertEquals(order.getId(), responseBody[1].getId());
         assertEquals(order2.getId(), responseBody[0].getId());
     }
 
 
+    /**
+     * Method which verifies that the valid view of orders by order state ascending
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(38)
     public void testValidViewOrdersByOrderStateAsc() {
+
+        // Create valid orders and save them in the repo
+        Date orderDate = new Date(System.currentTimeMillis());
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Prepared, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
         orderRepository.save(order2);
 
         // Act
         ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/status?userId=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
+                "/orders-status?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
 
+
+        // Verify status is HTTP.OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
         OrderResponseDto[] responseBody = response.getBody();
         assertNotNull(responseBody);
 
         // Verify the correct data is returned
         assertEquals(2, responseBody.length);
-        assertEquals(validOrderId, responseBody[0].getId());
+        assertEquals(order.getId(), responseBody[0].getId());
         assertEquals(order2.getId(), responseBody[1].getId());
     }
 
+    /**
+     * Method which invalidates the view of orders by status descending by customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(39)
     public void testInvalidViewOrdersByStatus() {
+        invalidViewOrders("/orders-status?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
 
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/status?userId=" + testCustomer.getId()  +"&filterDirection=" + "descending", ErrorDto.class);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().toString());
     }
 
 }

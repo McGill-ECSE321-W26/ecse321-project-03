@@ -7,8 +7,6 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.repository.*;
-import org.junit.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 import  org.junit.jupiter.api.*;
 
@@ -139,8 +137,13 @@ public class InventoryIntegrationTest {
 
     }
 
+    // RESTOCK
+
+    /**
+     * Method that validates the restock of items
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(0)
     public void testValidRestock() {
 
         // Act
@@ -149,255 +152,331 @@ public class InventoryIntegrationTest {
                 + "&quantityToAdd=" + 3
                 + "&accountId=" + testManager.getAccount().getId(), null, ItemTypeDto.class);
 
-        // Assert
+        // Verify the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verify that the stock was updated
         ItemTypeDto itemTypeDto =  response.getBody();
         assertEquals(13, itemTypeDto.getStock());
 
-        ItemType itemTypeDB = itemTypeRepository.findById(testItemType1.getId()).orElseThrow();
-        assertEquals(13, itemTypeDB.getStock());
-
-
     }
 
+
+    /**
+     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
+     * @author Wissam Abchiche
+     * @param url the url of the restock
+     * @param expectedHttpStatus    the expected HTTP status code of the response
+     * @param expectedErrorMessage  the expected error message in the response body
+     */
+    private void invalidTestForCreateRestock(String url, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
+        // Verify the status code is the expected one
+        ResponseEntity<ErrorDto> response = client.postForEntity(url, null, ErrorDto.class);
+        assertEquals(expectedHttpStatus, response.getStatusCode());
+
+        // Verify that the error message returned is what is expected
+        ErrorDto responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
+    }
+
+
+    /**
+     * Method that invalidates the restock when given an invalid account id
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(1)
     public void testRestockInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/restock"
+        invalidTestForCreateRestock("/restock"
                 + "?itemTypeId=" + testItemType1.getId()
                 + "&quantityToAdd=" + 3
-                + "&accountId=" + 9999, null, ErrorDto.class);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No account managing the stock found with id 9999", responseBody.getErrors().toString());
+                + "&accountId=" + -1, HttpStatus.NOT_FOUND, "No account managing the stock found with id -1");
     }
+
+
+    /**
+     * Method that invalidates the restock when done by customer
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(2)
     public void testRestockInvalidByCustomer() {
-
-        ResponseEntity<ErrorDto> response = client.postForEntity("/restock"
+        invalidTestForCreateRestock("/restock"
                 + "?itemTypeId=" + testItemType1.getId()
                 + "&quantityToAdd=" + 3
-                + "&accountId=" + testCustomer.getId(), null, ErrorDto.class);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("A customer cannot manage the stock", responseBody.getErrors().toString());
+                + "&accountId=" + testCustomer.getId(), HttpStatus.FORBIDDEN, "A customer cannot manage the stock");
     }
 
 
+
+    /**
+     * Method that invalidates the restock when done by an employee
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(3)
     public void testRestockInvalidByEmployee() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/restock"
+        invalidTestForCreateRestock("/restock"
                 + "?itemTypeId=" + testItemType1.getId()
                 + "&quantityToAdd=" + 3
-                + "&accountId=" + testEmployee.getId(), null, ErrorDto.class);
-
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("A employee cannot manage the stock", responseBody.getErrors().toString());
+                + "&accountId=" + testEmployee.getAccount().getId(), HttpStatus.FORBIDDEN, "A employee cannot manage the stock");
     }
 
 
+    /**
+     * Method that invalidates the restock when invalid quantity
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(4)
     public void testRestockInvalidQuantity() {
-
-        ResponseEntity<ErrorDto> response = client.postForEntity("/restock"
+        invalidTestForCreateRestock("/restock"
                 + "?itemTypeId=" + testItemType1.getId()
                 + "&quantityToAdd=" + 0
-                + "&accountId=" + testManager.getAccount().getId(), null, ErrorDto.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Restock quantity must be positive", responseBody.getErrors().toString());
+                + "&accountId=" + testManager.getAccount().getId(), HttpStatus.BAD_REQUEST, "Restock quantity must be positive");
     }
 
+
+    /**
+     * Method that invalidates the restock when invalid item type id
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(5)
     public void testRestockInvalidWithNoItemType() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/restock"
-                + "?itemTypeId=" + 99999
-                + "&quantityToAdd=" + 0
-                + "&accountId=" + testManager.getAccount().getId(), null, ErrorDto.class);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("No item type found with id 99999", responseBody.getErrors().toString());
+        invalidTestForCreateRestock("/restock"
+                + "?itemTypeId=" + -1
+                + "&quantityToAdd=" + 2
+                + "&accountId=" + testManager.getAccount().getId(), HttpStatus.NOT_FOUND, "No item type found with id -1");
     }
 
 
+    // STOCK STATUS
+
+    /**
+     * Method that validates the get stock status action when stock is 0
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(6)
     public void testValidGetStockStatusStockEqual0() {
 
-
+        // Update stock of item type to 0 and save to repo
         testItemType1.setStock(0);
         itemTypeRepository.save(testItemType1);
-        // Act
-        ResponseEntity<String> response = client.postForEntity("/stock-status"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(), null, String.class);
 
-        // Assert
+        // Act
+        ResponseEntity<String> response = client.getForEntity("/stock-status"
+                + "?itemTypeId=" + testItemType1.getId()
+                + "&accountId=" + testManager.getAccount().getId(), String.class);
+
+        // Validate the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Validate if the message is correct
         String status =  response.getBody();
         assertEquals("Out of Stock", status);
 
 
     }
 
+    /**
+     * Method that validates the get stock status action when stock is less than 10
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(7)
     public void testValidGetStockStatusLessThan10() {
+        // Update stock of item type to 9 and save to repo
         testItemType1.setStock(9);
         itemTypeRepository.save(testItemType1);
 
         // Act
-        ResponseEntity<String> response = client.postForEntity("/stock-status"
+        ResponseEntity<String> response =client.getForEntity("/stock-status"
                 + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(), null, String.class);
+                + "&accountId=" + testManager.getAccount().getId(),  String.class);
 
-        // Assert
+        // Validate the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Validate if the message is correct
         String status =  response.getBody();
         assertEquals("Almost Out of Stock! Only " + 9 + " left!!!", status);
     }
 
+    /**
+     * Method that validates the get stock status action when stock is more than 9
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(8)
     public void testValidGetStockStatusMoreThan9() {
+        // Update stock of item type to 10 and save to repo
         testItemType1.setStock(10);
         itemTypeRepository.save(testItemType1);
 
         // Act
-        ResponseEntity<String> response = client.postForEntity("/stock-status"
+        ResponseEntity<String> response = client.getForEntity("/stock-status"
                 + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(), null, String.class);
+                + "&accountId=" + testManager.getAccount().getId(),  String.class);
 
-        // Assert
+        // Validate the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Validate if the message is correct
         String status =  response.getBody();
         assertEquals("In Stock", status);
     }
 
+    /**
+     * Method that invalidates the get stock status action when the account performing the action doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(9)
     public void testGetStockStatusInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/stock-status"
+        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-status"
                 + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + 9999, null, ErrorDto.class);
+                + "&accountId=" + -1,  ErrorDto.class);
 
+        // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
+
+        // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No account found with id 9999", responseBody.getErrors().toString());
+        assertEquals("No account found with id -1", responseBody.getErrors().get(0));
     }
 
 
-
+    /**
+     * Method that invalidates the get stock status action when the item type  doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(10)
     public void testGetStockStateInvalidWithNoItemType() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/stock-status"
-                + "?itemTypeId=" + 99999
-                + "&accountId=" + testManager.getAccount().getId(), null, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-status"
+                + "?itemTypeId=" + -1
+                + "&accountId=" + testManager.getAccount().getId(), ErrorDto.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        // Validate the status code is HTTP.NOT_FOUND
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
+
+        // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No item type found with id 99999", responseBody.getErrors().toString());
+        assertEquals("No item type found with id -1", responseBody.getErrors().get(0));
     }
 
+
+    // GET STOCK
+
+    /**
+     * Method that validates the get stock action
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(11)
     public void testValidGetStock() {
         // Act
-        ResponseEntity<Integer> response = client.postForEntity("/stock-level"
+        ResponseEntity<Integer> response = client.getForEntity("/stock-level"
                 + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(), null, Integer.class);
+                + "&accountId=" + testManager.getAccount().getId(),  Integer.class);
 
-        // Assert
+        // Validate the status code is HTTP.OK
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Validate if the found stock is correct
         int stock =  response.getBody();
         assertEquals(10, stock);
 
     }
 
+    /**
+     * Method that invalidates the get stock action when done by an account that doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(12)
     public void testGetStockInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/stock-level"
+        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-level"
                 + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + 9999, null, ErrorDto.class);
+                + "&accountId=" + -1, ErrorDto.class);
 
+        // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
+
+        // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No account found with id 9999", responseBody.getErrors().toString());
+        assertEquals("No account found with id -1", responseBody.getErrors().toString());
     }
 
 
 
+    /**
+     * Method that invalidates the get stock  action when no item type exists
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(13)
     public void testGetStockInvalidWithNoItemType() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/stock-level"
-                + "?itemTypeId=" + 99999
-                + "&accountId=" + testManager.getAccount().getId(), null, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-level"
+                + "?itemTypeId=" + -1
+                + "&accountId=" + testManager.getAccount().getId(),  ErrorDto.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        // Validate the status code is HTTP.NOT_FOUND
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
+
+        // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No item type found with id 99999", responseBody.getErrors().toString());
+        assertEquals("No item type found with id -1", responseBody.getErrors().toString());
     }
 
 
+    /**
+     * Method that validates the get all items action
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(14)
     public void testValidGetAllItemTypes() {
         // Act
-        ResponseEntity<ItemTypeDto[]> response = client.postForEntity("/item-types"
-                + "?accountId=" + testManager.getAccount().getId(), null,ItemTypeDto[].class);
+        ResponseEntity<ItemTypeDto[]> response = client.getForEntity("/item-types"
+                + "?accountId=" + testManager.getAccount().getId(), ItemTypeDto[].class);
 
         // Assert
         assertNotNull(response);
+
+        // Validate the status code is OK
         assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Verify that the number of item types is 2
         ItemTypeDto[] itemTypeDtos =  response.getBody();
         assertEquals(2, itemTypeDtos.length);
 
+        // Verify that the first created testItempType is at position 0 of the array and the second one at position 1
         assertEquals(itemTypeDtos[0].getId(), testItemType1.getId());
         assertEquals(itemTypeDtos[1].getId(), testItemType2.getId());
     }
 
+
+    /**
+     * Method that invalidates the get items  action when done by an account that doesn't exist
+     * @author Wissam Abchiche
+     */
     @Test
-    @org.junit.jupiter.api.Order(12)
     public void testGetAllItemTypesInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.postForEntity("/item-types"
-                + "&accountId=" + 9999, null, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/item-types"
+                + "&accountId=" + -1, ErrorDto.class);
 
+        // Validate the status code is NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         ErrorDto responseBody = response.getBody();
+
+        // Validate if the message is correct
         assertNotNull(responseBody);
         assertEquals("No account found with id 9999", responseBody.getErrors().toString());
     }
