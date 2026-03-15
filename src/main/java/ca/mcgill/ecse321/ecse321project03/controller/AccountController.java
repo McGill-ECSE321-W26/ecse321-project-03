@@ -149,20 +149,20 @@ public class AccountController {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
         }
     }
-
+/*
 
     //------------------------
     // Related to Loyalty Points
     //------------------------
 
-    /**
+    *//**
      * Awards loyalty points to an account.
      *
      * @param id the ID of the account receiving loyalty points
      * @param orderId the ID of the order that triggers the loyalty-point award
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if the operation fails
-     */
+     *//*
     @PostMapping("/{id}/award-loyalty")
     public ResponseEntity<?> awardLoyaltyPts(@PathVariable int id, @RequestParam int orderId) {
         try {
@@ -173,7 +173,7 @@ public class AccountController {
         }
     }
 
-    /**
+    *//**
      * Redeems loyalty points for a specific order belonging to an account.
      *
      * @param id the ID of the account using loyalty points
@@ -181,7 +181,7 @@ public class AccountController {
      * @param usePoints the choice of redeeming loyalty points
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if redemption fails
-     */
+     *//*
     @PostMapping("/{id}/redeem-loyalty")
     public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
             @RequestParam int orderId, @RequestParam boolean usePoints) {
@@ -191,5 +191,5 @@ public class AccountController {
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
-    }
+    }*/
 }
