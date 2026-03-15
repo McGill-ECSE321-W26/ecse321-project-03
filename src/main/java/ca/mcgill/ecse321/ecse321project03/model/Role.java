@@ -43,6 +43,7 @@ public abstract class Role {
         if (aNewAccount != null) {
             account = aNewAccount;
             wasSet = true;
+            id = aNewAccount.getId();
         }
         return wasSet;
     }

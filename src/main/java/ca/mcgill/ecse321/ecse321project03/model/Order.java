@@ -52,9 +52,6 @@ public class Order {
         if (!setCustomer(aCustomer)) {
             throw new RuntimeException("Unable to create Order due to aCustomer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
-        if (!setAssignee(aAssignee)) {
-            throw new RuntimeException("Unable to create Order due to aAssignee. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
-        }
     }
 
     //------------------------
@@ -101,10 +98,8 @@ public class Order {
 
     public boolean setAssignee(Employee aNewAssignee) {
         boolean wasSet = false;
-        if (aNewAssignee != null) {
-            assignee = aNewAssignee;
-            wasSet = true;
-        }
+        assignee = aNewAssignee;
+        wasSet = true;
         return wasSet;
     }
 
