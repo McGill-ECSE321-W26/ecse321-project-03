@@ -15,20 +15,17 @@ import ca.mcgill.ecse321.ecse321project03.repository.CartRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemTypeRepository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
 
-@ExtendWith(MockitoExtension.class)  // replaces @SpringBootTest
+@SpringBootTest
 public class CartServiceTests {
     @Mock
     private AccountRepository accountRepo;
@@ -44,11 +41,6 @@ public class CartServiceTests {
     @InjectMocks
     private CartService cartService;
 
-    private String username;
-    private String email;
-    private String password;
-    private String address;
-    private int loyaltyPts;
     private int id;
     private Account account;
     private Cart cart;
@@ -58,15 +50,15 @@ public class CartServiceTests {
     private CartItem.CartItemId cartItemId;
     private ItemType itemType;
     private ItemTypeDto itemTypeDto;
-    private Item item;
 
     @BeforeEach
     void setup() {
-        username = "user1";
-        email = "email1@mail.com";
-        password = "p";
-        address = "123 Street";
-        loyaltyPts = 0;
+        MockitoAnnotations.openMocks(this);
+        String username = "user1";
+        String email = "email1@mail.com";
+        String password = "p";
+        String address = "123 Street";
+        int loyaltyPts = 0;
         id = 5;
 
 
@@ -74,7 +66,7 @@ public class CartServiceTests {
         cart = new Cart(account);
         cartDto = new CartCreationDto(account);
 
-        item = new Item("Shirt", Item.Tag.Top, 15);
+        Item item = new Item("Shirt", Item.Tag.Top, 15);
         itemType = new ItemType(ItemType.Size.M, ItemType.Color.White, 2, item);
         itemTypeDto = new ItemTypeDto(itemType);
         cartItemId = new CartItem.CartItemId(itemType, cart);
@@ -82,6 +74,7 @@ public class CartServiceTests {
         cartItemDto = new CartItemDto(cartItem);
     }
 
+    // ---------- createNewCart: success ----------
     @Test
     public void testCreateNewValidCart() {
         when(accountRepo.findById(id)).thenReturn(Optional.of(account));
@@ -94,6 +87,7 @@ public class CartServiceTests {
         verify(cartRepo, times(1)).save(any(Cart.class));
     }
 
+    // ---------- createNewCart: failures ----------
     @Test
     public void testCreateNewCartNullCustomer() {
         Ecse321Project03Exception e =
@@ -118,6 +112,7 @@ public class CartServiceTests {
         assertEquals("A cart already exists! Users may only have one active cart at the time.", e.getMessage());
     }
 
+    // ---------- deleteCart: successes ----------
     @Test
     public void testDeleteValidCartWithItems(){
         CartItem.CartItemId cartItemid = new CartItem.CartItemId(itemTypeMock, cart);
@@ -143,6 +138,7 @@ public class CartServiceTests {
         verify(cartRepo, times(1)).delete(cart);
     }
 
+    // ---------- deleteCart: failures ----------
     @Test
     public void testDeleteCartInvalidId() {
         Ecse321Project03Exception e =
@@ -165,7 +161,41 @@ public class CartServiceTests {
         assertEquals("Impossible to delete the cart. No carts are associate to this customer.", e.getMessage());
     }
 
+    // ---------- addItemToCart: successes ----------
+    @Test
+    public void testIncreaseQuantityExistingItemToCart() {
+        CartItem existingCartItem = new CartItem(cartItemId, 3);
 
+        when(accountRepo.findById(id)).thenReturn(Optional.of(account));
+        when(cartRepo.findByAccount_Id(id)).thenReturn(cart);
+        when(itemTypeRepo.findById(itemTypeDto.getId())).thenReturn(Optional.of(itemType));
+        when(cartItemRepo.findById(cartItemId)).thenReturn(Optional.of(existingCartItem));
+        when(cartItemRepo.save(any(CartItem.class))).thenReturn(existingCartItem);
+
+        CartItem returnedCartItem = cartService.addItemToCart(id, cartItemDto);
+
+        assertNotNull(returnedCartItem);
+        assertEquals( existingCartItem.getCartItemId(), returnedCartItem.getCartItemId());
+        assertEquals(4, returnedCartItem.getQuantity());
+        verify(cartItemRepo, times(1)).save(any(CartItem.class));
+    }
+
+    @Test
+    public void testAddNewItemToCart(){
+        when(accountRepo.findById(id)).thenReturn(Optional.of(account));
+        when(cartRepo.findByAccount_Id(id)).thenReturn(cart);
+        when(itemTypeRepo.findById(itemTypeDto.getId())).thenReturn(Optional.of(itemType));
+        when(cartItemRepo.save(any(CartItem.class))).thenReturn(cartItem);
+
+        CartItem returnedCartItem = cartService.addItemToCart(id, cartItemDto);
+
+        assertNotNull(returnedCartItem);
+        assertEquals(cartItem.getCartItemId(), returnedCartItem.getCartItemId());
+        assertEquals(1, returnedCartItem.getQuantity());
+        verify(cartItemRepo, times(1)).save(any(CartItem.class));
+    }
+
+    // ---------- addItemToCart: failures ----------
     @Test
     public void testAddItemToCartInvalidId() {
         Ecse321Project03Exception e =
@@ -273,39 +303,7 @@ public class CartServiceTests {
 
     }
 
-    @Test
-    public void testIncreaseQuantityExistingItemToCart() {
-        CartItem existingCartItem = new CartItem(cartItemId, 3);
-
-        when(accountRepo.findById(id)).thenReturn(Optional.of(account));
-        when(cartRepo.findByAccount_Id(id)).thenReturn(cart);
-        when(itemTypeRepo.findById(itemTypeDto.getId())).thenReturn(Optional.of(itemType));
-        when(cartItemRepo.findById(cartItemId)).thenReturn(Optional.of(existingCartItem));
-        when(cartItemRepo.save(any(CartItem.class))).thenReturn(existingCartItem);
-
-        CartItem returnedCartItem = cartService.addItemToCart(id, cartItemDto);
-
-        assertNotNull(returnedCartItem);
-        assertEquals( existingCartItem.getCartItemId(), returnedCartItem.getCartItemId());
-        assertEquals(4, returnedCartItem.getQuantity());
-        verify(cartItemRepo, times(1)).save(any(CartItem.class));
-    }
-
-    @Test
-    public void testAddNewItemToCart(){
-        when(accountRepo.findById(id)).thenReturn(Optional.of(account));
-        when(cartRepo.findByAccount_Id(id)).thenReturn(cart);
-        when(itemTypeRepo.findById(itemTypeDto.getId())).thenReturn(Optional.of(itemType));
-        when(cartItemRepo.save(any(CartItem.class))).thenReturn(cartItem);
-
-        CartItem returnedCartItem = cartService.addItemToCart(id, cartItemDto);
-
-        assertNotNull(returnedCartItem);
-        assertEquals(cartItem.getCartItemId(), returnedCartItem.getCartItemId());
-        assertEquals(1, returnedCartItem.getQuantity());
-        verify(cartItemRepo, times(1)).save(any(CartItem.class));
-    }
-
+    // ---------- findCartTotalPrice: success ----------
     @Test
     public void testFindCartTotalPriceValidId(){
         when(accountRepo.findById(id)).thenReturn(Optional.of(account));
@@ -318,6 +316,7 @@ public class CartServiceTests {
         assertEquals(15, returnedPrice);
     }
 
+    // ---------- findCartTotalPrice: failures ----------
     @Test
     public void testFindCartTotalPriceInvalidId() {
         Ecse321Project03Exception e =
