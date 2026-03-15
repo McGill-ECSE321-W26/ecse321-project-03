@@ -46,7 +46,10 @@ public class CartIntegrationTests {
         cartRepository.deleteAll();
     }
 
-    // POST: Create a new valid cart
+    /*
+        Valid test for endpoint POST create cart
+        @author: Maria Klinski
+     */
     @Test
     @Order(0)
     public void testCreateNewCartValid() {
@@ -65,7 +68,10 @@ public class CartIntegrationTests {
         
     }
 
-    // POST: Create a new cart
+    /*
+        Invalid test for endpoint POST create cart, empty
+        @author: Maria Klinski
+     */
     @Test
     @Order(1)
     public void testCreateNewCartInvalid() {
@@ -83,6 +89,10 @@ public class CartIntegrationTests {
         
     }
 
+    /*
+        Valid test for endpoint POST add item to cart
+        @author: Maria Klinski
+     */
     @Test
     @Order(2)
     public void testAddItemToCartValid() {
@@ -101,8 +111,10 @@ public class CartIntegrationTests {
         assertNotNull(response.getBody());
         assertEquals(2, response.getBody().getQuantity());
     }
-
-    // POST: Add item to a cart that DNE
+    /*
+        Invalid test for endpoint POST add item to cart, invalid userID
+        @author: Maria Klinski
+     */
     @Test
     @Order(3)
     public void testAddItemToCartInvalid() {
@@ -122,8 +134,11 @@ public class CartIntegrationTests {
         assertNotNull(response.getBody());
     }
 
+    /*
+        Valid test for endpoint GET find cart total price
+        @author: Maria Klinski
 
-    // GET: Find total price of a cart
+     */
     @Test
     @Order(4)
     public void testFindCartTotalPriceValid() {
@@ -136,7 +151,10 @@ public class CartIntegrationTests {
         assertNotNull(response.getBody());
     }
 
-    // GET: Find total price of a cart that DNE
+    /*
+        Invalid test for endpoint GET find cart total price, invalid userID
+        @author: Maria Klinski
+     */
     @Test
     @Order(5)   
     public void testFindCartTotalPriceInvalid() {
@@ -151,7 +169,10 @@ public class CartIntegrationTests {
         assertNotNull(response.getBody());
     }
 
-    // DELETE: Delete a cart
+    /*
+        Valid test for endpoint DELETE delete cart
+        @author: Maria Klinski
+     */
     @Test
     @Order(6)
     public void testDeleteCartValid() {
@@ -163,6 +184,10 @@ public class CartIntegrationTests {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
+    /*
+        Invalid test for endpoint DELETE delete cart, invalid userID
+        @author: Maria Klinski
+     */
     @Test
     @Order(7)
     public void testDeleteCartInvalid() {

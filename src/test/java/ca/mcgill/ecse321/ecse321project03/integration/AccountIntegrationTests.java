@@ -49,8 +49,10 @@ public class AccountIntegrationTests {
         accountRepository.deleteAll();
     }
 
-
-    // POST: valid create Account
+    /*
+      Valid test for endpoint POST create account
+      @author: Maria Klinski
+     */
     @Test
     @Order(0)
     public void testCreateValidAccount() {
@@ -71,7 +73,10 @@ public class AccountIntegrationTests {
 
     }
 
-    // POST: invalid account creation: duplicate email
+    /*
+      Invalid test for endpoint POST create account, duplicate email
+      @author: Maria Klinski
+     */
     @Test
     @Order(1)
     public void testCreateAccountDuplicateEmail() {
@@ -86,8 +91,11 @@ public class AccountIntegrationTests {
         assertNotNull(response.getBody());
         assertIterableEquals(List.of("An account with the same email already exists."), response.getBody().getErrors());
     }
-    
-    // GET: find account by id
+   
+    /*
+      Valid test for endpoint GET find account by id
+      @author: Maria Klinski
+     */
     @Test
     @Order(2)
     public void testFindAccountByValidId() {
@@ -106,7 +114,10 @@ public class AccountIntegrationTests {
         assertEquals(VALID_ADDRESS, response.getBody().getAddress());
     }
 
-    // GET: find account by invalid id
+    /*
+      Invalid test for endpoint GET find account by id, invalid id
+      @author: Maria Klinski
+     */
     @Test
     @Order(3)
     public void testFindAccountByInvalidId() {
@@ -122,9 +133,12 @@ public class AccountIntegrationTests {
         assertNotNull(response.getBody());
         assertIterableEquals(List.of("No account found with id " + invalidId), response.getBody().getErrors());
 
-}
+    }
 
-    // GET: find account by username
+    /*
+      Valid test for endpoint GET find account by username
+      @author: Maria Klinski
+     */
     @Test
     @Order(4)
     public void testFindAccountByValidUsername() {
@@ -143,7 +157,10 @@ public class AccountIntegrationTests {
         assertEquals(VALID_ADDRESS, response.getBody().getAddress());
     }
 
-    // GET: find account by invalid username
+    /*
+      Invalid test for endpoint GET find account by username, invalid username
+      @author: Maria Klinski
+     */
     @Test
     @Order(5)
     public void testFindAccountByInvalidUsername() {
@@ -159,9 +176,11 @@ public class AccountIntegrationTests {
         assertNotNull(response.getBody());
         assertIterableEquals(List.of("No account found with username " + invalidUsername), response.getBody().getErrors());
     
-}
-
-    // GET: find account by email
+    }      
+    /*
+        Valid test for endpoint GET find account by email
+        @author: Maria Klinski
+     */
     @Test
     @Order(6)
     public void testFindAccountByValidEmail() {
@@ -180,7 +199,10 @@ public class AccountIntegrationTests {
         assertEquals(VALID_ADDRESS, response.getBody().getAddress());
     }
 
-    // GET: find account by invalid email
+    /*
+        Invalid test for endpoint GET find account by email, invalid email
+        @author: Maria Klinski
+     */
     @Test
     @Order(7)
     public void testFindAccountByInvalidEmail() {
@@ -196,7 +218,10 @@ public class AccountIntegrationTests {
         assertIterableEquals(List.of("No account found with email " + invalidEmail), response.getBody().getErrors());
     }
 
-    // POST: login
+    /*
+        Valid test for endpoint POST login
+        @author: Maria Klinski
+     */
     @Test
     @Order(8)
     public void testLoginValid() {
@@ -214,7 +239,10 @@ public class AccountIntegrationTests {
         assertEquals(VALID_ADDRESS, response.getBody().getAddress());
     }
 
-    // POST: login with invalid password
+    /*
+        Invalid test for endpoint POST login, invalid password
+        @author: Maria Klinski
+     */
     @Test
     @Order(9)
     public void testLoginInvalidPassword() {
@@ -231,7 +259,10 @@ public class AccountIntegrationTests {
         assertIterableEquals(List.of("Invalid password."), response.getBody().getErrors());
     }
 
-    // PUT: update account
+    /*
+        Valid test for endpoint PUT update account
+        @author: Maria Klinski
+     */
     @Test
     @Order(10)
     public void testUpdateAccountValid() {
@@ -253,7 +284,10 @@ public class AccountIntegrationTests {
 
     }
 
-    // DELETE: delete account
+    /*
+        Valid test for endpoint DELETE delete account
+        @author: Maria Klinski
+     */
     @Test
     @Order(11)
     public void testDeleteAccountValid() {

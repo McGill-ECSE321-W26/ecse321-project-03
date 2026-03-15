@@ -6,13 +6,15 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
+import ca.mcgill.ecse321.ecse321project03.dto.ItemCreationDto;
+import ca.mcgill.ecse321.ecse321project03.dto.ItemDefinitionResponseDto;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemImageRepository;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.util.LinkedMultiValueMap;
-
-import java.util.List;
+import java.math.BigDecimal;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,30 +44,70 @@ public class ItemDefinitionIntegrationTests {
     public void cleanup() {
         itemImageRepository.deleteAll();
     }
-    // POST: test create item
+    
+    /*
+    Valid test for endpoint POST create item
+    @author: Maria Klinski
+     */
     @Test
     @Order(0)
-    public void testCreateItem() {
+    public void testCreateItemValid() {
+        
+        int accountId = 1;
+        ItemCreationDto itemCreationDto = new ItemCreationDto();
+        itemCreationDto.setName("Test Item");
+        itemCreationDto.setTag("Test Tag");
+        itemCreationDto.setPrice(new BigDecimal("9.99"));
         
         // MultipartFile
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("accountId", 1);
+        body.add("accountId", accountId);
 
-        
+        HttpHeaders jsonHeaders = new HttpHeaders();
+        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-        
+        HttpEntity<ItemCreationDto> item = new HttpEntity<>(itemCreationDto, jsonHeaders);
+        body.add("item", item);
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
 
         // Act
-        String url = "/images/items/1?accountId=1";
-        ResponseEntity<ItemImageDto[]> response = client.postForEntity(url, body, ItemImageDto[].class);
+        ResponseEntity<ItemDefinitionResponseDto> response = client.postForEntity("/items", request, ItemDefinitionResponseDto.class);
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().length > 0);
+        assertTrue("Test Item".equals(response.getBody().getName()));
     }
 
+    /*
+    Invalid test for endpoint POST create item, missing item
+    @author: Maria Klinski
+     */
+    @Test
+    @Order(1)
+    public void testCreateItemInvalidMissingItem() {
+        
+        // MultipartFile
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
+        
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("accountId", 1);
+
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<ErrorDto> response = client.postForEntity("/items", request, ErrorDto.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
     
     
 }
