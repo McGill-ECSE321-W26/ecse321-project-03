@@ -57,12 +57,8 @@ public class OrderService {
     @Transactional
     public Order createOrder(@Valid OrderCreationDto orderDto) {
 
-        // Verify that the customer id entered by the customer when making the order is valid.
-        // Otherwise, throw an error
+        // This function is called in checkout, which already verifies if account exist. So no need to verify here
         Account customer = accountRepository.findById(orderDto.getCustomerId()).orElse(null);
-        if (customer == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
-        }
 
 
         // Get the current date as the order date
@@ -108,7 +104,7 @@ public class OrderService {
 
         // 1) Find the customer's cart
         Cart cart = cartRepository.findByAccount_Id(orderDto.getCustomerId());
-        if (cart == null) {
+        if (cart == null) { // meaning the cart doesn't exist or the customer id isn't valid
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
                     "No cart found for customer with id " + orderDto.getCustomerId());
         }

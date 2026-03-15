@@ -221,7 +221,7 @@ public class OrderIntegrationTest {
         Date deliveryDate = new Date(System.currentTimeMillis() + 30L * 60L * 60L * 1000L);
         OrderCreationDto request = new OrderCreationDto(-1, deliveryDate);
 
-        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No customer found with id -1" );
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No cart found for customer with id -1" );
     }
 
     /**
