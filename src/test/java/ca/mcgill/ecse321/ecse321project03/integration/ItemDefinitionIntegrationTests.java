@@ -71,7 +71,6 @@ public class ItemDefinitionIntegrationTests {
     @Order(0)
     public void testCreateItemValid() {
         
-        int accountId = 1;
         ItemCreationDto itemCreationDto = new ItemCreationDto();
         itemCreationDto.setName("Test Item");
         itemCreationDto.setTag("Test Tag");
