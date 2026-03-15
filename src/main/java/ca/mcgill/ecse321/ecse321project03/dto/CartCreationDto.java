@@ -1,11 +1,11 @@
 package ca.mcgill.ecse321.ecse321project03.dto;
 
 import ca.mcgill.ecse321.ecse321project03.model.Account;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class CartCreationDto {
 
-    @NotBlank(message = "The cart must be associated to an account.")
+    @NotNull(message = "The cart must be associated to an account.")
     private Account account;
 
     @SuppressWarnings("unused")
