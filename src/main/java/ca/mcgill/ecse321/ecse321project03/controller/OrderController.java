@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 /**
  * REST controller responsible for handling all order-related API endpoints.
  * It connects HTTP requests from the client to the OrderService layer.
@@ -203,6 +205,27 @@ public class OrderController {
                     .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
                     .toList();
             return new ResponseEntity<>(orderDtos, HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+        }
+    }
+
+    /**
+     * Redeems loyalty points for a specific order belonging to an account.
+     *
+     *
+     * @param orderId the ID of the order where points are redeemed
+     * @param accountId the ID of the account using loyalty points
+     * @param usePoints the choice of redeeming loyalty points
+     * @return a ResponseEntity containing the updated AccountResponseDto if successful,
+     *         or an ErrorDto if redemption fails
+     */
+    @PostMapping("/{id}/redeem-loyalty")
+    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int orderId,
+                                                      @RequestParam int accountId, @RequestParam boolean usePoints) {
+        try {
+            String message = orderService.redeemLoyaltyPts(accountId, orderId, usePoints);
+            return new ResponseEntity<>(message, HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
