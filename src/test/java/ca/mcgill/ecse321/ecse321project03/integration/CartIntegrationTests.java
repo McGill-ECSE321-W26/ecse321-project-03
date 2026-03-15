@@ -11,6 +11,8 @@ import ca.mcgill.ecse321.ecse321project03.repository.CartRepository;
 import ca.mcgill.ecse321.ecse321project03.dto.CartDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartItemDto;
+import ca.mcgill.ecse321.ecse321project03.model.Account;
+import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,14 +38,26 @@ public class CartIntegrationTests {
     @Autowired
     private CartRepository cartRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
     
-    private final int testUserId = 15;
-
+    private int testUserId;
 
     @BeforeAll
     @AfterAll
     public void clearDatabase() {
         cartRepository.deleteAll();
+    }
+
+    @BeforeEach
+    public void setup() {
+        cartRepository.deleteAll();
+        accountRepository.deleteAll();
+
+        Account account = new Account("Test", "test@gmail.com", "Password123!", "123 Street", 0);
+        accountRepository.save(account);
+
+        testUserId = account.getId();
     }
 
     /*
