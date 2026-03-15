@@ -58,7 +58,7 @@ public class AccountService {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "An account with username " + accountCreationDto.getUsername() + " already exists");
         }
 
-        Account account = new Account(accountCreationDto.getUsername(), accountCreationDto.getPassword(), accountCreationDto.getEmail(), accountCreationDto.getAddress(), 0);
+        Account account = new Account(accountCreationDto.getUsername(), accountCreationDto.getEmail(), accountCreationDto.getPassword(), accountCreationDto.getAddress(), 0);
 
         // Save the account to the database
         return accountRepository.save(account);
