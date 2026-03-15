@@ -94,7 +94,7 @@ public class OrderIntegrationTest {
     public void setup(){
 
         // Customer
-        testCustomer = new Account("Jeane", "jeane@gmail.com", "$fjdgbfdju1234", "1000 McGill", 0);
+        testCustomer = new Account("Jeane", "jeane@gmail.com", "$fjdgbfdju1234", "1000 McGill", 2);
         accountRepository.save(testCustomer);
 
         testAccountEmployee = new Account("Gabriel", "gabriel@gmail.com", "$fjdgb23525", "2000 McGill", 0);
@@ -163,8 +163,8 @@ public class OrderIntegrationTest {
         assertEquals(orderDateMinutes, createdOrderDateMinutes);
 
         // Verify the correct delivery date (in min) is returned
-        long delivDateMinutes = orderDate.getTime() / (60L * 1000L);
-        long createdDelivDateMinutes = createdOrder.getOrderDate().getTime() / (60L * 1000L);
+        long delivDateMinutes = delivDate.getTime() / (60L * 1000L);
+        long createdDelivDateMinutes = createdOrder.getDelivDate().getTime() / (60L * 1000L);
         assertEquals(delivDateMinutes, createdDelivDateMinutes);
 
         // Verify the correct state is returned
@@ -187,6 +187,9 @@ public class OrderIntegrationTest {
         assertEquals(8, createdItemType1.getStock());
         ItemType createdItemType2 = itemTypeRepository.findById(testItemType2.getId()).orElse(null);
         assertEquals(4, createdItemType2.getStock());
+
+        //Verify the loyalty points was not incremented, as the customer has only one order
+        assertEquals(2, (accountRepository.findById(createdOrder.getCustomerId()).orElse(null)).getLoyaltyPts());
     }
 
 

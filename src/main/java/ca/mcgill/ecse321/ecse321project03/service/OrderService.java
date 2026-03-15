@@ -81,8 +81,9 @@ public class OrderService {
                 Order.OrderState.Ordered,
                 customer,
                 null);
-        //awardLoyaltyPts(customer.getId(), newOrder.getId());
-        return orderRepository.save(newOrder);
+        Order savedOrder = orderRepository.save(newOrder);
+        awardLoyaltyPts(customer.getId(), savedOrder.getId());
+        return savedOrder;
     }
 
 
@@ -485,7 +486,7 @@ public class OrderService {
         }
 
         if (!usePts){
-            return "";
+            return "Points not used.";
         }
 
         double price = findOrderPrice(orderFromDB);
@@ -535,20 +536,16 @@ public class OrderService {
      * @author Emily Sun
      */
     public double findOrderPrice(Order orderFromDB){
-        
-        List <OrderItem> orderItemList = findOrderItems(orderFromDB);
         double price = 0.00;
+        Cart cart = cartRepository.findByAccount_Id(orderFromDB.getCustomer().getId());
+        List <CartItem> cartItemList = cartItemRepository.findByCartItemId_Cart(cart);
 
-        if(orderItemList.isEmpty()){
-            return price;
-        }
 
-        for (OrderItem orderItem : orderItemList){
-            //get the item, but im not sure if we have to find it from the database or if this is ok??
-            ItemType itemType = orderItem.getOrderItemId().getItemType();
+        for (CartItem cartItem : cartItemList){
+            ItemType itemType = cartItem.getCartItemId().getItemType();
             Item item = itemType.getGeneralItem();
             double itemPrice = item.getPrice();
-            int quantity = orderItem.getQuantity();
+            int quantity = cartItem.getQuantity();
 
             price += itemPrice*quantity;
         }

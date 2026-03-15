@@ -190,14 +190,10 @@ public class OrderController {
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if redemption fails
      */
-    @PostMapping("/{id}/redeem-loyalty")
-    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int orderId,
-                                                      @RequestParam int accountId, @RequestParam boolean usePoints) {
-        try {
+    @PostMapping("/redeem-loyalty/{orderId}")
+    public String redeemLoyaltyPtsInOrder( @PathVariable int orderId,
+                                           @RequestParam int accountId, @RequestParam boolean usePoints) {
             String message = orderService.redeemLoyaltyPts(accountId, orderId, usePoints);
-            return new ResponseEntity<>(message, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return message;
     }
 }
