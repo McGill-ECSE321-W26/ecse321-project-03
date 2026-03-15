@@ -75,11 +75,12 @@ public class AccountIntegrationTests {
     @Order(0)
     public void testCreateValidAccount() {
         // Arrange
-        AccountCreationDto body = new AccountCreationDto("Bob", "bob@gmail.com", "Bob123#", "123 Peel St, Montreal, QC");
+        AccountCreationDto body = new AccountCreationDto("Bob", "bob@gmail.com", "Bob123#456", "123 Peel St, Montreal, QC");
 
         // Act
-        ResponseEntity<AccountResponseDto> response = client.postForEntity("/accounts", body, AccountResponseDto.class);
-        
+         ResponseEntity<AccountResponseDto> response = client.postForEntity("/accounts", body, AccountResponseDto.class);
+
+
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -107,8 +108,10 @@ public class AccountIntegrationTests {
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertIterableEquals(List.of("An account with the same email already exists."), response.getBody().getErrors());
+        assertIterableEquals(List.of("An account with email " + testCustomer.getEmail() + " already exists"), response.getBody().getErrors());
     }
+
+
    
     /*
       Valid test for endpoint GET find account by id
@@ -149,7 +152,7 @@ public class AccountIntegrationTests {
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertIterableEquals(List.of("No account found with id " + invalidId), response.getBody().getErrors());
+        assertIterableEquals(List.of("No person found with id " + invalidId), response.getBody().getErrors());
 
     }
 
@@ -274,7 +277,7 @@ public class AccountIntegrationTests {
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertIterableEquals(List.of("Invalid password."), response.getBody().getErrors());
+        assertIterableEquals(List.of("Incorrect password for email " + testAccountManager.getEmail()), response.getBody().getErrors());
     }
 
     /*
