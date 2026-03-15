@@ -150,20 +150,26 @@ public class AccountController {
         }
     }
 
+
+    //------------------------
+    // Related to Loyalty Points
+    //------------------------
+
     /**
      * Awards loyalty points to an account.
      *
      * @param id the ID of the account receiving loyalty points
+     * @param orderId the ID of the order that triggers the loyalty-point award
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if the operation fails
      */
     @PostMapping("/{id}/award-loyalty")
-    public ResponseEntity<?> awardLoyaltyPts(@PathVariable int id) {
+    public ResponseEntity<?> awardLoyaltyPts(@PathVariable int id, @RequestParam int orderId) {
         try {
-            Account account = accountService.awardLoyaltyPts(id);
+            Account account = accountService.awardLoyaltyPts(id, orderId);
             return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
     }
 
@@ -172,18 +178,18 @@ public class AccountController {
      *
      * @param id the ID of the account using loyalty points
      * @param orderId the ID of the order where points are redeemed
-     * @param pointsUsed the number of loyalty points to redeem
+     * @param usePoints the choice of redeeming loyalty points
      * @return a ResponseEntity containing the updated AccountResponseDto if successful,
      *         or an ErrorDto if redemption fails
      */
-//    @PostMapping("/{id}/redeem-loyalty")
-//    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
-//            @RequestParam int orderId, @RequestParam int pointsUsed) {
-//        try {
-//            Account account = accountService.redeemLoyaltyPtsInOrder(id, orderId, pointsUsed);
-//            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
-//        } catch (Ecse321Project03Exception e) {
-//            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PostMapping("/{id}/redeem-loyalty")
+    public ResponseEntity<?> redeemLoyaltyPtsInOrder( @PathVariable int id,
+            @RequestParam int orderId, @RequestParam boolean usePoints) {
+        try {
+            String message = accountService.redeemLoyaltyPts(id, orderId, usePoints);
+            return new ResponseEntity<>(message, HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+        }
+    }
 }

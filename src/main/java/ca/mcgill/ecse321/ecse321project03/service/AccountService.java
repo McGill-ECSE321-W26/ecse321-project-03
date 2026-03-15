@@ -33,7 +33,7 @@ public class AccountService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private RoleRepository RoleRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     private OrderService orderService;
@@ -144,7 +144,7 @@ public class AccountService {
              throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
         }
 
-        Role role = RoleRepository.findByAccount_Id(id);
+        Role role = roleRepository.findByAccount_Id(id);
         // check if account is a manager account
         if (role instanceof Manager) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
@@ -182,8 +182,6 @@ public class AccountService {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "An account with username " + accountCreationDto.getUsername() + " already exists");
         }
 
-        
-
         // Update the fields of the existing account
         accountFromDB.setUsername(accountCreationDto.getUsername());
         accountFromDB.setPassword(accountCreationDto.getPassword());
@@ -195,24 +193,38 @@ public class AccountService {
     }
 
 
+    //------------------------
+    // Related to Loyalty Points
+    //------------------------
+
     /**
      * Awards Loyalty points
-     * @param accountID id of the user receiving the loyalty points
+     * @param accountId id of the user receiving the loyalty points
+     * @param orderId the ID of the order that triggers the loyalty-point award
      * @author Emily Sun
      */
     @Transactional
-    public Account awardLoyaltyPts(int accountID){
-        //using the find method from above
-        Account accountFromDB = findAccountById(accountID);
-        //find order list for account
-        List<Order> orderList = orderRepository.findByCustomer_Id(accountID);
-        //check if customer is returning customer
-        if(!orderList.isEmpty()){
-            //if so, award points
-            addLoyaltyPtsForOrder(accountFromDB);
+    public Account awardLoyaltyPts(int accountId, int orderId) {
+        Account accountFromDB = findAccountById(accountId);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
+
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No order found with id " + orderId);
+        }
+
+        if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
+                    "This order does not belong to the account with id " + accountId + ".");
+        }
+
+        List<Order> orderList = orderRepository.findByCustomer_Id(accountId);
+        if(orderList.size() > 1){
+           addLoyaltyPtsForOrder(accountFromDB);
         }
         return accountRepository.save(accountFromDB);
     }
+
 
     public void addLoyaltyPtsForOrder(Account accountFromDB){
         int pts = accountFromDB.getLoyaltyPts();
@@ -224,66 +236,62 @@ public class AccountService {
      * Redeem your loyalty points
      * @param accountId id of the user
      * @param orderId id of the order for which you want to redeem the points
-     * @param pointsUsed
      * @author Emily Sun and Sonia Ly
      */
     @Transactional
-    public Account redeemLoyaltyPts (int accountId, int orderId, int pointsUsed){
+    public String redeemLoyaltyPts (int accountId, int orderId, boolean usePts){
         Account accountFromDB = findAccountById(accountId);
         Order orderFromDB = orderRepository.findById(orderId).orElse(null);
 
         if (accountFromDB == null) {
-            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "No person with id " + accountId + " found.");
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No person with id " + accountId + " found.");
         }
-
         if (orderFromDB == null) {
-            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "No order with id " + orderId + " found.");
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order with id " + orderId + " found.");
+        }
+        if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
+                    "This order does not belong to the account with id " + accountId + ".");
         }
 
-        int orderPrice = (int) orderService.findOrderPrice(orderFromDB);
-        useLoyaltyPoints(accountFromDB, Math.min(pointsUsed, orderPrice));
-
-        /* Emily's code:
-        Order order = orderRepository.findById(orderId).orElse(null);
-        if (order == null){
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No order found with id " + orderId);
+        double price = orderService.findOrderPrice(orderFromDB);
+        double moneySaved = useLoyaltyPoints(accountFromDB) * price;
+        if(moneySaved == 0.0){
+            return "";
         }
-        double orderPrice = orderService.findOrderPrice(order);
-        //round up the int -> if order price is $67.67
-        //since 1 point = $1 off, then you would need a full point to cover the $0.67 extra
-        //that way, when they use 68 points, the final price will be $0
-        int intPrice = (int) Math.ceil(orderPrice);
-        //use smallest out of price and pointsUsed because final price cannot be negative
-        if(accountFromDB.getLoyaltyPts() == 0){
-            //i think we could go without the logic since i can deal with it in the helper function
-            //but i wanted the functionality to be that if they didn't have loyalty points, we dont even call the use function
-            //but idk how to implement that teehee :P
-            return accountFromDB;
-        }
-        useLoyaltyPoints(accountFromDB, Math.min(pointsUsed, intPrice));
-        return accountRepository.save(accountFromDB);
-
-         */
-
-        return accountRepository.save(accountFromDB);
+        return "You saved " + String.format("%.2f", moneySaved) + " on this order!";
 
     }
 
     /**
      * Use up loyalty points
-     * @param account account that's uing up the loyalty points
-     * @param pts amount of points to redeem
+     * @param account account that's using the loyalty points
      * @author Emily Sun
      */
-    public void useLoyaltyPoints(Account account, int pts){
-        int loyaltyPts = account.getLoyaltyPts();
-        if(loyaltyPts <= pts){
-            //if the number of points they want to use is greater or equal to the number they have
-            //just use all the points
-            account.setLoyaltyPts(0);
+    public double useLoyaltyPoints(Account account){
+        int lytPts = account.getLoyaltyPts();
+        if(lytPts < 10){
+            //no discount
+            return 0.0;
         }
-        else{
-            account.setLoyaltyPts(loyaltyPts - pts);
+        else if (lytPts < 15){
+            // 10-14 pts -> 10% off
+            return 0.1;
+        }
+        else if (lytPts < 20){
+            //15-19 pts -> 20% off
+            return 0.2;
+        }
+        else if (lytPts < 25){
+            //20-24 pts -> 30% off
+            return 0.3;
+        }
+        else if (lytPts < 35){
+            //25-34 pts -> 40% off
+            return 0.4;
+        }else{
+            // lytpts >= 35 -> 50% off (caps off at 50%)
+            return 0.5;
         }
     }
 
