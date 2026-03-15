@@ -21,9 +21,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.Optional;
 
 @SpringBootTest
@@ -68,11 +65,11 @@ public class AccountServiceTests {
         Account accountCreated = accountService.createAccount(dto);
 
         assertNotNull(accountCreated);
-        assertEquals(accountCreated.getUsername(), username);
-        assertEquals(accountCreated.getEmail(), email);
-        assertEquals(accountCreated.getPassword(), password);
-        assertEquals(accountCreated.getAddress(), address);
-        assertEquals(accountCreated.getLoyaltyPts(), 0);
+        assertEquals(username, accountCreated.getUsername());
+        assertEquals(email, accountCreated.getEmail());
+        assertEquals(password, accountCreated.getPassword());
+        assertEquals(address, accountCreated.getAddress());
+        assertEquals(0, accountCreated.getLoyaltyPts());
 
         verify(repo, times(1)).save(any(Account.class));
     }
@@ -112,11 +109,11 @@ public class AccountServiceTests {
         Account foundAccount = accountService.findAccountById(id);
 
         assertNotNull(foundAccount);
-        assertEquals(foundAccount.getUsername(), username);
-        assertEquals(foundAccount.getPassword(), password);
-        assertEquals(foundAccount.getEmail(), email);
-        assertEquals(foundAccount.getAddress(), address);
-        assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        assertEquals(username, foundAccount.getUsername());
+        assertEquals(password, foundAccount.getPassword());
+        assertEquals(email, foundAccount.getEmail());
+        assertEquals(address, foundAccount.getAddress());
+        assertEquals(loyaltyPts, foundAccount.getLoyaltyPts());
     }
 
     // ---------- findAccountById : failure  ----------
@@ -138,11 +135,11 @@ public class AccountServiceTests {
         Account foundAccount = accountService.findAccountByUsername(username);
 
         assertNotNull(foundAccount);
-        assertEquals(foundAccount.getUsername(), username);
-        assertEquals(foundAccount.getPassword(), password);
-        assertEquals(foundAccount.getEmail(), email);
-        assertEquals(foundAccount.getAddress(), address);
-        assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        assertEquals(username, foundAccount.getUsername());
+        assertEquals(password, foundAccount.getPassword());
+        assertEquals(email, foundAccount.getEmail());
+        assertEquals(address, foundAccount.getAddress());
+        assertEquals(loyaltyPts, foundAccount.getLoyaltyPts());
     }
 
     // ---------- findAccountByUsername : failure  ----------
@@ -164,11 +161,11 @@ public class AccountServiceTests {
         Account foundAccount = accountService.findAccountByEmail(email);
 
         assertNotNull(foundAccount);
-        assertEquals(foundAccount.getUsername(), username);
-        assertEquals(foundAccount.getPassword(), password);
-        assertEquals(foundAccount.getEmail(), email);
-        assertEquals(foundAccount.getAddress(), address);
-        assertEquals(foundAccount.getLoyaltyPts(), loyaltyPts);
+        assertEquals(username, foundAccount.getUsername());
+        assertEquals(password, foundAccount.getPassword());
+        assertEquals(email, foundAccount.getEmail());
+        assertEquals(address, foundAccount.getAddress());
+        assertEquals(loyaltyPts, foundAccount.getLoyaltyPts());
     }
 
     // ---------- findAccountByEmail : failure  ----------
@@ -190,11 +187,11 @@ public class AccountServiceTests {
         Account loggedInAccount = accountService.login(email, password);
 
         assertNotNull(loggedInAccount);
-        assertEquals(loggedInAccount.getUsername(), username);
-        assertEquals(loggedInAccount.getPassword(), password);
-        assertEquals(loggedInAccount.getEmail(), email);
-        assertEquals(loggedInAccount.getAddress(), address);
-        assertEquals(loggedInAccount.getLoyaltyPts(), loyaltyPts);
+        assertEquals(username, loggedInAccount.getUsername());
+        assertEquals(password, loggedInAccount.getPassword());
+        assertEquals(email, loggedInAccount.getEmail());
+        assertEquals(address, loggedInAccount.getAddress());
+        assertEquals(loyaltyPts, loggedInAccount.getLoyaltyPts());
     }
 
     // ---------- login : failures  ----------
