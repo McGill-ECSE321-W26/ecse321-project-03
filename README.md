@@ -48,14 +48,14 @@ questions or regrading
 **Deliverable 2 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|-----------|
-| Unit testing of service layer  |        8.5        |           |          |            |                 |               |           |
+| Unit testing of service layer  |        8.5        |           |          |      7.5   |                 |               |           |
 | Project management             |         3         |           |          |            |                 |               |           |
 | QA plan and report             |                   |           |          |            |                 |               |           |
 | Integration testing of backend |                   |           |          |            |                 |               |           |
 | Build system                   |                   |           |          |            |                 |               |           |
-| Business methods               |                   |           |          |            |                 |               |           |
+| Business methods               |                   |           |          |     12     |                 |               |           |
 | Add your own tasks             |                   |           |          |            |                 |               |           |
-| Total                          |                   |           |          |            |                 |               |           |
+| Total                          |                   |           |          |      19.5  |                 |               |           |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
