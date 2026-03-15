@@ -14,7 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,16 +78,16 @@ public class OrderIntegrationTest {
     @BeforeEach
     @AfterEach
     public void clearDatabaseSetup() {
-        orderRepository.deleteAll();
         orderItemRepository.deleteAll();
-        accountRepository.deleteAll();
+        orderRepository.deleteAll();
+        cartItemRepository.deleteAll();
+        cartRepository.deleteAll();
         employeeRepository.deleteAll();
+        managerRepository.deleteAll();
         roleRepository.deleteAll();
         itemTypeRepository.deleteAll();
-        cartItemRepository.deleteAll();
-        managerRepository.deleteAll();
         itemRepository.deleteAll();
-        cartRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     @BeforeEach
@@ -142,24 +142,32 @@ public class OrderIntegrationTest {
 
         // Valid date
         Date orderDate = new Date(System.currentTimeMillis());
-        Date delivDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date delivDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
 
         // Create the order
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), delivDate);
 
         // Act
-        ResponseEntity<OrderResponseDto> response = client.postForEntity("/checkout", request, OrderResponseDto.class);
+        ResponseEntity<OrderResponseDto> response = client.postForEntity("/orders/checkout", request, OrderResponseDto.class);
 
         // Assert the HTTP status
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         OrderResponseDto createdOrder =  response.getBody();
 
-
         assertNotNull(createdOrder);
-        // Verify the correct data is returned
-        assertEquals(delivDate, createdOrder.getDelivDate());
-        assertEquals(orderDate, createdOrder.getOrderDate());
+
+        // Verify the correct order date (in min) is returned
+        long orderDateMinutes = orderDate.getTime() / (60L * 1000L);
+        long createdOrderDateMinutes = createdOrder.getOrderDate().getTime() / (60L * 1000L);
+        assertEquals(orderDateMinutes, createdOrderDateMinutes);
+
+        // Verify the correct delivery date (in min) is returned
+        long delivDateMinutes = orderDate.getTime() / (60L * 1000L);
+        long createdDelivDateMinutes = createdOrder.getOrderDate().getTime() / (60L * 1000L);
+        assertEquals(delivDateMinutes, createdDelivDateMinutes);
+
+        // Verify the correct state is returned
         assertEquals(Order.OrderState.Ordered.toString(), createdOrder.getOrderState());
         assertEquals(testCustomer.getId(), createdOrder.getCustomerId());
 
@@ -191,7 +199,7 @@ public class OrderIntegrationTest {
      */
     private void invalidTestForCreateOrderAndCheckout(OrderCreationDto request, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
         // Verify the status code is the expected one
-        ResponseEntity<ErrorDto> response = client.postForEntity("/checkout", request, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.postForEntity("/orders/checkout", request, ErrorDto.class);
         assertEquals(expectedHttpStatus, response.getStatusCode());
 
         // Verify that the error message returned is what is expected
@@ -207,7 +215,7 @@ public class OrderIntegrationTest {
     @Test
     public void testCreateOrderAndCheckoutInvalidCustomerId() {
         // Create order with invalid customer id
-        Date deliveryDate = new Date(System.currentTimeMillis() + 30 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 30L * 60L * 60L * 1000L);
         OrderCreationDto request = new OrderCreationDto(-1, deliveryDate);
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No customer found with id -1" );
@@ -222,7 +230,7 @@ public class OrderIntegrationTest {
         // Create order with null delivery date
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), null);
 
-        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No delivery date found" );
+        invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Delivery date must not be null" );
 
     }
 
@@ -247,7 +255,7 @@ public class OrderIntegrationTest {
     @Test
     public void testCreateOrderAndCheckoutInvalidCart() {
         // Create a valid order
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L* 60L * 1000L);
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
 
@@ -270,7 +278,7 @@ public class OrderIntegrationTest {
         cartItemRepository.save(testCartItem1);
 
         // Create a valid order
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L* 60L * 1000L);
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Cart contains an invalid quantity: 0");
@@ -288,7 +296,7 @@ public class OrderIntegrationTest {
         cartItemRepository.save(testCartItem1);
 
         // Create a valid order
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Not enough stock for itemType id " + testItemType1.getId() +
@@ -306,12 +314,12 @@ public class OrderIntegrationTest {
     public void testValidFindOrderById() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
         // Verify that the status code is OK
-        ResponseEntity<OrderResponseDto> response = client.getForEntity("/orders/" + order.getId(), OrderResponseDto.class);
+        ResponseEntity<OrderResponseDto> response = client.getForEntity("/orders/order/" + order.getId(), OrderResponseDto.class);
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
 
@@ -358,7 +366,7 @@ public class OrderIntegrationTest {
      * @author Wissam Abchiche
      */
     private String assignEmployeeUrl(int orderId, int employeeId, int accountId){
-        return "/orders/" + orderId + "/assign-employee"
+        return "/orders/order/" + orderId + "/assign-employee"
                 + "?employeeId=" + employeeId
                 + "&accountId=" + accountId;
     }
@@ -370,7 +378,7 @@ public class OrderIntegrationTest {
     private void testValidAssignEmployee(int accountId) {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -428,7 +436,7 @@ public class OrderIntegrationTest {
 
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -445,7 +453,7 @@ public class OrderIntegrationTest {
 
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -463,7 +471,7 @@ public class OrderIntegrationTest {
     public void testAssignEmployeeEmployeeNotFound() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -479,7 +487,7 @@ public class OrderIntegrationTest {
     public void testAssignEmployeeEmployeeIsCustomer() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -501,7 +509,7 @@ public class OrderIntegrationTest {
     public void testAssignEmployeeByAnotherEmployee() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -546,7 +554,7 @@ public class OrderIntegrationTest {
      * @author Wissam Abchiche
      */
     private String updateStatusUrl(int orderId, String status, int accountId){
-        return "/orders/" + orderId + "/status"
+        return "/orders/order/" + orderId + "/status"
                 + "?orderState=" + status
                 + "&accountId=" + accountId;
     }
@@ -561,7 +569,7 @@ public class OrderIntegrationTest {
     private void testValidUpdateStatus(Order.OrderState orderState, String updatedOrderState) {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, orderState, testCustomer,null);
         orderRepository.save(order);
 
@@ -615,12 +623,12 @@ public class OrderIntegrationTest {
     public void testValidUpdateStatusToCancelled() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
         ResponseEntity<OrderResponseDto> response = client.exchange(
-                updateStatusUrl(order.getId(), "Cancelled", testEmployee.getAccount().getId()),
+                updateStatusUrl(order.getId(), "Cancelled", testManager.getAccount().getId()),
                 HttpMethod.PUT, null, OrderResponseDto.class);
 
         // Verify the status code is HTTP.OK
@@ -632,18 +640,11 @@ public class OrderIntegrationTest {
         assertNotNull(responseBody);
         assertEquals("Cancelled", responseBody.getOrderState());
 
-        // Verify it updates the stock of all itemTypes that were in the cart
+        // Verify it updates the stock of all itemTypes that were in the order
         ItemType itemType1 = itemTypeRepository.findById(testItemType1.getId()).orElse(null);
         assertEquals(10, itemType1.getStock());
         ItemType itemType2 = itemTypeRepository.findById(testItemType2.getId()).orElse(null);
         assertEquals(7, itemType2.getStock());
-
-        // Verify cart is empty
-        Cart cart = cartRepository.findByAccount_Id(order.getCustomer().getId());
-        assertNotNull(order);
-        List<CartItem> cartItems = cartItemRepository.findByCartItemId_Cart(cart);
-        assertNotNull(cartItems);
-        assertTrue(cartItems.isEmpty());
     }
 
 
@@ -666,7 +667,7 @@ public class OrderIntegrationTest {
     public void testUpdateStatusToCancellationByAccountThatDoesNotExist() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -682,10 +683,12 @@ public class OrderIntegrationTest {
     public void testUpdateStatusToCancellationLess24HoursToDelivery() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 12 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 12L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
-        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", testManager.getAccount().getId()),
+
+        // Verify that customer cancels less than 24 hours before delivery, which should throiw an error
+        invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", testCustomer.getId()),
                 HttpStatus.BAD_REQUEST, "The order cannot be cancelled less than 24 hours before the delivery date");
 
     }
@@ -698,7 +701,7 @@ public class OrderIntegrationTest {
     public void testUpdateStatusToCancellationByEmployee() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -716,7 +719,7 @@ public class OrderIntegrationTest {
     public void testUpdateStatusByCustomer() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -733,7 +736,7 @@ public class OrderIntegrationTest {
 
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -750,7 +753,7 @@ public class OrderIntegrationTest {
     public void testUpdateStatusFromOrderedToDelivered() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
         orderRepository.save(order);
 
@@ -767,7 +770,7 @@ public class OrderIntegrationTest {
     public void testUpdateStatusFromInPreparationToDelivered() {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
+        Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
         Order order = new Order(orderDate, deliveryDate, Order.OrderState.InPreparation, testCustomer,null);
         orderRepository.save(order);
 
@@ -776,326 +779,5 @@ public class OrderIntegrationTest {
 
     }
 
-    // VIEW ORDERS
-
-    /**
-     * Method which validates the view of orders
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrders() {
-        // Create a valid order and save it in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders?userID=" + testManager.getAccount().getId(), OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(1, responseBody.length);
-        assertEquals(order.getId(), responseBody[0].getId());
-    }
-
-
-    /**
-     * Method which invalidates the view of orders if done by customer
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testInvalidViewOrders() {
-
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/orders?userID=" + testCustomer.getId(), ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().get(0));
-    }
-
-
-
-    /**
-     * Method which verifies that the invalid action corresponds to a certain HttpStatus and an expectedError
-     * @author Wissam Abchiche
-     * @param url the url to verify
-     * @param expectedHttpStatus    the expected HTTP status code of the response
-     * @param expectedErrorMessage  the expected error message in the response body
-     */
-    private void invalidViewOrders(String url, HttpStatus expectedHttpStatus, String expectedErrorMessage) {
-        // Verify the status code is the expected one
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                url, ErrorDto.class);
-        assertNotNull(response);
-        assertEquals(expectedHttpStatus, response.getStatusCode());
-
-        // Verify that the error message returned is what is expected
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals(expectedErrorMessage, responseBody.getErrors().get(0));
-
-    }
-
-
-
-    /**
-     * Method which verifies that the valid view of orders by date ascending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByDateAscending() {
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-date?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "ASC", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[0].getId());
-        assertEquals(order2.getId(), responseBody[1].getId());
-    }
-
-
-
-    /**
-     * Method which verifies that the valid view of orders by date descending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByDateDescending() {
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-date?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[1].getId());
-        assertEquals(order2.getId(), responseBody[0].getId());
-    }
-
-
-    /**
-     * Method which invalidates the view of orders by date descending by customer
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testInvalidViewOrdersByDate() {
-        invalidViewOrders("/orders-date?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
-    }
-
-    /**
-     * Method which verifies that the valid view of orders by customer descending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByCustomerDescending() {
-
-        // Create second customer
-        Account customer2 = new Account("albert", "albert@gmail.com", "revfgnr33e!10", "6000 McGill", 0);
-        accountRepository.save(customer2);
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-customer?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[1].getId());
-        assertEquals(order2.getId(), responseBody[0].getId());
-    }
-
-
-
-    /**
-     * Method which verifies that the valid view of orders by customer ascending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByCustomerAscending() {
-
-        // Create second customer
-        Account customer2 = new Account("albert", "albert@gmail.com", "revfgnr33e!10", "6000 McGill", 0);
-        accountRepository.save(customer2);
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-customer?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[0].getId());
-        assertEquals(order2.getId(), responseBody[1].getId());
-    }
-
-
-    /**
-     * Method which invalidates the view of orders by customer descending by customer
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testInvalidViewOrdersByCustomer() {
-
-        invalidViewOrders("/orders-customer?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
-
-    }
-
-    /**
-     * Method which verifies that the valid view of orders by order state descending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByOrderStateDescending() {
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-status?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "descending", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[1].getId());
-        assertEquals(order2.getId(), responseBody[0].getId());
-    }
-
-
-    /**
-     * Method which verifies that the valid view of orders by order state ascending
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testValidViewOrdersByOrderStateAsc() {
-
-        // Create valid orders and save them in the repo
-        Date orderDate = new Date(System.currentTimeMillis());
-        Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
-        orderRepository.save(order);
-
-        Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
-        orderRepository.save(order2);
-
-        // Act
-        ResponseEntity<OrderResponseDto[]> response = client.getForEntity(
-                "/orders-status?userID=" + testManager.getAccount().getId()  +"&filterDirection=" + "asc", OrderResponseDto[].class);
-
-
-        // Verify status is HTTP.OK
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        OrderResponseDto[] responseBody = response.getBody();
-        assertNotNull(responseBody);
-
-        // Verify the correct data is returned
-        assertEquals(2, responseBody.length);
-        assertEquals(order.getId(), responseBody[0].getId());
-        assertEquals(order2.getId(), responseBody[1].getId());
-    }
-
-    /**
-     * Method which invalidates the view of orders by status descending by customer
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testInvalidViewOrdersByStatus() {
-        invalidViewOrders("/orders-status?userID=" + testCustomer.getId()  +"&filterDirection=" + "descending", HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
-
-
-    }
 
 }

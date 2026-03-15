@@ -39,9 +39,9 @@ public class InventoryController {
      * @return a ResponseEntity containing the updated ItemTypeDto if successful,
      *         or an ErrorDto if restocking fails
      */
-    @PostMapping("/restock")
+    @PostMapping("/restock/{itemTypeId}")
     public ItemTypeDto restockItemType(
-            @RequestParam int itemTypeId,
+            @PathVariable int itemTypeId,
             @RequestParam int quantityToAdd,
             @RequestParam int accountId) {
             ItemType itemType = inventoryService.restockItemType(itemTypeId, quantityToAdd, accountId);

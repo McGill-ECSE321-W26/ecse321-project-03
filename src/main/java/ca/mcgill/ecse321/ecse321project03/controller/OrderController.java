@@ -63,7 +63,7 @@ public class OrderController {
      * @return a ResponseEntity containing the OrderResponseDto if the order exists,
      *         or an ErrorDto if the order cannot be found
      */
-    @GetMapping("/orders/{id}")
+    @GetMapping("/order/{id}")
     public OrderResponseDto findOrderById(@PathVariable int id) {
             Order order = orderService.findOrderByIdResponseDto(id);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
@@ -80,7 +80,7 @@ public class OrderController {
      * @return a ResponseEntity containing the updated OrderResponseDto if successful,
      *         or an ErrorDto if the assignment fails
      */
-    @PutMapping("/orders/{orderId}/assign-employee")
+    @PutMapping("/order/{orderId}/assign-employee")
     public OrderResponseDto assignEmployee(@PathVariable int orderId,
             @RequestParam int employeeId, @RequestParam int accountId) {
 
@@ -99,7 +99,7 @@ public class OrderController {
      * @return a ResponseEntity containing the updated OrderResponseDto if successful,
      *         or an ErrorDto if the update fails
      */
-    @PutMapping("/orders/{orderId}/status")
+    @PutMapping("/order/{orderId}/status")
     public OrderResponseDto updateStatus(@PathVariable int orderId,
             @RequestParam String orderState, @RequestParam int accountId) {
             Order order = orderService.updateStatus(orderId, orderState, accountId);
@@ -115,7 +115,7 @@ public class OrderController {
      * @return a ResponseEntity containing a list of OrderResponseDto objects if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/orders")
+    @GetMapping("/order")
     public List<OrderResponseDto> viewOrders(@RequestParam int userID) {
 
             List<Order> orders = orderInfoService.viewOrders(userID);
@@ -133,7 +133,7 @@ public class OrderController {
      * @return a ResponseEntity containing a list of OrderResponseDto objects if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/orders-date")
+    @GetMapping("/order-date")
     public List<OrderResponseDto> viewOrdersByOrderDate(@RequestParam int userID, @RequestParam String filterDirection) {
 
             List<Order> orders = orderInfoService.viewOrdersByOrderDate(userID, filterDirection);
@@ -152,7 +152,7 @@ public class OrderController {
      * @return a ResponseEntity containing a list of OrderResponseDto objects if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/orders-customer")
+    @GetMapping("/order-customer")
     public List<OrderResponseDto> viewOrdersByCustomer(@RequestParam int userID, @RequestParam String filterDirection) {
 
             List<Order> orders = orderInfoService.viewOrdersByCustomer(userID, filterDirection);
@@ -171,7 +171,7 @@ public class OrderController {
      * @return a ResponseEntity containing a list of OrderResponseDto objects if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/orders-status")
+    @GetMapping("/order-status")
     public List<OrderResponseDto> sortOrdersByStatus(@RequestParam int userID, @RequestParam String filterDirection) {
             List<Order> orders = orderInfoService.sortOrdersByStatus(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()

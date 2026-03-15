@@ -70,14 +70,13 @@ public class InventoryIntegrationTest {
     @BeforeEach
     @AfterEach
     public void clearDatabaseSetup() {
+        cartItemRepository.deleteAll();
         cartRepository.deleteAll();
-        accountRepository.deleteAll();
         employeeRepository.deleteAll();
-        itemTypeRepository.deleteAll();
-        cartItemRepository.deleteAll();
-        cartItemRepository.deleteAll();
         managerRepository.deleteAll();
+        itemTypeRepository.deleteAll();
         itemRepository.deleteAll();
+        accountRepository.deleteAll();
     }
 
     @BeforeEach
@@ -130,9 +129,9 @@ public class InventoryIntegrationTest {
     public void testValidRestock() {
 
         // Act
-        ResponseEntity<ItemTypeDto> response = client.postForEntity("/restock"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&quantityToAdd=" + 3
+        ResponseEntity<ItemTypeDto> response = client.postForEntity("/inventory/restock/"
+                + testItemType1.getId()
+                + "?quantityToAdd=" + 3
                 + "&accountId=" + testManager.getAccount().getId(), null, ItemTypeDto.class);
 
         // Verify the status code is HTTP.OK
@@ -172,9 +171,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testRestockInvalidAccountId() {
 
-        invalidTestForCreateRestock("/restock"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&quantityToAdd=" + 3
+        invalidTestForCreateRestock("/inventory/restock/"
+                +  testItemType1.getId()
+                + "?quantityToAdd=" + 3
                 + "&accountId=" + -1, HttpStatus.NOT_FOUND, "No account managing the stock found with id -1");
     }
 
@@ -185,9 +184,9 @@ public class InventoryIntegrationTest {
      */
     @Test
     public void testRestockInvalidByCustomer() {
-        invalidTestForCreateRestock("/restock"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&quantityToAdd=" + 3
+        invalidTestForCreateRestock("/inventory/restock/"
+                + testItemType1.getId()
+                + "?quantityToAdd=" + 3
                 + "&accountId=" + testCustomer.getId(), HttpStatus.FORBIDDEN, "A customer cannot manage the stock");
     }
 
@@ -200,10 +199,10 @@ public class InventoryIntegrationTest {
     @Test
     public void testRestockInvalidByEmployee() {
 
-        invalidTestForCreateRestock("/restock"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&quantityToAdd=" + 3
-                + "&accountId=" + testEmployee.getAccount().getId(), HttpStatus.FORBIDDEN, "A employee cannot manage the stock");
+        invalidTestForCreateRestock("/inventory/restock/"
+                +  testItemType1.getId()
+                + "?quantityToAdd=" + 3
+                + "&accountId=" + testEmployee.getAccount().getId(), HttpStatus.FORBIDDEN, "An employee cannot manage the stock");
     }
 
 
@@ -213,9 +212,9 @@ public class InventoryIntegrationTest {
      */
     @Test
     public void testRestockInvalidQuantity() {
-        invalidTestForCreateRestock("/restock"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&quantityToAdd=" + 0
+        invalidTestForCreateRestock("/inventory/restock/"
+                +  testItemType1.getId()
+                + "?quantityToAdd=" + 0
                 + "&accountId=" + testManager.getAccount().getId(), HttpStatus.BAD_REQUEST, "Restock quantity must be positive");
     }
 
@@ -227,9 +226,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testRestockInvalidWithNoItemType() {
 
-        invalidTestForCreateRestock("/restock"
-                + "?itemTypeId=" + -1
-                + "&quantityToAdd=" + 2
+        invalidTestForCreateRestock("/inventory/restock/"
+                + -1
+                + "?quantityToAdd=" + 2
                 + "&accountId=" + testManager.getAccount().getId(), HttpStatus.NOT_FOUND, "No item type found with id -1");
     }
 
@@ -248,9 +247,9 @@ public class InventoryIntegrationTest {
         itemTypeRepository.save(testItemType1);
 
         // Act
-        ResponseEntity<String> response = client.getForEntity("/stock-status"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(), String.class);
+        ResponseEntity<String> response = client.getForEntity("/inventory/stock-status/"
+                +  testItemType1.getId()
+                + "?accountId=" + testManager.getAccount().getId(), String.class);
 
         // Validate the status code is HTTP.OK
         assertNotNull(response);
@@ -274,9 +273,9 @@ public class InventoryIntegrationTest {
         itemTypeRepository.save(testItemType1);
 
         // Act
-        ResponseEntity<String> response =client.getForEntity("/stock-status"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(),  String.class);
+        ResponseEntity<String> response =client.getForEntity("/inventory/stock-status/"
+                +  testItemType1.getId()
+                + "?accountId=" + testManager.getAccount().getId(),  String.class);
 
         // Validate the status code is HTTP.OK
         assertNotNull(response);
@@ -298,9 +297,9 @@ public class InventoryIntegrationTest {
         itemTypeRepository.save(testItemType1);
 
         // Act
-        ResponseEntity<String> response = client.getForEntity("/stock-status"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(),  String.class);
+        ResponseEntity<String> response = client.getForEntity("/inventory/stock-status/"
+                +  testItemType1.getId()
+                + "?accountId=" + testManager.getAccount().getId(),  String.class);
 
         // Validate the status code is HTTP.OK
         assertNotNull(response);
@@ -318,9 +317,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testGetStockStatusInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-status"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + -1,  ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/inventory/stock-status/"
+                + testItemType1.getId()
+                + "?accountId=" + -1,  ErrorDto.class);
 
         // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -339,9 +338,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testGetStockStateInvalidWithNoItemType() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-status"
-                + "?itemTypeId=" + -1
-                + "&accountId=" + testManager.getAccount().getId(), ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/inventory/stock-status/"
+                +  -1
+                + "?accountId=" + testManager.getAccount().getId(), ErrorDto.class);
 
         // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -362,9 +361,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testValidGetStock() {
         // Act
-        ResponseEntity<Integer> response = client.getForEntity("/stock-level"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + testManager.getAccount().getId(),  Integer.class);
+        ResponseEntity<Integer> response = client.getForEntity("/inventory/stock-level/"
+                +  testItemType1.getId()
+                + "?accountId=" + testManager.getAccount().getId(),  Integer.class);
 
         // Validate the status code is HTTP.OK
         assertNotNull(response);
@@ -383,9 +382,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testGetStockInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-level"
-                + "?itemTypeId=" + testItemType1.getId()
-                + "&accountId=" + -1, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/inventory/stock-level/"
+                +  testItemType1.getId()
+                + "?accountId=" + -1, ErrorDto.class);
 
         // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -393,7 +392,7 @@ public class InventoryIntegrationTest {
 
         // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No account found with id -1", responseBody.getErrors().toString());
+        assertEquals("No account found with id -1", responseBody.getErrors().get(0));
     }
 
 
@@ -405,9 +404,9 @@ public class InventoryIntegrationTest {
     @Test
     public void testGetStockInvalidWithNoItemType() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity("/stock-level"
-                + "?itemTypeId=" + -1
-                + "&accountId=" + testManager.getAccount().getId(),  ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/inventory/stock-level/"
+                +  -1
+                + "?accountId=" + testManager.getAccount().getId(),  ErrorDto.class);
 
         // Validate the status code is HTTP.NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -415,7 +414,7 @@ public class InventoryIntegrationTest {
 
         // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No item type found with id -1", responseBody.getErrors().toString());
+        assertEquals("No item type found with id -1", responseBody.getErrors().get(0));
     }
 
 
@@ -426,7 +425,7 @@ public class InventoryIntegrationTest {
     @Test
     public void testValidGetAllItemTypes() {
         // Act
-        ResponseEntity<ItemTypeDto[]> response = client.getForEntity("/item-types"
+        ResponseEntity<ItemTypeDto[]> response = client.getForEntity("/inventory/item-types"
                 + "?accountId=" + testManager.getAccount().getId(), ItemTypeDto[].class);
 
         // Assert
@@ -452,8 +451,8 @@ public class InventoryIntegrationTest {
     @Test
     public void testGetAllItemTypesInvalidAccountId() {
 
-        ResponseEntity<ErrorDto> response = client.getForEntity("/item-types"
-                + "&accountId=" + -1, ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/inventory/item-types"
+                + "?accountId=" + -1, ErrorDto.class);
 
         // Validate the status code is NOT_FOUND
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -461,7 +460,7 @@ public class InventoryIntegrationTest {
 
         // Validate if the message is correct
         assertNotNull(responseBody);
-        assertEquals("No account found with id 9999", responseBody.getErrors().toString());
+        assertEquals("No account found with id -1", responseBody.getErrors().get(0));
     }
 }
 

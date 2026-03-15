@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -69,11 +69,8 @@ public class OrderService {
         Date orderDate = new Date(System.currentTimeMillis());
 
 
-        // Verify that the delivery date has been chosen and that it was chosen at least 24 hours after the order date
-        if (orderDto.getDelivDate() == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No delivery date found");
-
-        } else if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60 * 60 * 1000)) < 24) {
+        // Verify that the delivery date has been chosen at least 24 hours after the order date
+         if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60L * 60L * 1000L)) < 24) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
         }
 
@@ -84,7 +81,7 @@ public class OrderService {
                 Order.OrderState.Ordered,
                 customer,
                 null);
-        awardLoyaltyPts(customer.getId(), newOrder.getId());
+        //awardLoyaltyPts(customer.getId(), newOrder.getId());
         return orderRepository.save(newOrder);
     }
 
@@ -295,7 +292,7 @@ public class OrderService {
 
             // Verify that the cancellation is made more than 24 hours from the delivery date. Otherwise, throw an error
             Date currentDate = new Date(System.currentTimeMillis());
-            if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60 * 60 * 1000)) < 24) {
+            if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60L * 60L * 1000L)) < 24) {
                 throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The order cannot be cancelled less " +
                         "than 24 hours before the delivery date");
             }
