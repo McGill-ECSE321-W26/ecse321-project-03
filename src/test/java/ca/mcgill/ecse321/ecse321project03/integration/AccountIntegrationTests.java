@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
+import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 
 import java.util.List;
@@ -34,11 +35,9 @@ public class AccountIntegrationTests {
     private TestRestTemplate client;
 
     private int createdAccountId;
-
-    private static final String VALID_USERNAME = "Bob_1";
-    private static final String VALID_EMAIL = "bob1@gmail.com";
-    private static final String VALID_PASSWORD = "Bob123#";
-    private static final String VALID_ADDRESS = "123 Peel St, Montreal, QC";
+    private Account testCustomer;
+    private Account testAccountEmployee;
+    private Account testAccountManager;
 
     @Autowired
     private AccountRepository accountRepository;
@@ -49,6 +48,25 @@ public class AccountIntegrationTests {
         accountRepository.deleteAll();
     }
 
+    @BeforeEach
+    public void setup() {
+        accountRepository.deleteAll();
+        
+        // Customer
+        testCustomer = new Account("Jeane", "jeane@gmail.com", "$fjdgbfdju1234", "1000 McGill", 0);
+        accountRepository.save(testCustomer);
+
+        // Employee
+        testAccountEmployee = new Account("Gabriel", "gabriel@gmail.com", "$fjdgb23525", "2000 McGill", 0);
+        accountRepository.save(testAccountEmployee);
+
+        // Manager
+        testAccountManager = new Account("Joseph", "joseph@gmail.com", "$fjdgb222/115", "3000 McGill", 0);
+        accountRepository.save(testAccountManager);
+
+        createdAccountId = testAccountManager.getId();
+    }
+
     /*
       Valid test for endpoint POST create account
       @author: Maria Klinski
@@ -57,7 +75,7 @@ public class AccountIntegrationTests {
     @Order(0)
     public void testCreateValidAccount() {
         // Arrange
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, VALID_PASSWORD, VALID_ADDRESS);
+        AccountCreationDto body = new AccountCreationDto("Bob", "bob@gmail.com", "Bob123#", "123 Peel St, Montreal, QC");
 
         // Act
         ResponseEntity<AccountResponseDto> response = client.postForEntity("/accounts", body, AccountResponseDto.class);
@@ -81,7 +99,7 @@ public class AccountIntegrationTests {
     @Order(1)
     public void testCreateAccountDuplicateEmail() {
         // Arrange
-        AccountCreationDto body = new AccountCreationDto("NotBob", VALID_EMAIL, VALID_PASSWORD, VALID_ADDRESS);
+        AccountCreationDto body = new AccountCreationDto("NotBob", testCustomer.getEmail(), "NotBob123#", "111 Peel St, Montreal, QC");
 
         // Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/accounts", body, ErrorDto.class);
@@ -109,9 +127,9 @@ public class AccountIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(this.createdAccountId, response.getBody().getId());
-        assertEquals(VALID_USERNAME, response.getBody().getUsername());
-        assertEquals(VALID_EMAIL, response.getBody().getEmail());
-        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+        assertEquals(testAccountManager.getUsername(), response.getBody().getUsername());
+        assertEquals(testAccountManager.getEmail(), response.getBody().getEmail());
+        assertEquals(testAccountManager.getAddress(), response.getBody().getAddress());
     }
 
     /*
@@ -143,7 +161,7 @@ public class AccountIntegrationTests {
     @Order(4)
     public void testFindAccountByValidUsername() {
         // Arrange
-        String url = String.format("/accounts/username/%s", VALID_USERNAME);
+        String url = String.format("/accounts/username/%s", testAccountManager.getUsername());
 
         // Act
         ResponseEntity<AccountResponseDto> response = client.getForEntity(url, AccountResponseDto.class);
@@ -152,9 +170,9 @@ public class AccountIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(this.createdAccountId, response.getBody().getId());
-        assertEquals(VALID_USERNAME, response.getBody().getUsername());
-        assertEquals(VALID_EMAIL, response.getBody().getEmail());
-        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+        assertEquals(testAccountManager.getUsername(), response.getBody().getUsername());
+        assertEquals(testAccountManager.getEmail(), response.getBody().getEmail());
+        assertEquals(testAccountManager.getAddress(), response.getBody().getAddress());
     }
 
     /*
@@ -165,7 +183,7 @@ public class AccountIntegrationTests {
     @Order(5)
     public void testFindAccountByInvalidUsername() {
         // Arrange
-        String invalidUsername = "1";
+        String invalidUsername = "invalidUsername";
         String url = String.format("/accounts/username/%s", invalidUsername);
 
         // Act
@@ -185,7 +203,7 @@ public class AccountIntegrationTests {
     @Order(6)
     public void testFindAccountByValidEmail() {
         // Arrange
-        String url = String.format("/accounts/email/%s", VALID_EMAIL);
+        String url = String.format("/accounts/email/%s", testAccountManager.getEmail());
 
         // Act
         ResponseEntity<AccountResponseDto> response = client.getForEntity(url, AccountResponseDto.class);
@@ -194,9 +212,9 @@ public class AccountIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(this.createdAccountId, response.getBody().getId());
-        assertEquals(VALID_USERNAME, response.getBody().getUsername());
-        assertEquals(VALID_EMAIL, response.getBody().getEmail());
-        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+        assertEquals(testAccountManager.getUsername(), response.getBody().getUsername());
+        assertEquals(testAccountManager.getEmail(), response.getBody().getEmail());
+        assertEquals(testAccountManager.getAddress(), response.getBody().getAddress());
     }
 
     /*
@@ -227,16 +245,16 @@ public class AccountIntegrationTests {
     public void testLoginValid() {
 
         // Act
-        String url = String.format("/accounts/login?email=%s&password=%s", VALID_EMAIL, VALID_PASSWORD);
+        String url = String.format("/accounts/login?email=%s&password=%s", testAccountManager.getEmail(), testAccountManager.getPassword());
         ResponseEntity<AccountResponseDto> response = client.postForEntity(url, null, AccountResponseDto.class);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(this.createdAccountId, response.getBody().getId());
-        assertEquals(VALID_USERNAME, response.getBody().getUsername());
-        assertEquals(VALID_EMAIL, response.getBody().getEmail());
-        assertEquals(VALID_ADDRESS, response.getBody().getAddress());
+        assertEquals(testAccountManager.getUsername(), response.getBody().getUsername());
+        assertEquals(testAccountManager.getEmail(), response.getBody().getEmail());
+        assertEquals(testAccountManager.getAddress(), response.getBody().getAddress());
     }
 
     /*
@@ -250,7 +268,7 @@ public class AccountIntegrationTests {
         String invalidPassword = "WrongPass!";
 
         // Act
-        String url = String.format("/accounts/login?email=%s&password=%s", VALID_EMAIL, invalidPassword);
+        String url = String.format("/accounts/login?email=%s&password=%s", testAccountManager.getEmail(), invalidPassword);
         ResponseEntity<ErrorDto> response = client.postForEntity(url, null, ErrorDto.class);
 
         // Assert
@@ -269,7 +287,7 @@ public class AccountIntegrationTests {
         // Arrange
         String newAddress = "272 Bob St. , Montreal, QC";
 
-        AccountCreationDto body = new AccountCreationDto(VALID_USERNAME, VALID_EMAIL, VALID_PASSWORD, newAddress);
+        AccountCreationDto body = new AccountCreationDto(testAccountManager.getUsername(), testAccountManager.getEmail(), testAccountManager.getPassword(), newAddress);
 
         // Act
         ResponseEntity<AccountResponseDto> response = client.exchange("/accounts/" + this.createdAccountId, HttpMethod.PUT, new HttpEntity<>(body), AccountResponseDto.class);
@@ -278,8 +296,8 @@ public class AccountIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(this.createdAccountId, response.getBody().getId());
-        assertEquals(VALID_USERNAME, response.getBody().getUsername());
-        assertEquals(VALID_EMAIL, response.getBody().getEmail());
+        assertEquals(testAccountManager.getUsername(), response.getBody().getUsername());
+        assertEquals(testAccountManager.getEmail(), response.getBody().getEmail());
         assertEquals(newAddress, response.getBody().getAddress());
 
     }
