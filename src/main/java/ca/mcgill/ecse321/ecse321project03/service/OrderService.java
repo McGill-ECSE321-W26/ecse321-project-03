@@ -106,11 +106,14 @@ public class OrderService {
     @Transactional
     public List<OrderItem> checkout(@Valid OrderCreationDto orderDto) {
 
+        Order order = createOrder(orderDto); // saves order
+        Account customer = order.getCustomer();
+
         // 1) Find the customer's cart
-        Cart cart = cartRepository.findByAccount_Id(orderDto.getCustomerId());
+        Cart cart = cartRepository.findByAccount_Id(customer.getId());
         if (cart == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
-                    "No cart found for customer with id " + orderDto.getCustomerId());
+                    "No cart found for customer with id " + customer.getId());
         }
 
         // 2) Load all cart items
@@ -143,9 +146,6 @@ public class OrderService {
         }
 
         // 4) Create OrderItems + decrement stock
-        Order order = createOrder(orderDto); // saves order
-        Account customer = order.getCustomer();
-
         List<OrderItem> createdOrderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
@@ -166,7 +166,6 @@ public class OrderService {
         // 5) Clear cart
         cartItemRepository.deleteAll(cartItems);
 
-        awardLoyaltyPts(customer.getId(), order.getId());
         return createdOrderItems;
     }
 
@@ -458,7 +457,7 @@ public class OrderService {
     }
 
 
-    private void addLoyaltyPts(Account account){
+    public void addLoyaltyPts(Account account){
         int pts = account.getLoyaltyPts();
         pts += 1;
         account.setLoyaltyPts(pts);
@@ -504,7 +503,7 @@ public class OrderService {
      * @param account account that's using the loyalty points
      * @author Emily Sun
      */
-    private double useLoyaltyPoints(Account account){
+    public double useLoyaltyPoints(Account account){
         int lytPts = account.getLoyaltyPts();
         if(lytPts < 10){
             //no discount
