@@ -39,17 +39,14 @@ public class InventoryController {
      * @return a ResponseEntity containing the updated ItemTypeDto if successful,
      *         or an ErrorDto if restocking fails
      */
-    @PostMapping("/restock")
-    public ResponseEntity<?> restockItemType(
-            @RequestParam int itemTypeId,
+    @PostMapping("/restock/{itemTypeId}")
+    public ItemTypeDto restockItemType(
+            @PathVariable int itemTypeId,
             @RequestParam int quantityToAdd,
             @RequestParam int accountId) {
-        try {
             ItemType itemType = inventoryService.restockItemType(itemTypeId, quantityToAdd, accountId);
-            return new ResponseEntity<>(new ItemTypeDto(itemType), HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return new ItemTypeDto(itemType);
+
     }
 
     /**
@@ -60,16 +57,13 @@ public class InventoryController {
      * @return a ResponseEntity containing the stock status string if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/{itemTypeId}/stock-status")
-    public ResponseEntity<?> getItemTypeStockStatus(
+    @GetMapping("/stock-status/{itemTypeId}")
+    public String getItemTypeStockStatus(
             @PathVariable int itemTypeId,
             @RequestParam int accountId) {
-        try {
             String stockStatus = inventoryService.getItemTypeStockStatus(itemTypeId, accountId);
-            return new ResponseEntity<>(stockStatus, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return stockStatus;
+
     }
 
     /**
@@ -80,16 +74,13 @@ public class InventoryController {
      * @return a ResponseEntity containing the stock level if successful,
      *         or an ErrorDto if the request fails
      */
-    @GetMapping("/{itemTypeId}/stock-level")
-    public ResponseEntity<?> getInventoryLevel(
+    @GetMapping("/stock-level/{itemTypeId}")
+    public int getInventoryLevel(
             @PathVariable int itemTypeId,
             @RequestParam int accountId) {
-        try {
             int stockLevel = inventoryService.getInventoryLevel(itemTypeId, accountId);
-            return new ResponseEntity<>(stockLevel, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return stockLevel;
+
     }
 
     /**
@@ -99,15 +90,11 @@ public class InventoryController {
      *         or an ErrorDto if the request fails
      */
     @GetMapping("/item-types")
-    public ResponseEntity<?> getAllItemTypes() {
-        try {
-            List<ItemType> itemTypes = inventoryService.getAllItemTypes();
+    public  List<ItemTypeDto> getAllItemTypes(@RequestParam int accountId) {
+            List<ItemType> itemTypes = inventoryService.getAllItemTypes(accountId);
             List<ItemTypeDto> itemTypeDtos = itemTypes.stream()
                     .map(ItemTypeDto::new)
                     .toList();
-            return new ResponseEntity<>(itemTypeDtos, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+            return itemTypeDtos;
     }
 }
