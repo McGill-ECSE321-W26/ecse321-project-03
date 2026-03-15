@@ -3,7 +3,7 @@ package ca.mcgill.ecse321.ecse321project03.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.Date;
+import java.util.Date;
 
 //Reference: Tutoral 7
 public class OrderCreationDto {

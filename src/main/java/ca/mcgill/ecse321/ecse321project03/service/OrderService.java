@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -69,13 +69,9 @@ public class OrderService {
         Date orderDate = new Date(System.currentTimeMillis());
 
 
-        // Verify that the delivery date has been chosen and that it was chosen at least 24 hours after the order date
-        if (orderDto.getDelivDate() == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No delivery date found");
-
-        } else if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60 * 60 * 1000)) < 24) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date " + orderDto.getDelivDate() +
-                    " can not be placed less than 24 hours after the order date " + orderDate);
+        // Verify that the delivery date has been chosen at least 24 hours after the order date
+         if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60L * 60L * 1000L)) < 24) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
         }
 
         // Create the Order object. For now, the employee assigned is null and the state is Ordered.
@@ -85,8 +81,9 @@ public class OrderService {
                 Order.OrderState.Ordered,
                 customer,
                 null);
-        awardLoyaltyPts(customer.getId(), newOrder.getId());
-        return orderRepository.save(newOrder);
+        Order savedOrder = orderRepository.save(newOrder);
+        awardLoyaltyPts(customer.getId(), savedOrder.getId());
+        return savedOrder;
     }
 
 
@@ -296,9 +293,9 @@ public class OrderService {
 
             // Verify that the cancellation is made more than 24 hours from the delivery date. Otherwise, throw an error
             Date currentDate = new Date(System.currentTimeMillis());
-            if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60 * 60 * 1000)) < 24) {
+            if (((order.getDelivDate().getTime() - currentDate.getTime()) / (60L * 60L * 1000L)) < 24) {
                 throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The order cannot be cancelled less " +
-                        "than 24 hours before the delivery date " + order.getDelivDate());
+                        "than 24 hours before the delivery date");
             }
 
             // Set the state of order to Cancelled if no error was found
@@ -489,7 +486,7 @@ public class OrderService {
         }
 
         if (!usePts){
-            return "";
+            return "Points not used.";
         }
 
         double price = findOrderPrice(orderFromDB);
@@ -539,20 +536,16 @@ public class OrderService {
      * @author Emily Sun
      */
     public double findOrderPrice(Order orderFromDB){
-        
-        List <OrderItem> orderItemList = findOrderItems(orderFromDB);
         double price = 0.00;
+        Cart cart = cartRepository.findByAccount_Id(orderFromDB.getCustomer().getId());
+        List <CartItem> cartItemList = cartItemRepository.findByCartItemId_Cart(cart);
 
-        if(orderItemList.isEmpty()){
-            return price;
-        }
 
-        for (OrderItem orderItem : orderItemList){
-            //get the item, but im not sure if we have to find it from the database or if this is ok??
-            ItemType itemType = orderItem.getOrderItemId().getItemType();
+        for (CartItem cartItem : cartItemList){
+            ItemType itemType = cartItem.getCartItemId().getItemType();
             Item item = itemType.getGeneralItem();
             double itemPrice = item.getPrice();
-            int quantity = orderItem.getQuantity();
+            int quantity = cartItem.getQuantity();
 
             price += itemPrice*quantity;
         }

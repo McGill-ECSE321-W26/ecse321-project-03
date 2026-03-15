@@ -4,7 +4,7 @@ import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
 
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 

@@ -137,10 +137,16 @@ public class InventoryService {
      * Utility: list all ItemTypes (useful for inventory screens).
      *
      * @author Yani Zhang
+     * @param accountId account performing the action
      * @return list of all ItemTypes
      */
     @Transactional
-    public List<ItemType> getAllItemTypes() {
+    public List<ItemType> getAllItemTypes(int accountId) {
+        // Verify that the account verifying the inventory level exists
+        if (accountRepository.findById(accountId).isEmpty()) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + accountId);
+        }
+
         List<ItemType> result = new ArrayList<>();
         for (ItemType it : itemTypeRepository.findAll()) {
             result.add(it);
