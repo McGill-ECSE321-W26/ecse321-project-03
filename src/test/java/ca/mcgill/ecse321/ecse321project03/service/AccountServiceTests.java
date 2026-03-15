@@ -17,6 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-@ExtendWith(MockitoExtension.class)  // replaces @SpringBootTest
+@SpringBootTest
 public class AccountServiceTests {
     @Mock
     private AccountRepository repo;
@@ -45,12 +47,13 @@ public class AccountServiceTests {
 
     @BeforeEach
     void setup() {
+        MockitoAnnotations.openMocks(this);
         username = "user1";
         email = "email1@mail.com";
         password = "p";
         address = "123 Street";
         loyaltyPts = 0;
-        int id = 5;
+        id = 5;
 
         dto = new AccountCreationDto(username, email, password, address);
         newAccountCreationDto = new AccountCreationDto("NewUser", "newEmail@mail.com", "NewPassword", "new Street");
