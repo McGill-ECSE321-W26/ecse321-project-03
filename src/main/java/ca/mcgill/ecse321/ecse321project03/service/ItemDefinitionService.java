@@ -23,6 +23,12 @@ import java.util.List;
 import java.util.Set;
 
 
+/**
+ * Service for creating and querying item definitions (items and their variants).
+ * Item creation is manager-only; validation includes name, tag, price, and variant specs (color, size, initial stock).
+ *
+ * @author Zirun Wang
+ */
 @Service
 public class ItemDefinitionService {
 
@@ -70,6 +76,12 @@ public class ItemDefinitionService {
         return itemTypeRepository.findByGeneralItem_Id(itemId);
     }
 
+    /**
+     * Verifies that the given account exists and is associated with a manager.
+     * Throws if the account is missing or the user is not a manager.
+     *
+     * @param accountId the authenticated account id
+     */
     private void ensureManager(int accountId) {
         Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
@@ -81,6 +93,11 @@ public class ItemDefinitionService {
         }
     }
 
+    /**
+     * Validates item-level fields: name (non-blank, length within bounds), tag (valid enum), and price (non-null, &gt;= 0).
+     *
+     * @param dto the item creation DTO to validate
+     */
     private void validateItemFields(ItemCreationDto dto) {
         if (dto.getName() == null || dto.getName().isBlank()) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "name: must not be null or blank.");
@@ -101,6 +118,11 @@ public class ItemDefinitionService {
         }
     }
 
+    /**
+     * Validates the variants list: non-null, non-empty; each variant has valid color, size, and initialStock; no duplicate color/size pairs.
+     *
+     * @param dto the item creation DTO containing variants to validate
+     */
     private void validateVariants(ItemCreationDto dto) {
         if (dto.getVariants() == null) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "variants: must not be null.");
@@ -145,6 +167,11 @@ public class ItemDefinitionService {
         }
     }
 
+    /**
+     * Ensures no existing item has the given name; throws CONFLICT if the name is already used.
+     *
+     * @param name the item name to check for uniqueness
+     */
     private void checkItemNameUnique(String name) {
         List<Item> existing = itemRepository.findByName(name);
         if (existing != null && !existing.isEmpty()) {
@@ -152,6 +179,12 @@ public class ItemDefinitionService {
         }
     }
 
+    /**
+     * Creates and persists a single Item from the DTO (name, tag, price).
+     *
+     * @param dto the item creation DTO
+     * @return the saved Item entity
+     */
     private Item persistItem(ItemCreationDto dto) {
         Tag tag = parseTag(dto.getTag());
         double price = dto.getPrice().doubleValue();
@@ -159,6 +192,13 @@ public class ItemDefinitionService {
         return itemRepository.save(item);
     }
 
+    /**
+     * Creates and persists ItemType variants for the given item from the variant specs.
+     *
+     * @param item  the parent item
+     * @param specs the variant specifications (color, size, initialStock)
+     * @return list of saved ItemType entities
+     */
     private List<ItemType> persistVariants(Item item, List<VariantSpec> specs) {
         return specs.stream()
                 .map(s -> {
@@ -170,6 +210,12 @@ public class ItemDefinitionService {
                 .toList();
     }
 
+    /**
+     * Parses a string into an Item.Tag enum value (case-insensitive). Returns null if null, blank, or invalid.
+     *
+     * @param value the string to parse
+     * @return the matching Tag or null
+     */
     private static Tag parseTag(String value) {
         if (value == null || value.isBlank()) return null;
         String normalized = value.trim();
@@ -179,6 +225,12 @@ public class ItemDefinitionService {
         return null;
     }
 
+    /**
+     * Parses a string into an ItemType.Color enum value (case-insensitive). Returns null if null, blank, or invalid.
+     *
+     * @param value the string to parse
+     * @return the matching Color or null
+     */
     private static ItemType.Color parseColor(String value) {
         if (value == null || value.isBlank()) return null;
         String normalized = value.trim();
@@ -188,6 +240,12 @@ public class ItemDefinitionService {
         return null;
     }
 
+    /**
+     * Parses a string into an ItemType.Size enum value (case-insensitive). Returns null if null, blank, or invalid.
+     *
+     * @param value the string to parse
+     * @return the matching Size or null
+     */
     private static ItemType.Size parseSize(String value) {
         if (value == null || value.isBlank()) return null;
         String normalized = value.trim();
