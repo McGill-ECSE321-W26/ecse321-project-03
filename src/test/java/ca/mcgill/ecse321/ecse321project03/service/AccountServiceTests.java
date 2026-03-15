@@ -124,7 +124,7 @@ public class AccountServiceTests {
                         () -> accountService.findAccountById(id));
 
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-        assertEquals("No account found with id " + id, e.getMessage());
+        assertEquals("No person found with id " + id, e.getMessage());
     }
 
     // ---------- findAccountByUsername : success  ----------
