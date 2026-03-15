@@ -269,9 +269,10 @@ public class InventoryServiceTests {
     @Test
     public void testGetAllItemTypesSuccess() {
         List<ItemType> types = List.of(itemType);
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
         when(itemTypeRepository.findAll()).thenReturn(types);
 
-        List<ItemType> result = service.getAllItemTypes();
+        List<ItemType> result = service.getAllItemTypes(MANAGER_ACCOUNT_ID);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -281,12 +282,27 @@ public class InventoryServiceTests {
 
     @Test
     public void testGetAllItemTypesEmpty() {
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
         when(itemTypeRepository.findAll()).thenReturn(new ArrayList<>());
 
-        List<ItemType> result = service.getAllItemTypes();
+        List<ItemType> result = service.getAllItemTypes(MANAGER_ACCOUNT_ID);
 
         assertNotNull(result);
         assertEquals(0, result.size());
         verify(itemTypeRepository, times(1)).findAll();
     }
+
+
+    // ---------- getAllItemTypes: failure ----------
+    @Test
+    public void testGetAllItemTypesAccountNotFound() {
+        when(accountRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> service.getAllItemTypes(999));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("No account found with id 999", e.getMessage());
+        verify(accountRepository, times(1)).findById(999);
+    }
+
 }

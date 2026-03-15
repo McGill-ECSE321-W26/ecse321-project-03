@@ -25,4 +25,5 @@ public class ErrorDto { // tutorial 6
     public void setErrors(List<String> errors) {
         this.errors = errors;
     }
+
 }

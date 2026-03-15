@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.*;
 
-import java.sql.Date;
+import java.util.Date;
 
 
 @Entity
@@ -36,7 +36,8 @@ public class Order {
     //Order Associations
     @ManyToOne
     private Account customer;
-    @ManyToOne
+    @ManyToOne()
+    @JoinColumn(nullable = true)
     private Employee assignee;
 
     //------------------------
@@ -49,6 +50,7 @@ public class Order {
         orderDate = aOrderDate;
         delivDate = aDelivDate;
         orderState = aOrderState;
+        assignee = aAssignee;
         if (!setCustomer(aCustomer)) {
             throw new RuntimeException("Unable to create Order due to aCustomer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }

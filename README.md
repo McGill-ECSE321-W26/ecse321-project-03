@@ -15,10 +15,8 @@ With backgroungs in domain modeling, state machines and software development, we
 are collaborating to implement a functional and structured system.
 
 ## Roles 
-**Non-technical**: 
-- Manager: The person who reminds the team what each member should
-do and by when. Preferably, 2 people will be needed in case one person
-forgets to send reminders
+- Scrum master : They ensure that scrum process is followed, they are also accountable for the team's effectiveness
+- Developper : They create and implement tasks
 - Secretary: The person who initiates/announces and plans the group
 meetings. Keep note of what was said during each meeting. (Write the
 meeting minutes)
@@ -32,9 +30,6 @@ formatting.
 - Contact person: The person who contacts the teacher in case of
 questions or regrading
 
-**Technical**: 
-- Scrum master : 
-- Developper : 
 
 ## Team Members
 
@@ -50,11 +45,11 @@ questions or regrading
 
 ## Task breakdown 
 
-**Deliverable 2** 
+**Deliverable 2 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|-----------|
-| Unit testing of service layer  |                   |           |          |            |                 |               |           |
-| Project management             |                   |           |          |            |                 |               |           |
+| Unit testing of service layer  |        8.5        |           |          |            |                 |               |           |
+| Project management             |         3         |           |          |            |                 |               |           |
 | QA plan and report             |                   |           |          |            |                 |               |           |
 | Integration testing of backend |                   |           |          |            |                 |               |           |
 | Build system                   |                   |           |          |            |                 |               |           |
