@@ -48,22 +48,22 @@ questions or regrading
 **Deliverable 2 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Unit testing of service layer  |        8.5        |    10.5   |          |      7.5   |                 |               |            |
-| Project management             |         3         |           |          |            |                 |               |            |
-| DTOs Creation                  |                   |           |          |            |                 |      3        |            |
-| QA plan and report             |                   |           |          |            |                 |               |            |
-| Integration testing of backend |                   |           |          |            |                 |      12       |            |
-| Build system                   |                   |           |          |            |                 |      1        |            |
-| Business methods               |                   |     3     |          |     12     |                 |      3        |      6     |
-| Controller layer               |                   |           |          |            |                 |               |     10     |
+| Unit testing of service layer  |        8.5        |    10.5   |    1     |      7.5   |                 |               |            |
+| Project management             |         3         |           |    1     |            |                 |               |            |
+| DTOs Creation                  |                   |           |    0     |            |                 |      3        |            |
+| QA plan and report             |                   |           |    4     |            |                 |               |            |
+| Integration testing of backend |                   |           |    0     |            |                 |      12       |            |
+| Build system                   |                   |           |    0     |            |                 |      1        |            |
+| Business methods               |                   |     3     |    4     |     12     |                 |      3        |      6     |
+| Controller layer               |                   |           |    0     |            |                 |               |     10     |
 | Meetings                       |                   |     3     |     3    |     3      |        3        |      3        |     3     |
-| Total                          |                   |    16.5   |          |    22.5    |                 |      22       |     19     |
+| Total                          |                   |    16.5   |    13    |    22.5    |                 |      22       |     19     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
 | -------------- | -------------------- | 
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
-| 2              |                      |
+| 2              | [Meeting Minutes D2]((https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D2.0:-Project-Report#meeting-minutes))          |
 | 3              |                      | 
 
 
