@@ -59,28 +59,17 @@ tasks.named('jacocoTestCoverageVerification') {
 	dependsOn test // tests are required to run before checking code coverage.
 }
 
-sourceSets {
-	integrationTest {
-		java {
-			srcDir 'src/test/java/ca/mcgill/ecse321/ecse321project03/integration'
-		}
-		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
-		runtimeClasspath += output + compileClasspath
-	}
-}
 
-configurations {
-	integrationTestImplementation.extendsFrom testImplementation
-	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
 
 tasks.register('integrationTest', Test) {
     description = 'Runs integration tests.'
     group = 'verification'
 
-    testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
 	useJUnitPlatform()
+	include '**/*IntegrationTests.class'
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
 
 }
 
