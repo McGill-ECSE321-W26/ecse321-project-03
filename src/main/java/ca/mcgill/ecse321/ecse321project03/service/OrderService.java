@@ -82,7 +82,6 @@ public class OrderService {
                 customer,
                 null);
         Order savedOrder = orderRepository.save(newOrder);
-        awardLoyaltyPts(customer.getId(), savedOrder.getId());
         return savedOrder;
     }
 
@@ -110,10 +109,10 @@ public class OrderService {
         Account customer = order.getCustomer();
 
         // 1) Find the customer's cart
-        Cart cart = cartRepository.findByAccount_Id(customer.getId());
+        Cart cart = cartRepository.findByAccount_Id(orderDto.getCustomerId());
         if (cart == null) {
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
-                    "No cart found for customer with id " + customer.getId());
+                    "No cart found for customer with id " + orderDto.getCustomerId());
         }
 
         // 2) Load all cart items
@@ -166,6 +165,7 @@ public class OrderService {
         // 5) Clear cart
         cartItemRepository.deleteAll(cartItems);
 
+        awardLoyaltyPts(customer.getId(), order.getId());
         return createdOrderItems;
     }
 
