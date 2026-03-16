@@ -140,24 +140,6 @@ public class OrderServiceTests {
 
     //failure
     @Test
-    public void createOrderNoCustomer(){
-        //arrange
-        Account fakePerson = new Account("customerUserFake", "customerFake@mail.com", "passc", "addrc", 0);
-        fakePerson.setId(10);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate);
-        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
-        when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
-
-        //act
-        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
-                () -> orderService.createOrder(orderDto));
-
-        //assert
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-        assertEquals( "No customer found with id "  + 10, e.getMessage());
-    }
-
-    @Test
     public void createOrderWrongDelivDate(){
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
@@ -209,6 +191,25 @@ public class OrderServiceTests {
     }
 
     //failure
+    @Test
+    public void checkoutNoCustomer(){
+        //arrange
+        Account fakePerson = new Account("customerUserFake", "customerFake@mail.com", "passc", "addrc", 0);
+        fakePerson.setId(10);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate);
+        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
+        when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
+
+        //act
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> orderService.checkout(orderDto));
+
+        //assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals( "No cart found for customer with id "  + 10, e.getMessage());
+    }
+    
+
     @Test
     public void checkoutCustomerNoCart(){
         //arrange
