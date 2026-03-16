@@ -36,12 +36,12 @@ questions or regrading
 | Name              | GitHub username | Team roles                              | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
 |-------------------|----------------|------------------------------------------|-----------------------|-----------------------|-----------------------|
 | Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |                       |
-| Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             19.5      |                       |
-| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              13        |                       |
-| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            22.5       |                       |
-| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             23        |                       |
-| Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             22        |                       |
-| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            19         |                       |
+| Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             20.5      |                       |
+| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |                       |
+| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
+| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |                       |
+| Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             23        |                       |
+| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |                       |
 
 ## Task breakdown 
 
@@ -56,8 +56,8 @@ questions or regrading
 | Build system                   |                   |           |          |            |                 |      1        |            |
 | Business methods               |                   |     3     |    4     |     12     |        6        |      3        |      6     |
 | Controller layer               |                   |           |          |            |                 |               |     10     |
-| Meetings                       |         1         |     3     |     3    |     3      |        3        |      3        |     3     |
-| Total                          |         15        |    19.5   |    13    |    22.5    |       23        |      22       |     19     |
+| Meetings                       |         1         |     4     |     4    |     4      |        4        |      4        |     4     |
+| Total                          |         15        |    20.5   |    14    |    23.5    |       24        |      23       |     20     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
