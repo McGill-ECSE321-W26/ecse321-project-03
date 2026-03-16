@@ -50,12 +50,14 @@ questions or regrading
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Unit testing of service layer  |        8.5        |    10.5   |          |      7.5   |                 |               |            |
 | Project management             |         3         |           |          |            |                 |               |            |
+| DTOs Creation                  |                   |           |          |            |                 |      3        |            |
 | QA plan and report             |                   |           |          |            |                 |               |            |
-| Integration testing of backend |                   |           |          |            |                 |               |            |
-| Build system                   |                   |           |          |            |                 |               |            |
-| Business methods               |                   |     3     |          |     12     |                 |               |      6     |
+| Integration testing of backend |                   |           |          |            |                 |      12       |            |
+| Build system                   |                   |           |          |            |                 |      1        |            |
+| Business methods               |                   |     3     |          |     12     |                 |      3        |      6     |
 | Controller layer               |                   |           |          |            |                 |               |     10     |
-| Total                          |                   |    13.5   |          |      19.5  |                 |               |     16     |
+| Meetings                       |                   |     3     |     3    |     3      |        3        |      3        |     3     |
+| Total                          |                   |    16.5   |          |    22.5    |                 |      22       |     19     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
