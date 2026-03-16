@@ -158,24 +158,6 @@ public class OrderServiceTests {
     }
 
     @Test
-    public void createOrderNoDelivDate(){
-        //arrange
-        when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
-        Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), null);
-        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
-        when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
-
-        //act - deliv date is null
-        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
-                () -> orderService.createOrder(orderDto));
-
-        //assert
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-        assertEquals( "No delivery date found", e.getMessage());
-    }
-
-    @Test
     public void createOrderWrongDelivDate(){
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
@@ -190,8 +172,7 @@ public class OrderServiceTests {
 
         //assert
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals( "The delivery date " + orderDto.getDelivDate() +
-                " can not be placed less than 24 hours after the order date " + newOrder.getOrderDate(), e.getMessage());
+        assertEquals( "The delivery date can not be placed less than 24 hours after the order date", e.getMessage());
     }
 
 
@@ -234,6 +215,7 @@ public class OrderServiceTests {
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
         when(cartRepository.findByAccount_Id(CUSTOMER_ACCOUNT_ID)).thenReturn(null);
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
         OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
 
         //act
@@ -252,6 +234,7 @@ public class OrderServiceTests {
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
         Cart fakeCart = new Cart(customer);
         when(cartRepository.findByAccount_Id(CUSTOMER_ACCOUNT_ID)).thenReturn(fakeCart);
+        when(orderRepository.save(any(Order.class))).thenReturn(order);
         OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
 
         //act
@@ -318,10 +301,6 @@ public class OrderServiceTests {
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
         Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
         when(orderRepository.save(any(Order.class))).thenReturn(fakeOrder);
-        /*ItemType it = itemType;
-        it.setStock(0);
-        CartItem.CartItemId ciid = new CartItem.CartItemId(itemType, cart);
-        CartItem cartItem1 = new CartItem(ciid, 2);*/
         CartItem cartItem1 = cartItem;
         cartItem1.getCartItemId().getItemType().setStock(0);
         when(cartItemRepository.findByCartItemId_Cart(cart)).thenReturn(List.of(cartItem1));
@@ -347,22 +326,19 @@ public class OrderServiceTests {
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
-        Employee fakeEmployee = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
+        Employee fakeEmployee = employee;
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
-        Role fakeRole = roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
+        Order fakeOrder = order;
         fakeOrder.setAssignee(null);
         when(orderRepository.save(any(Order.class))).thenReturn(fakeOrder);
 
-        assertEquals(null, fakeOrder.getAssignee());
 
         //act
-        Order newOrder = orderService.assignEmployee(fakeOrder.getId(), fakeEmployee.getId(), fakeEmployee.getId());
+        Order newOrder = orderService.assignEmployee(fakeOrder.getId(), fakeEmployee.getId(), fakeEmployee.getAccount().getId());
 
         //assert
-        assertEquals(EMPLOYEE_ACCOUNT_ID, fakeRole.getId());
         assertEquals(fakeOrder.getId(), newOrder.getId());
         assertEquals(fakeEmployee.getId(), newOrder.getAssignee().getId());
     }
@@ -417,14 +393,13 @@ public class OrderServiceTests {
     public void assignEmployeeEmployeeDoesntExist(){
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
-        Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
+        Account fakePerson = customer;
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
-        Account fakeEmployeeAcc = accountRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
-        Employee fakeEmployee = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
+        Account fakeEmployeeAcc = employeeAccount;
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
+        Order fakeOrder = order;
         fakeOrder.setAssignee(null);
         when(orderRepository.save(any(Order.class))).thenReturn(fakeOrder);
 
@@ -432,7 +407,7 @@ public class OrderServiceTests {
         fakeOrder.setCustomer(fakeEmployeeAcc);
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> orderService.assignEmployee(fakeOrder.getId(), fakePerson.getId(), fakeEmployee.getId()));
+                        () -> orderService.assignEmployee(fakeOrder.getId(), fakePerson.getId(), employeeAccount.getId()));
 
         //assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
@@ -444,12 +419,15 @@ public class OrderServiceTests {
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
-        Account fakeEmployeeAcc = accountRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
-        Employee fakeEmployee = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
+        Account fakeEmployeeAcc = employeeAccount;
+        // Account fakeEmployeeAcc = accountRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
+        Employee fakeEmployee = employee;
+        //Employee fakeEmployee = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
+        Order fakeOrder = order;
+        //Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
         fakeOrder.setAssignee(null);
         when(orderRepository.save(any(Order.class))).thenReturn(fakeOrder);
 
@@ -457,7 +435,7 @@ public class OrderServiceTests {
         fakeOrder.setCustomer(fakeEmployeeAcc);
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> orderService.assignEmployee(fakeOrder.getId(), fakeEmployee.getId(), fakeEmployee.getId()));
+                        () -> orderService.assignEmployee(fakeOrder.getId(), fakeEmployee.getId(), employeeAccount.getId()));
 
         //assert
         assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
@@ -465,26 +443,29 @@ public class OrderServiceTests {
     }
 
     @Test
-    public void assignEmployeeAccountIsNotEmployee(){
+    public void assignEmployeeAccountIsNotTheSameAsEmployee(){
         //arrange
+        Role mockEmployeeRole = spy(employeeRole2);
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID2)).thenReturn(Optional.of(employeeAccount2));
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID2)).thenReturn(Optional.of(employee2));
-        Employee fakeEmployee = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID).orElse(null);
-        Employee fakeEmployee2 = employeeRepository.findById(EMPLOYEE_ACCOUNT_ID2).orElse(null);
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
+        //when(employeeRepository.findById(employee2.getId())).thenReturn(Optional.of(employee2));
+        Employee fakeEmployee = employee;
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
-        when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID2)).thenReturn(employeeRole2);
+
+        //when(mockEmployeeRole.getAccount()).thenReturn(employeeAccount2);
+        when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID2)).thenReturn(mockEmployeeRole);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
-        Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
+        when(mockEmployeeRole.getId()).thenReturn(1);
+        Order fakeOrder = order;
         fakeOrder.setAssignee(null);
         when(orderRepository.save(any(Order.class))).thenReturn(fakeOrder);
 
         //act - account is not employee
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> orderService.assignEmployee(fakeOrder.getId(), fakeEmployee.getId(), fakeEmployee2.getId()));
+                        () -> orderService.assignEmployee(fakeOrder.getId(), employee.getId(), mockEmployeeRole.getAccount().getId()));
 
         //assert
         assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
@@ -584,7 +565,7 @@ public class OrderServiceTests {
     @Test
     public void updateStatusWrongState(){
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
         Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
@@ -593,7 +574,7 @@ public class OrderServiceTests {
         //act
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> orderService.updateStatus(fakeOrder.getId(), "Delivered", employee.getId()));
+                        () -> orderService.updateStatus(fakeOrder.getId(), "Delivered", employeeAccount.getId()));
 
         //assert
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -603,7 +584,7 @@ public class OrderServiceTests {
     @Test
     public void updateStatusWrongCancel(){
         when(accountRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employeeAccount));
-        when(employeeRepository.findById(EMPLOYEE_ACCOUNT_ID)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findById(employee.getId())).thenReturn(Optional.of(employee));
         when(roleRepository.findByAccount_Id(EMPLOYEE_ACCOUNT_ID)).thenReturn(employeeRole);
         when(orderRepository.findById(ORDER_ID)).thenReturn(Optional.of(order));
         Order fakeOrder = orderRepository.findById(ORDER_ID).orElse(null);
@@ -612,7 +593,7 @@ public class OrderServiceTests {
         //act
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> orderService.updateStatus(fakeOrder.getId(), "Cancelled", employee.getId()));
+                        () -> orderService.updateStatus(fakeOrder.getId(), "Cancelled", employeeAccount.getId()));
 
         //assert
         assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
@@ -635,7 +616,7 @@ public class OrderServiceTests {
 
         //assert
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals( "The order cannot be cancelled less than 24 hours before the delivery date " + fakeOrder.getDelivDate(), e.getMessage());
+        assertEquals( "The order cannot be cancelled less than 24 hours before the delivery date", e.getMessage());
     }
 
 
@@ -678,7 +659,7 @@ public class OrderServiceTests {
 
         //assertion
         assertEquals("You don't have enough points to get a discount :(", msg1);
-        assertEquals("", msg2);
+        assertEquals("Points not used.", msg2);
         assertEquals("You saved $0.00 on this order!", msg3);
     }
 

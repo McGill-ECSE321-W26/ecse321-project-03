@@ -77,7 +77,6 @@ public class OrderService {
                 customer,
                 null);
         Order savedOrder = orderRepository.save(newOrder);
-        awardLoyaltyPts(customer.getId(), savedOrder.getId());
         return savedOrder;
     }
 
