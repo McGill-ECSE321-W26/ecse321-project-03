@@ -53,9 +53,9 @@ questions or regrading
 | QA plan and report             |                   |           |          |            |                 |               |            |
 | Integration testing of backend |                   |           |          |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
-| Business methods               |                   |     3     |          |     12     |                 |               |            |
-| Add your own tasks             |                   |           |          |            |                 |               |            |
-| Total                          |                   |    13.5   |          |      19.5  |                 |               |            |
+| Business methods               |                   |     3     |          |     12     |                 |               |      6     |
+| Controller layer               |                   |           |          |            |                 |               |     10     |
+| Total                          |                   |    13.5   |          |      19.5  |                 |               |     16     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
