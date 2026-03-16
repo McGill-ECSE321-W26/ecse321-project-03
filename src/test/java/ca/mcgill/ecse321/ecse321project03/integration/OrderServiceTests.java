@@ -620,16 +620,33 @@ public class OrderServiceTests {
         assertEquals( "The order cannot be cancelled less than 24 hours before the delivery date", e.getMessage());
     }
 
+    @Test
+    public void testAutomaticDeliveryUpdate(){
+        // ordered 2 days ago, delivery scheduled to one day ago
+        Date orderDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 48));
+        Date delivDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 24));
+        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Prepared, customer, employee);
+        when(orderRepository.findAll()).thenReturn(List.of(preparedOrder));
 
-    //------------------------
-    //Prepare to Deliver Automatically -> private helper function, no testing
-    //------------------------
+        assertDoesNotThrow(() -> orderService.automaticDeliveryUpdate());
 
+        assertEquals(Order.OrderState.Delivered, preparedOrder.getOrderState());
+        verify(orderRepository, times(1)).save(any(Order.class));
+    }
 
-    //------------------------
-    //automaticDeliveryUpdate -> not called, no testing
-    //------------------------
+    @Test
+    public void testAutomaticDeliveryUpdateWrongState() {
+        // ordered 2 days ago, delivery scheduled to one day ago
+        Date orderDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 48));
+        Date delivDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 24));
+        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Ordered, customer, employee);
+        when(orderRepository.findAll()).thenReturn(List.of(preparedOrder));
 
+        assertDoesNotThrow(() -> orderService.automaticDeliveryUpdate());
+
+        assertEquals(Order.OrderState.Cancelled, preparedOrder.getOrderState());
+        verify(orderRepository, times(1)).save(any(Order.class));
+    }
 
     //------------------------
     //Use Loyalty Points test -> private helper function, no testing
