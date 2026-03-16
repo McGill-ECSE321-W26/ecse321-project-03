@@ -63,7 +63,7 @@ questions or regrading
 | Deliverable    | Link                 |                    
 | -------------- | -------------------- | 
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
-| 2              | [Meeting Minutes D2]((https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D2.0:-Project-Report#meeting-minutes))          |
+| 2              | [Meeting Minutes D2](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D2.0:-Project-Report#meeting-minutes)          |
 | 3              |                      | 
 
 
