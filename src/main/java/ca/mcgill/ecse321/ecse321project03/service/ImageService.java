@@ -198,7 +198,7 @@ public class ImageService {
      *
      * @param paths the paths to delete
      */
-    private static void deletePathsQuietly(List<Path> paths) {
+    public static void deletePathsQuietly(List<Path> paths) {
         for (Path p : paths) {
             try {
                 Files.deleteIfExists(p);
