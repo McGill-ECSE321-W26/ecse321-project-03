@@ -1,8 +1,10 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -103,6 +105,18 @@ public class ImageServiceTests {
         verify(managerRepository, times(1)).findByAccount_Id(MANAGER_ACCOUNT_ID);
         verify(itemRepository, times(1)).findById(ITEM_ID);
         verify(itemImageRepository, times(1)).save(any(ItemImage.class));
+
+        // verify uploaded image exists on disk, then delete and verify deletion (tests deletePathsQuietly)
+        List<Path> paths = result.stream()
+                .map(im -> ImageService.pathFromKey(im.getKey()))
+                .toList();
+        for (Path p : paths) {
+            assertTrue(Files.exists(p), "Uploaded image should exist: " + p);
+        }
+        ImageService.deletePathsQuietly(paths);
+        for (Path p : paths) {
+            assertFalse(Files.exists(p), "Image should be deleted after deletePathsQuietly: " + p);
+        }
     }
 
     // ---------- uploadItemImages: ensureManager failures ----------
@@ -271,5 +285,12 @@ public class ImageServiceTests {
                 () -> service.uploadItemImages(MANAGER_ACCOUNT_ID, ITEM_ID, files));
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("Failed to read file: read failed", e.getMessage());
+    }
+
+    // ---------- pathFromKey (public static) ----------
+    @Test
+    public void testPathFromKeyReturnsCorrectPath() {
+        Path result = ImageService.pathFromKey("items/10/abc-def-123.webp");
+        assertEquals(Path.of("uploads", "items/10/abc-def-123.webp"), result);
     }
 }
