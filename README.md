@@ -35,29 +35,29 @@ questions or regrading
 
 | Name              | GitHub username | Team roles                              | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
 |-------------------|----------------|------------------------------------------|-----------------------|-----------------------|-----------------------|
-| Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |                       |                       |
-| Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |                       |                       |
-| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |                       |                       |
-| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |                       |                       |
-| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |                       |                       |
-| Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |                       |                       |
-| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |                       |                       |
+| Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |                       |
+| Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             16.5      |                       |
+| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              13        |                       |
+| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            22.5       |                       |
+| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             23        |                       |
+| Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             22        |                       |
+| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            19         |                       |
 
 ## Task breakdown 
 
 **Deliverable 2 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Unit testing of service layer  |        8.5        |    10.5   |    2     |      7.5   |                 |               |            |
+| Unit testing of service layer  |         9         |    10.5   |    2     |      7.5   |                 |               |            |
 | Project management             |         3         |           |    1     |            |                 |               |            |
 | DTOs Creation                  |                   |           |          |            |                 |      3        |            |
-| QA plan and report             |                   |           |    4     |            |                 |               |            |
+| QA plan and report             |         2         |           |    4     |            |                 |               |            |
 | Integration testing of backend |                   |           |          |            |       13        |      12       |            |
 | Build system                   |                   |           |          |            |                 |      1        |            |
 | Business methods               |                   |     3     |    4     |     12     |        6        |      3        |      6     |
 | Controller layer               |                   |           |          |            |                 |               |     10     |
-| Meetings                       |                   |     3     |     3    |     3      |        3        |      3        |     3     |
-| Total                          |                   |    16.5   |    13    |    22.5    |       23        |      22       |     19     |
+| Meetings                       |         1         |     3     |     3    |     3      |        3        |      3        |     3     |
+| Total                          |         15        |    16.5   |    13    |    22.5    |       23        |      22       |     19     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
