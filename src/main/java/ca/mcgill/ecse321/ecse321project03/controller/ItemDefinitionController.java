@@ -42,15 +42,13 @@ public class ItemDefinitionController {
     private ImageService imageService;
 
     /**
-     * Creates a new item with variants and optionally uploads images in one request.
-     * Request must be multipart/form-data with:
-     * - "item" (application/json): item name, tag, price, variants
-     * - "files" (optional): image files (e.g. image/jpeg, image/png, image/webp)
+     * Creates a new item with variants and optionally uploads images.
      *
      * @param accountId      the authenticated account (must be a manager)
      * @param itemCreationDto the item and variant specs (part name "item")
      * @param files           optional image files (part name "files")
      * @return ItemDefinitionResponseDto with item fields, variants, and image URLs for the frontend
+     * @author Zirun Wang
      */
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<?> createItem(

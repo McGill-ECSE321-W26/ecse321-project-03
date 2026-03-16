@@ -24,6 +24,12 @@ import java.util.Set;
 import java.util.UUID;
 
 
+/**
+ * Service for uploading and managing item images. Handles validation of file type and size,
+ * persistence of image metadata, and writing image files to disk under an uploads directory.
+ *
+ * @author Zirun Wang
+ */
 @Service
 public class ImageService {
 
@@ -68,6 +74,12 @@ public class ImageService {
         return saved;
     }
 
+    /**
+     * Verifies that the given account exists and is associated with a manager.
+     * Throws if the account is missing or the user is not a manager.
+     *
+     * @param accountId the authenticated account id
+     */
     private void ensureManager(int accountId) {
         Account account = accountRepository.findById(accountId).orElse(null);
         if (account == null) {
@@ -79,11 +91,23 @@ public class ImageService {
         }
     }
 
+    /**
+     * Loads the item by id or throws if not found.
+     *
+     * @param itemId the item id
+     * @return the Item entity
+     */
     private Item getItemOrThrow(int itemId) {
         return itemRepository.findById(itemId)
                 .orElseThrow(() -> new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No item found with id " + itemId));
     }
 
+    /**
+     * Validates the list of uploaded files: non-null, non-empty, count within limit,
+     * each file non-empty, allowed content type (jpeg/png/webp), and size at most 5MB.
+     *
+     * @param files the list of multipart files to validate
+     */
     private void validateFiles(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "At least one image file is required.");
@@ -110,10 +134,11 @@ public class ImageService {
     }
 
     /**
-     * Private helper for generating a key (a partial file path) for the image
-     * in the form: KEY_PREFIX + "/" + itemId + "/" + UUID.randomUUID() + "." + ext
-     * Ex. items/1/73wfbe-283dw-73bd3-dnh238gue2.png
-     * Then builds up an image record
+     * Builds image records with a unique key per file. Key format: items/{itemId}/{uuid}.{ext}.
+     *
+     * @param itemId the item id used in the path
+     * @param files  the uploaded files
+     * @return list of ImageRecord with key and byte content
      */
     private List<ImageRecord> buildImageRecords(int itemId, List<MultipartFile> files) {
         List<ImageRecord> records = new ArrayList<>();
@@ -129,6 +154,13 @@ public class ImageService {
         return records;
     }
 
+    /**
+     * Persists image metadata for each record as ItemImage entities linked to the given item.
+     *
+     * @param item    the item to associate images with
+     * @param records the image records (key and bytes)
+     * @return list of saved ItemImage entities
+     */
     private List<ItemImage> persistImageRecords(Item item, List<ImageRecord> records) {
         List<ItemImage> saved = new ArrayList<>();
         for (ImageRecord r : records) {
@@ -138,6 +170,12 @@ public class ImageService {
         return saved;
     }
 
+    /**
+     * Writes each image record's bytes to disk under the uploads directory. On failure,
+     * removes any files already written.
+     *
+     * @param records the image records to write
+     */
     private void writeFilesToDisk(List<ImageRecord> records) {
         List<Path> written = new ArrayList<>();
         try {
@@ -155,6 +193,11 @@ public class ImageService {
         }
     }
 
+    /**
+     * Deletes the given paths from the filesystem, ignoring any IO errors.
+     *
+     * @param paths the paths to delete
+     */
     private static void deletePathsQuietly(List<Path> paths) {
         for (Path p : paths) {
             try {
@@ -164,6 +207,12 @@ public class ImageService {
         }
     }
 
+    /**
+     * Maps a content type to a file extension (jpg, png, or webp). Defaults to "jpg" if null or unknown.
+     *
+     * @param contentType the MIME content type
+     * @return the corresponding file extension
+     */
     private static String extensionFromContentType(String contentType) {
         if (contentType == null) return "jpg"; //default to jpg
         return switch (contentType) {
@@ -177,15 +226,27 @@ public class ImageService {
     /**
      * Resolves the filesystem path for an image key (e.g. for serving or deletion).
      * Path is relative to project/process working directory: uploads/items/{itemId}/{uuid}.{ext}
+     *
+     * @param key the image key (e.g. items/1/uuid.png)
+     * @return the Path relative to the uploads base directory
      */
     public static Path pathFromKey(String key) {
         return Path.of(UPLOADS_BASE, key);
     }
 
+    /**
+     * Holds the storage key and raw bytes for an image before persistence and disk write.
+     */
     private static class ImageRecord {
         final String key;
         final byte[] bytes;
 
+        /**
+         * Creates an image record with the given key and byte content.
+         *
+         * @param key   the storage key (path under uploads)
+         * @param bytes the image bytes
+         */
         ImageRecord(String key, byte[] bytes) {
             this.key = key;
             this.bytes = bytes;

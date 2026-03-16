@@ -4,18 +4,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Expected Request Body:
-{
-  "name": "Classic Tee",
-  "tag": "TOP",
-  "price": 19.99,
-  "variants": [
-    { "color": "Black", "size": "S", "initialStock": 10 },
-    { "color": "Black", "size": "M", "initialStock": 5 },
-    { "color": "White", "size": "S", "initialStock": 7 }
-  ]
-}
-*/
+ * ItemCreationDto is a DTO for creating a new item.
+ * It contains the name, tag, price, and variants of the item.
+ * The variants are a list of VariantSpec objects, each containing a color, size, and initial stock.
+ * 
+ * @author Zirun Wang   
+ */
 public class ItemCreationDto {
 
     private String name;
@@ -59,9 +53,6 @@ public class ItemCreationDto {
         this.variants = variants;
     }
 
-    /**
-     * One variant spec: color + size + initial stock. Matches ItemType.Color, ItemType.Size and stock.
-     */
     public static class VariantSpec {
         private String color;
         private String size;

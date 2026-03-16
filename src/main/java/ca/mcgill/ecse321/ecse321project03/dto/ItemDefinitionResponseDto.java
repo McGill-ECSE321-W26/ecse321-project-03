@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  * Response DTO for item creation. Contains item fields, variant info, and
  * image URLs that the frontend can use to load and render images (e.g. via
  * GET /images/... endpoints).
+ * 
+ * @author Zirun Wang
  */
 public class ItemDefinitionResponseDto {
 
@@ -22,11 +24,6 @@ public class ItemDefinitionResponseDto {
     private List<VariantResponse> variants;
     private List<String> imageUrls;
 
-    /**
-     * Builds the response from an Item, its types, and a list of image URL paths.
-     * Image URLs should be paths like "/images/items/1/uuid.jpg" that the frontend
-     * can use to load images.
-     */
     public ItemDefinitionResponseDto(Item item, List<ItemType> itemTypes, List<String> imageUrls) {
         this.id = item.getId();
         this.name = item.getName();

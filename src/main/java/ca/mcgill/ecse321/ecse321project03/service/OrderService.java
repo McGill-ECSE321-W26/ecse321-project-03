@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.ecse321project03.service;
 
 
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.repository.*;
@@ -57,12 +56,8 @@ public class OrderService {
     @Transactional
     public Order createOrder(@Valid OrderCreationDto orderDto) {
 
-        // Verify that the customer id entered by the customer when making the order is valid.
-        // Otherwise, throw an error
+        // This function is called in checkout, which already verifies if account exist. So no need to verify here
         Account customer = accountRepository.findById(orderDto.getCustomerId()).orElse(null);
-        if (customer == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No customer found with id " + orderDto.getCustomerId());
-        }
 
 
         // Get the current date as the order date
@@ -105,12 +100,9 @@ public class OrderService {
     @Transactional
     public List<OrderItem> checkout(@Valid OrderCreationDto orderDto) {
 
-        Order order = createOrder(orderDto); // saves order
-        Account customer = order.getCustomer();
-
         // 1) Find the customer's cart
         Cart cart = cartRepository.findByAccount_Id(orderDto.getCustomerId());
-        if (cart == null) {
+        if (cart == null) { // meaning the cart doesn't exist or the customer id isn't valid
             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
                     "No cart found for customer with id " + orderDto.getCustomerId());
         }
@@ -145,6 +137,9 @@ public class OrderService {
         }
 
         // 4) Create OrderItems + decrement stock
+        Order order = createOrder(orderDto); // saves order
+        Account customer = order.getCustomer();
+
         List<OrderItem> createdOrderItems = new ArrayList<>();
 
         for (CartItem cartItem : cartItems) {
@@ -457,7 +452,7 @@ public class OrderService {
     }
 
 
-    public void addLoyaltyPts(Account account){
+    private void addLoyaltyPts(Account account){
         int pts = account.getLoyaltyPts();
         pts += 1;
         account.setLoyaltyPts(pts);
@@ -503,7 +498,7 @@ public class OrderService {
      * @param account account that's using the loyalty points
      * @author Emily Sun
      */
-    public double useLoyaltyPoints(Account account){
+    private double useLoyaltyPoints(Account account){
         int lytPts = account.getLoyaltyPts();
         if(lytPts < 10){
             //no discount

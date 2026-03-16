@@ -46,16 +46,16 @@ questions or regrading
 ## Task breakdown 
 
 **Deliverable 2 - hours spent on each task per teammate** 
-| Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zang |
-|--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|-----------|
-| Unit testing of service layer  |        8.5        |           |          |            |                 |               |           |
-| Project management             |         3         |           |          |            |                 |               |           |
-| QA plan and report             |                   |           |          |            |                 |               |           |
-| Integration testing of backend |                   |           |          |            |                 |               |           |
-| Build system                   |                   |           |          |            |                 |               |           |
-| Business methods               |                   |           |          |            |                 |               |           |
-| Add your own tasks             |                   |           |          |            |                 |               |           |
-| Total                          |                   |           |          |            |                 |               |           |
+| Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
+|--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
+| Unit testing of service layer  |        8.5        |    10.5   |          |      7.5   |                 |               |            |
+| Project management             |         3         |           |          |            |                 |               |            |
+| QA plan and report             |                   |           |          |            |                 |               |            |
+| Integration testing of backend |                   |           |          |            |                 |               |            |
+| Build system                   |                   |           |          |            |                 |               |            |
+| Business methods               |                   |     3     |          |     12     |                 |               |            |
+| Add your own tasks             |                   |           |          |            |                 |               |            |
+| Total                          |                   |    13.5   |          |      19.5  |                 |               |            |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
