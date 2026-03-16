@@ -48,7 +48,7 @@ questions or regrading
 **Deliverable 2 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Unit testing of service layer  |        8.5        |    10.5   |    1     |      7.5   |                 |               |            |
+| Unit testing of service layer  |        8.5        |    10.5   |    2     |      7.5   |                 |               |            |
 | Project management             |         3         |           |    1     |            |                 |               |            |
 | DTOs Creation                  |                   |           |          |            |                 |      3        |            |
 | QA plan and report             |                   |           |    4     |            |                 |               |            |
