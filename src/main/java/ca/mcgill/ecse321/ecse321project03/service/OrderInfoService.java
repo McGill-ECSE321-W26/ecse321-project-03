@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
-import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;

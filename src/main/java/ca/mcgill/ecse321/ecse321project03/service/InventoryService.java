@@ -3,8 +3,6 @@ package ca.mcgill.ecse321.ecse321project03.service;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Employee;
 import ca.mcgill.ecse321.ecse321project03.model.ItemType;
-import ca.mcgill.ecse321.ecse321project03.model.Manager;
-import ca.mcgill.ecse321.ecse321project03.model.Role;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemTypeRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
