@@ -661,7 +661,7 @@ public class OrderServiceTests {
         //assertion
         assertEquals("You don't have enough points to get a discount :(", msg1);
         assertEquals("Points not used.", msg2);
-        assertEquals("You saved $0,00 on this order!", msg3);
+        assertEquals("You saved $0.00 on this order!", msg3);
     }
 
 
