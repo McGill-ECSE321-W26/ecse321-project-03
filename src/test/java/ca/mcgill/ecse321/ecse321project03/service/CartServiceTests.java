@@ -80,7 +80,7 @@ public class CartServiceTests {
         when(accountRepo.findById(id)).thenReturn(Optional.of(account));
         when(cartRepo.save(any(Cart.class))).thenReturn(cart);
 
-        Cart createdCart = cartService.createNewCart(id, cartDto);
+        Cart createdCart = cartService.createNewCart(id);
 
         assertNotNull(createdCart);
         assertEquals(createdCart.getAccount(), account);
@@ -92,7 +92,7 @@ public class CartServiceTests {
     public void testCreateNewCartNullCustomer() {
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> cartService.createNewCart(id, cartDto));
+                        () -> cartService.createNewCart(id));
 
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("No person with id " + id + " found.", e.getMessage());
@@ -106,7 +106,7 @@ public class CartServiceTests {
 
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> cartService.createNewCart(id, cartDto));
+                        () -> cartService.createNewCart(id));
 
         assertEquals(HttpStatus.CONFLICT, e.getStatus());
         assertEquals("A cart already exists! Users may only have one active cart at the time.", e.getMessage());

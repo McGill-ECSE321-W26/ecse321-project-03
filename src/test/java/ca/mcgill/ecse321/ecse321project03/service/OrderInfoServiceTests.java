@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.ecse321project03.service;
-import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.repository.*;
@@ -17,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest

@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.ecse321project03.integration;
-import ca.mcgill.ecse321.ecse321project03.model.Item;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 import org.junit.jupiter.api.*;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemDefinitionResponseDto;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemImageRepository;
 import org.springframework.util.LinkedMultiValueMap;

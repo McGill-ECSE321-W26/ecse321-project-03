@@ -42,7 +42,7 @@ public class CartController {
     @PostMapping("/{id}")
     public ResponseEntity<?> createNewCart(@PathVariable int id, @RequestBody CartCreationDto cartCreationDto) {
         try {
-            Cart cart = cartService.createNewCart(id, cartCreationDto);
+            Cart cart = cartService.createNewCart(id);
             return new ResponseEntity<>(new CartDto(cart), HttpStatus.CREATED);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());

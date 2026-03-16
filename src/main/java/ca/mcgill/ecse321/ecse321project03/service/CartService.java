@@ -1,7 +1,5 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
-import ca.mcgill.ecse321.ecse321project03.dto.CartCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.CartDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartItemDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemTypeDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
@@ -14,7 +12,6 @@ import ca.mcgill.ecse321.ecse321project03.repository.CartItemRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.CartRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemTypeRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -45,11 +42,7 @@ public class CartService {
      * @author Sonia Ly
      */
     @Transactional
-    public Cart createNewCart(int id, @Valid CartCreationDto cartCreationDto) {
-        // Question: CartCreationDto is never used in this method
-        // because we find account directly using id
-        // Delete cartCreationDto?
-
+    public Cart createNewCart(int id) {
         // Check if the user already as a cart (a user should only have one cart at the time)
         Account customer = accountRepository.findById(id).orElse(null);
         if (customer == null) {

@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.ecse321project03.integration;
 import ca.mcgill.ecse321.ecse321project03.dto.*;
 import ca.mcgill.ecse321.ecse321project03.model.*;
 import ca.mcgill.ecse321.ecse321project03.repository.*;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Order;
 import org.springframework.beans.factory.annotation.Autowired;
