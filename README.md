@@ -52,12 +52,12 @@ questions or regrading
 | Project management             |         3         |           |    1     |            |                 |               |            |
 | DTOs Creation                  |                   |           |    0     |            |                 |      3        |            |
 | QA plan and report             |                   |           |    4     |            |                 |               |            |
-| Integration testing of backend |                   |           |    0     |            |                 |      12       |            |
+| Integration testing of backend |                   |           |    0     |            |       13        |      12       |            |
 | Build system                   |                   |           |    0     |            |                 |      1        |            |
-| Business methods               |                   |     3     |    4     |     12     |                 |      3        |      6     |
+| Business methods               |                   |     3     |    4     |     12     |        6        |      3        |      6     |
 | Controller layer               |                   |           |    0     |            |                 |               |     10     |
 | Meetings                       |                   |     3     |     3    |     3      |        3        |      3        |     3     |
-| Total                          |                   |    16.5   |    13    |    22.5    |                 |      22       |     19     |
+| Total                          |                   |    16.5   |    13    |    22.5    |       23        |      22       |     19     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
