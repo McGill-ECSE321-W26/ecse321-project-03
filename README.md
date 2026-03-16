@@ -50,12 +50,12 @@ questions or regrading
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Unit testing of service layer  |        8.5        |    10.5   |    1     |      7.5   |                 |               |            |
 | Project management             |         3         |           |    1     |            |                 |               |            |
-| DTOs Creation                  |                   |           |    0     |            |                 |      3        |            |
+| DTOs Creation                  |                   |           |          |            |                 |      3        |            |
 | QA plan and report             |                   |           |    4     |            |                 |               |            |
-| Integration testing of backend |                   |           |    0     |            |       13        |      12       |            |
-| Build system                   |                   |           |    0     |            |                 |      1        |            |
+| Integration testing of backend |                   |           |          |            |       13        |      12       |            |
+| Build system                   |                   |           |          |            |                 |      1        |            |
 | Business methods               |                   |     3     |    4     |     12     |        6        |      3        |      6     |
-| Controller layer               |                   |           |    0     |            |                 |               |     10     |
+| Controller layer               |                   |           |          |            |                 |               |     10     |
 | Meetings                       |                   |     3     |     3    |     3      |        3        |      3        |     3     |
 | Total                          |                   |    16.5   |    13    |    22.5    |       23        |      22       |     19     |
 
