@@ -12,7 +12,10 @@ import ca.mcgill.ecse321.ecse321project03.service.ItemDefinitionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -27,7 +30,7 @@ import java.util.stream.Collectors;
  * REST controller for item definition (create item with optional images).
  * 
  * It connects the user interface to the item definition service and image service.
- * Single endpoint: create item and optionally upload images in one request.
+ * Endpoints: create, update, and delete items (with optional image upload on create/update).
  */
 @RestController
 @RequestMapping("/items")
@@ -69,6 +72,54 @@ public class ItemDefinitionController {
             List<ItemType> variants = itemDefinitionService.getItemTypesForItem(item.getId());
             ItemDefinitionResponseDto response = new ItemDefinitionResponseDto(item, variants, imageUrls);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+        }
+    }
+
+    /**
+     * Updates an existing item by id using the same payload as creation.
+     * When {@code files} is non-empty, all previous images for the item are removed and replaced by the upload.
+     *
+     * @param accountId       the authenticated account (must be a manager)
+     * @param itemId          the item id
+     * @param itemCreationDto the new item and variant specs (part name "item")
+     * @param files           optional replacement images (part name "files")
+     * @return item definition response with updated variants and image URLs
+     * @author Zirun Wang
+     */
+    @PutMapping(value = "/{itemId}", consumes = "multipart/form-data")
+    public ResponseEntity<?> updateItem(
+            @RequestParam int accountId,
+            @PathVariable int itemId,
+            @RequestPart("item") ItemCreationDto itemCreationDto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) {
+        try {
+            Item item = itemDefinitionService.updateItem(accountId, itemId, itemCreationDto, files);
+            List<String> imageUrls = imageService.findImagesForItem(item.getId()).stream()
+                    .map(im -> IMAGE_URL_PREFIX + im.getKey())
+                    .collect(Collectors.toList());
+            List<ItemType> variants = itemDefinitionService.getItemTypesForItem(item.getId());
+            ItemDefinitionResponseDto response = new ItemDefinitionResponseDto(item, variants, imageUrls);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+        }
+    }
+
+    /**
+     * Deletes an item by id, including its variants, cart/order lines for those variants, and images.
+     *
+     * @param accountId the authenticated account (must be a manager)
+     * @param itemId    the item id
+     * @return 204 No Content on success
+     * @author Zirun Wang
+     */
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<?> deleteItem(@RequestParam int accountId, @PathVariable int itemId) {
+        try {
+            itemDefinitionService.deleteItem(accountId, itemId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }

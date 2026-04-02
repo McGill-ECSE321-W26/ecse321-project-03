@@ -32,9 +32,11 @@ import ca.mcgill.ecse321.ecse321project03.model.Item.Tag;
 import ca.mcgill.ecse321.ecse321project03.model.ItemType;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.CartItemRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemTypeRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.OrderItemRepository;
 
 @SpringBootTest
 public class ItemDefinitionServiceTests {
@@ -47,6 +49,15 @@ public class ItemDefinitionServiceTests {
     private ItemRepository itemRepository;
     @Mock
     private ItemTypeRepository itemTypeRepository;
+
+    @Mock
+    private CartItemRepository cartItemRepository;
+
+    @Mock
+    private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private ImageService imageService;
 
     @InjectMocks
     private ItemDefinitionService service;
@@ -131,7 +142,7 @@ public class ItemDefinitionServiceTests {
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
                 () -> service.createItem(MANAGER_ACCOUNT_ID, validDto));
         assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-        assertEquals("Only managers can create items.", e.getMessage());
+        assertEquals("Only managers can manage items.", e.getMessage());
     }
 
     // ---------- createItem: validateItemFields failures ----------
@@ -391,5 +402,89 @@ public class ItemDefinitionServiceTests {
         when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
         when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
         when(itemRepository.findByName(any(String.class))).thenReturn(new ArrayList<>());
+    }
+
+    // ---------- updateItem ----------
+    @Test
+    public void testUpdateItemSuccess() {
+        int itemId = 5;
+        Item existingItem = new Item("Classic Tee", Tag.Top, 19.99);
+        existingItem.setId(itemId);
+        ItemType existingType = new ItemType(ItemType.Size.S, ItemType.Color.Black, 5, existingItem);
+        existingType.setId(100);
+
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
+        when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+        when(itemRepository.findByName("Classic Tee")).thenReturn(List.of(existingItem));
+        when(itemTypeRepository.findByGeneralItem_Id(itemId)).thenReturn(List.of(existingType));
+        when(itemRepository.save(any(Item.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(itemTypeRepository.save(any(ItemType.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Item updated = service.updateItem(MANAGER_ACCOUNT_ID, itemId, validDto, null);
+
+        assertNotNull(updated);
+        assertEquals("Classic Tee", updated.getName());
+        assertEquals(10, existingType.getStock());
+        verify(itemTypeRepository, times(1)).save(existingType);
+        verify(imageService, times(0)).replaceItemImages(anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testUpdateItemNotFound() {
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
+        when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
+        when(itemRepository.findById(999)).thenReturn(Optional.empty());
+
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> service.updateItem(MANAGER_ACCOUNT_ID, 999, validDto, null));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+    }
+
+    @Test
+    public void testUpdateItemNameConflictOtherItem() {
+        int itemId = 5;
+        Item existingItem = new Item("Classic Tee", Tag.Top, 19.99);
+        existingItem.setId(itemId);
+        Item other = new Item("Classic Tee", Tag.Dress, 1.0);
+        other.setId(99);
+
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
+        when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+        when(itemRepository.findByName("Classic Tee")).thenReturn(List.of(existingItem, other));
+
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> service.updateItem(MANAGER_ACCOUNT_ID, itemId, validDto, null));
+        assertEquals(HttpStatus.CONFLICT, e.getStatus());
+    }
+
+    // ---------- deleteItem ----------
+    @Test
+    public void testDeleteItemSuccess() {
+        int itemId = 7;
+        Item item = new Item("ToDelete", Tag.Top, 1.0);
+        item.setId(itemId);
+
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
+        when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemTypeRepository.findByGeneralItem_Id(itemId)).thenReturn(new ArrayList<>());
+
+        service.deleteItem(MANAGER_ACCOUNT_ID, itemId);
+
+        verify(imageService, times(1)).deleteAllItemImages(MANAGER_ACCOUNT_ID, itemId);
+        verify(itemRepository, times(1)).delete(item);
+    }
+
+    @Test
+    public void testDeleteItemNotFound() {
+        when(accountRepository.findById(MANAGER_ACCOUNT_ID)).thenReturn(Optional.of(managerAccount));
+        when(managerRepository.findByAccount_Id(MANAGER_ACCOUNT_ID)).thenReturn(manager);
+        when(itemRepository.findById(888)).thenReturn(Optional.empty());
+
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> service.deleteItem(MANAGER_ACCOUNT_ID, 888));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
     }
 }

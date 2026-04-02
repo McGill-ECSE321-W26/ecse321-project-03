@@ -1,21 +1,16 @@
 package ca.mcgill.ecse321.ecse321project03.controller;
 
-import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
-import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
 import ca.mcgill.ecse321.ecse321project03.service.OrderService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 /**
  * REST controller responsible for handling all order-related API endpoints.

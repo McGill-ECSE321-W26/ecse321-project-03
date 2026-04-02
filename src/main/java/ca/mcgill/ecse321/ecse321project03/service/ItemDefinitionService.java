@@ -9,23 +9,28 @@ import ca.mcgill.ecse321.ecse321project03.model.Item.Tag;
 import ca.mcgill.ecse321.ecse321project03.model.ItemType;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.CartItemRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ItemTypeRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.OrderItemRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
 /**
- * Service for creating and querying item definitions (items and their variants).
- * Item creation is manager-only; validation includes name, tag, price, and variant specs (color, size, initial stock).
+ * Service for creating, updating, deleting, and querying item definitions (items and their variants).
+ * Mutations are manager-only; validation includes name, tag, price, and variant specs (color, size, initial stock).
  *
  * @author Zirun Wang
  */
@@ -48,6 +53,15 @@ public class ItemDefinitionService {
     @Autowired
     private ItemTypeRepository itemTypeRepository;
 
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ImageService imageService;
+
     /**
      * Creates a new item and its variants. Manager-only.
      *
@@ -64,6 +78,62 @@ public class ItemDefinitionService {
         Item item = persistItem(dto);
         persistVariants(item, dto.getVariants());
         return item;
+    }
+
+    /**
+     * Updates an existing item and its variants from the DTO (full overwrite of variants).
+     * Removed variants are deleted (after clearing cart/order lines for those types).
+     * If {@code files} is non-null and non-empty, existing images are removed from DB and disk and replaced by the upload.
+     * Manager-only.
+     *
+     * @param accountId authenticated account id (must be a manager)
+     * @param itemId    id of the item to update
+     * @param dto       new item and variant specs
+     * @param files     optional new images; when present and non-empty, replaces all item images
+     * @return the updated persisted Item
+     */
+    @Transactional
+    public Item updateItem(int accountId, int itemId, ItemCreationDto dto, List<MultipartFile> files) {
+        ensureManager(accountId);
+        validateItemFields(dto);
+        validateVariants(dto);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                        "No item found with id " + itemId));
+        checkItemNameUniqueForUpdate(itemId, dto.getName());
+        item.setName(dto.getName().trim());
+        item.setTag(parseTag(dto.getTag()));
+        item.setPrice(dto.getPrice().doubleValue());
+        itemRepository.save(item);
+        syncVariants(item, dto.getVariants());
+        if (files != null && !files.isEmpty()) {
+            imageService.replaceItemImages(accountId, itemId, files);
+        }
+        return item;
+    }
+
+    /**
+     * Deletes an item and all dependent data: cart lines and order lines for its variants,
+     * item types, images (DB and files), then the item. Manager-only.
+     *
+     * @param accountId authenticated account id (must be a manager)
+     * @param itemId    id of the item to delete
+     */
+    @Transactional
+    public void deleteItem(int accountId, int itemId) {
+        ensureManager(accountId);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                        "No item found with id " + itemId));
+        List<ItemType> types = itemTypeRepository.findByGeneralItem_Id(itemId);
+        for (ItemType type : types) {
+            removeCartAndOrderItemsForItemType(type.getId());
+        }
+        for (ItemType type : types) {
+            itemTypeRepository.delete(type);
+        }
+        imageService.deleteAllItemImages(accountId, itemId);
+        itemRepository.delete(item);
     }
 
     /**
@@ -89,7 +159,7 @@ public class ItemDefinitionService {
         }
         Manager manager = managerRepository.findByAccount_Id(accountId);
         if (manager == null) {
-            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Only managers can create items.");
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Only managers can manage items.");
         }
     }
 
@@ -177,6 +247,67 @@ public class ItemDefinitionService {
         if (existing != null && !existing.isEmpty()) {
             throw new Ecse321Project03Exception(HttpStatus.CONFLICT, "Item name already exists: " + name);
         }
+    }
+
+    /**
+     * Ensures no <em>other</em> item uses the given name when updating {@code itemId}.
+     *
+     * @param itemId id of the item being updated
+     * @param name   new name
+     */
+    private void checkItemNameUniqueForUpdate(int itemId, String name) {
+        List<Item> existing = itemRepository.findByName(name);
+        if (existing == null || existing.isEmpty()) {
+            return;
+        }
+        for (Item other : existing) {
+            if (other.getId() != itemId) {
+                throw new Ecse321Project03Exception(HttpStatus.CONFLICT, "Item name already exists: " + name);
+            }
+        }
+    }
+
+    /**
+     * Aligns persisted variants with the DTO: updates stock for matching color/size, creates new rows,
+     * removes types no longer listed (after clearing cart/order references).
+     */
+    private void syncVariants(Item item, List<VariantSpec> specs) {
+        List<ItemType> existing = itemTypeRepository.findByGeneralItem_Id(item.getId());
+        Map<String, ItemType> byPair = new HashMap<>();
+        if (existing != null) {
+            for (ItemType t : existing) {
+                byPair.put(t.getColor().name() + "/" + t.getSize().name(), t);
+            }
+        }
+        Set<String> dtoPairs = new HashSet<>();
+        for (VariantSpec s : specs) {
+            ItemType.Color color = parseColor(s.getColor());
+            ItemType.Size size = parseSize(s.getSize());
+            String pair = color.name() + "/" + size.name();
+            dtoPairs.add(pair);
+            ItemType current = byPair.get(pair);
+            if (current != null) {
+                current.setStock(s.getInitialStock());
+                itemTypeRepository.save(current);
+            } else {
+                ItemType created = new ItemType(size, color, s.getInitialStock(), item);
+                itemTypeRepository.save(created);
+            }
+        }
+        if (existing != null) {
+            for (ItemType t : existing) {
+                String pair = t.getColor().name() + "/" + t.getSize().name();
+                if (!dtoPairs.contains(pair)) {
+                    removeCartAndOrderItemsForItemType(t.getId());
+                    itemTypeRepository.delete(t);
+                }
+            }
+        }
+    }
+
+    private void removeCartAndOrderItemsForItemType(int itemTypeId) {
+        cartItemRepository.findByCartItemId_ItemType_Id(itemTypeId).forEach(cartItemRepository::delete);
+        orderItemRepository.findByOrderItemId_ItemType_Id(itemTypeId).forEach(orderItemRepository::delete);
     }
 
     /**

@@ -12,7 +12,7 @@ public class ManagerDto {
     // constructor
     public ManagerDto(Manager manager) {
         this.employeeId = manager.getAccount().getId();
-        this.account = new AccountResponseDto(manager.getAccount());
+        this.account = new AccountResponseDto(manager.getAccount(), manager);
     }
 
     @SuppressWarnings("unused")

@@ -27,6 +27,10 @@ public class AccountCreationDto {
     @NotBlank(message = "Address cannot be empty or null.")
     private String address;
 
+    /**
+     * Desired role: CUSTOMER (default), MANAGER, or EMPLOYEE.
+     */
+    private String accountType;
 
     //------------------------
     // CONSTRUCTOR
@@ -64,6 +68,14 @@ public class AccountCreationDto {
 
     public String getAddress() {
         return address;
+    }
+
+    public String getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
     }
 
 }

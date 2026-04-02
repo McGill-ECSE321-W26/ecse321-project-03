@@ -66,12 +66,71 @@ public class ImageService {
     @Transactional
     public List<ItemImage> uploadItemImages(int accountId, int itemId, List<MultipartFile> files) {
         ensureManager(accountId);
-        Item item = getItemOrThrow(itemId); // Check item exists for the item id
-        validateFiles(files); // Validate size and type of the image
-        List<ImageRecord> records = buildImageRecords(itemId, files); // generate name
+        Item item = getItemOrThrow(itemId);
+        return uploadItemImagesForItem(item, itemId, files);
+    }
+
+    /**
+     * Replaces all images for an item: deletes existing DB rows and files, then uploads the given files.
+     * Manager-only. At least one file is required (same validation as upload).
+     *
+     * @param accountId authenticated account (must be manager)
+     * @param itemId    existing item id
+     * @param files     new image files
+     * @return list of persisted ItemImage entities
+     */
+    @Transactional
+    public List<ItemImage> replaceItemImages(int accountId, int itemId, List<MultipartFile> files) {
+        ensureManager(accountId);
+        Item item = getItemOrThrow(itemId);
+        deleteAllItemImageRecordsAndFiles(itemId);
+        return uploadItemImagesForItem(item, itemId, files);
+    }
+
+    /**
+     * Deletes all image metadata and files on disk for the given item. Manager-only.
+     *
+     * @param accountId authenticated account (must be manager)
+     * @param itemId    existing item id
+     */
+    @Transactional
+    public void deleteAllItemImages(int accountId, int itemId) {
+        ensureManager(accountId);
+        getItemOrThrow(itemId);
+        deleteAllItemImageRecordsAndFiles(itemId);
+    }
+
+    /**
+     * Returns all persisted images for an item (no authorization).
+     *
+     * @param itemId the item id
+     * @return list of ItemImage, never null
+     */
+    public List<ItemImage> findImagesForItem(int itemId) {
+        List<ItemImage> list = itemImageRepository.findByItem_Id(itemId);
+        return list == null ? List.of() : list;
+    }
+
+    private List<ItemImage> uploadItemImagesForItem(Item item, int itemId, List<MultipartFile> files) {
+        validateFiles(files);
+        List<ImageRecord> records = buildImageRecords(itemId, files);
         List<ItemImage> saved = persistImageRecords(item, records);
         writeFilesToDisk(records);
         return saved;
+    }
+
+    private void deleteAllItemImageRecordsAndFiles(int itemId) {
+        List<ItemImage> images = itemImageRepository.findByItem_Id(itemId);
+        if (images == null) {
+            return;
+        }
+        for (ItemImage im : images) {
+            try {
+                Files.deleteIfExists(pathFromKey(im.getKey()));
+            } catch (IOException ignored) {
+            }
+            itemImageRepository.delete(im);
+        }
     }
 
     /**
