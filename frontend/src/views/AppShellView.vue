@@ -20,6 +20,14 @@ function logout() {
 function pickTab(tab) {
   if (tab === 'inventory' && !isManager.value) return
   activeTab.value = tab
+
+  if (tab === 'shop') {
+    router.push({ name: 'shop' })
+  } else if (tab === 'inventory') {
+    router.push({ name: 'inventory' })
+  } else if (tab === 'ordersList') {
+    router.push({ name: 'ordersList' })
+  }
 }
 </script>
 
@@ -43,6 +51,9 @@ function pickTab(tab) {
           @click="pickTab('inventory')"
         >
           Inventory
+        </button>
+        <button type="button" :class="{ on: activeTab === 'Orders' }" @click="pickTab('ordersList')">
+          Orders
         </button>
       </nav>
       <button type="button" class="ghost" @click="logout">Log out</button>
