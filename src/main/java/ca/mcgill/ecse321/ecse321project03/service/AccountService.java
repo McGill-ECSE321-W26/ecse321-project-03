@@ -1,7 +1,9 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
+import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
 import ca.mcgill.ecse321.ecse321project03.model.Role;
+import ca.mcgill.ecse321.ecse321project03.model.Employee;
 import ca.mcgill.ecse321.ecse321project03.model.Manager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,8 +57,38 @@ public class AccountService {
 
         Account account = new Account(accountCreationDto.getUsername(), accountCreationDto.getEmail(), accountCreationDto.getPassword(), accountCreationDto.getAddress(), 0);
 
-        // Save the account to the database
-        return accountRepository.save(account);
+        Account saved = accountRepository.save(account);
+        assignRoleForNewAccount(saved, accountCreationDto.getAccountType());
+        return saved;
+    }
+
+    /**
+     * Builds a response DTO including {@link AccountResponseDto#getAccountType()} from persisted role data.
+     */
+    public AccountResponseDto toAccountResponseDto(Account account) {
+        Role role = roleRepository.findByAccount_Id(account.getId());
+        return new AccountResponseDto(account, role);
+    }
+
+    private void assignRoleForNewAccount(Account account, String accountTypeRaw) {
+        String type = normalizeAccountType(accountTypeRaw);
+        switch (type) {
+            case "MANAGER" -> roleRepository.save(new Manager(account));
+            case "EMPLOYEE" -> roleRepository.save(new Employee(account));
+            default -> { /* CUSTOMER: no role row */ }
+        }
+    }
+
+    private static String normalizeAccountType(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "CUSTOMER";
+        }
+        String u = raw.trim().toUpperCase();
+        if ("MANAGER".equals(u) || "EMPLOYEE".equals(u) || "CUSTOMER".equals(u)) {
+            return u;
+        }
+        throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST,
+                "accountType must be MANAGER, EMPLOYEE, or CUSTOMER.");
     }
 
     

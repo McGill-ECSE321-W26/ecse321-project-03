@@ -72,6 +72,33 @@ public class AccountServiceTests {
         assertEquals(0, accountCreated.getLoyaltyPts());
 
         verify(repo, times(1)).save(any(Account.class));
+        verify(roleRepository, never()).save(any(Role.class));
+    }
+
+    @Test
+    public void testCreateAccountAsManagerPersistsRole() {
+        dto.setAccountType("MANAGER");
+        when(repo.save(any(Account.class))).thenAnswer(invocation -> {
+            Account a = invocation.getArgument(0);
+            a.setId(id);
+            return a;
+        });
+        when(roleRepository.save(any(Manager.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Account created = accountService.createAccount(dto);
+
+        assertNotNull(created);
+        verify(roleRepository, times(1)).save(any(Manager.class));
+    }
+
+    @Test
+    public void testCreateAccountInvalidAccountType() {
+        dto.setAccountType("ADMIN");
+        when(repo.save(any(Account.class))).thenReturn(account);
+
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> accountService.createAccount(dto));
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
 
     // ---------- createAccount: failures  ----------

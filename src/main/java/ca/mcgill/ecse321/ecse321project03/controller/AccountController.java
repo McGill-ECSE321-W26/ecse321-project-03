@@ -42,7 +42,7 @@ public class AccountController {
     public ResponseEntity<?> createAccount(@RequestBody AccountCreationDto accountCreationDto) {
         try {
             Account account = accountService.createAccount(accountCreationDto);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.CREATED);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.CREATED);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
@@ -58,7 +58,7 @@ public class AccountController {
     public ResponseEntity<?> findAccountById(@PathVariable int id) {
         try {
             Account account = accountService.findAccountById(id);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
         }
@@ -75,7 +75,7 @@ public class AccountController {
     public ResponseEntity<?> findAccountByUsername(@PathVariable String username) {
         try {
             Account account = accountService.findAccountByUsername(username);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
         }
@@ -92,7 +92,7 @@ public class AccountController {
     public ResponseEntity<?> findAccountByEmail(@PathVariable String email) {
         try {
             Account account = accountService.findAccountByEmail(email);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
         }
@@ -109,7 +109,7 @@ public class AccountController {
     public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
         try {
             Account account = accountService.login(email, password);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
@@ -127,7 +127,7 @@ public class AccountController {
     public ResponseEntity<?> updateAccount(@PathVariable int id, @RequestBody AccountCreationDto accountCreationDto) {
         try {
             Account account = accountService.updateAccount(id, accountCreationDto);
-            return new ResponseEntity<>(new AccountResponseDto(account), HttpStatus.OK);
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
         }
