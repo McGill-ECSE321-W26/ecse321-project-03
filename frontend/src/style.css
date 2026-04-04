@@ -8,9 +8,9 @@ html {
   font-family:
     system-ui,
     -apple-system,
-    'Segoe UI',
+    "Segoe UI",
     Roboto,
-    'Helvetica Neue',
+    "Helvetica Neue",
     Arial,
     sans-serif;
   line-height: 1.5;
@@ -23,4 +23,8 @@ body {
 
 #app {
   min-height: 100vh;
+}
+
+input[type="checkbox"] {
+  accent-color: #d8bff1; /* Changes the default blue to another color */
 }
