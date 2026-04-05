@@ -1,17 +1,12 @@
+import { API_BASE, readErrorMessage } from './base.js'
+
 /**
- * Base URL for the Spring Boot API.
- * In development, leave unset so requests are same-origin and Vite proxies them (see vite.config.js).
- * For production builds served separately, set VITE_API_BASE_URL (e.g. http://localhost:8080).
+ * Login with email and password.
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<Object>}
+ * @author Zirun Wang
  */
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
-
-function readErrorMessage(data) {
-  if (!data) return 'Request failed'
-  if (typeof data === 'string') return data
-  if (Array.isArray(data.errors) && data.errors.length) return data.errors[0]
-  return 'Request failed'
-}
-
 export async function loginWithEmailPassword(email, password) {
   const res = await fetch(`${API_BASE}/accounts/login`, {
     method: 'POST',
@@ -23,6 +18,12 @@ export async function loginWithEmailPassword(email, password) {
   return data
 }
 
+/**
+ * Register a new account.
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ * @author Zirun Wang
+ */
 export async function registerAccount(payload) {
   const res = await fetch(`${API_BASE}/accounts`, {
     method: 'POST',
