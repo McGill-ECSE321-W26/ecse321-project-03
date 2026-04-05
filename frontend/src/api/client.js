@@ -1,7 +1,7 @@
 /**
- * Base URL for the Spring Boot API.
- * In development, leave unset so requests are same-origin and Vite proxies them (see vite.config.js).
- * For production builds served separately, set VITE_API_BASE_URL (e.g. http://localhost:8080).
+ * backend URL for frontend to call directly
+ * we leave it unset so requests are same-origin and vite proxies them (as set in vite.config.js).
+ * for production, set VITE_API_BASE_URL in .env file
  */
 export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
@@ -12,6 +12,14 @@ function readErrorMessage(data) {
   return 'Request failed'
 }
 
+/**
+ * login with email and password
+ * @param {string} email - email of the account
+ * @param {string} password - password of the account
+ * @returns {Promise<Object>} - account information if successful, error message if not
+ * 
+ * @author Zirun Wang
+ */
 export async function loginWithEmailPassword(email, password) {
   const res = await fetch(`${API_BASE}/accounts/login`, {
     method: 'POST',
@@ -23,6 +31,13 @@ export async function loginWithEmailPassword(email, password) {
   return data
 }
 
+/**
+ * register a new account
+ * @param {Object} payload - account information
+ * @returns {Promise<Object>} - account information if successful, error message if not
+ * 
+ * @author Zirun Wang
+ */
 export async function registerAccount(payload) {
   const res = await fetch(`${API_BASE}/accounts`, {
     method: 'POST',
