@@ -10,6 +10,7 @@ import ca.mcgill.ecse321.ecse321project03.model.CartItem;
 import ca.mcgill.ecse321.ecse321project03.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,34 +37,24 @@ public class CartController {
      *
      * @param id the id of the user
      * @param cartCreationDto the cart creation data
-     * @return a ResponseEntity containing the created CartDto if successful,
-     *         or an ErrorDto if cart creation fails
+     * @return the created cart
      */
     @PostMapping("/{id}")
-    public ResponseEntity<?> createNewCart(@PathVariable int id, @RequestBody CartCreationDto cartCreationDto) {
-        try {
-            Cart cart = cartService.createNewCart(id);
-            return new ResponseEntity<>(new CartDto(cart), HttpStatus.CREATED);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public CartDto createNewCart(@PathVariable int id, @RequestBody CartCreationDto cartCreationDto) {
+        Cart cart = cartService.createNewCart(id);
+        return new CartDto(cart);
     }
 
     /**
      * Deletes a user's cart.
      *
      * @param id the id of the user
-     * @return a ResponseEntity with NO_CONTENT status if successful,
-     *         or an ErrorDto if deletion fails
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCart(@PathVariable int id) {
-        try {
-            cartService.deleteCart(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCart(@PathVariable int id) {
+        cartService.deleteCart(id);
     }
 
     /**
@@ -71,33 +62,23 @@ public class CartController {
      *
      * @param id the id of the user
      * @param cartItemDto the cart item data containing the item type and quantity
-     * @return a ResponseEntity containing the saved CartItemDto if successful,
-     *         or an ErrorDto if the operation fails
+     * @return the created cart item
      */
     @PostMapping("/{id}/items")
-    public ResponseEntity<?> addItemToCart(@PathVariable int id, @RequestBody CartItemDto cartItemDto) {
-        try {
-            CartItem cartItem = cartService.addItemToCart(id, cartItemDto);
-            return new ResponseEntity<>(new CartItemDto(cartItem), HttpStatus.CREATED);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public CartItemDto addItemToCart(@PathVariable int id, @RequestBody CartItemDto cartItemDto) {
+        CartItem cartItem = cartService.addItemToCart(id, cartItemDto);
+        return new CartItemDto(cartItem);
     }
 
     /**
      * Retrieves the total price of all items in a user's cart.
      *
      * @param id the id of the user
-     * @return a ResponseEntity containing the cart total price if successful,
-     *         or an ErrorDto if the request fails
+     * @return the total cart price
      */
     @GetMapping("/{id}/total")
-    public ResponseEntity<?> findCartTotalPrice(@PathVariable int id) {
-        try {
-            double total = cartService.findCartTotalPrice(id);
-            return new ResponseEntity<>(total, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    public double findCartTotalPrice(@PathVariable int id) {
+        return cartService.findCartTotalPrice(id);
     }
 }
