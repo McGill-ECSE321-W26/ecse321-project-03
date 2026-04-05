@@ -65,7 +65,7 @@ body {
   background-color: #f7f7f7;
 }
 
-/* When the checkbox is checked, add a blue background */
+/* When the checkbox is checked, add a lilac background */
 .container input:checked ~ .checkmark {
   background-color: #d8bff1;
 }
