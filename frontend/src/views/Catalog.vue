@@ -68,12 +68,16 @@ const filteredProducts = computed(() => {
       <!-- Stock filters -->
       <div class="filter-group">
         <h4>Stock</h4>
-        <label
-          ><input type="checkbox" v-model="filters.outOfStock" /> Show out
+        <label class="container"
+          ><input type="checkbox" v-model="filters.outOfStock" />
+          <span class="checkmark"></span>
+          Show out
           <br />of stock</label
         >
-        <label
-          ><input type="checkbox" v-model="filters.lowStock" /> Show low
+        <label class="container"
+          ><input type="checkbox" v-model="filters.lowStock" />
+          <span class="checkmark"></span>
+          Show low
           <br />on stock</label
         >
       </div>
@@ -81,8 +85,9 @@ const filteredProducts = computed(() => {
       <!-- Size filters -->
       <div class="filter-group">
         <h4>Size</h4>
-        <label v-for="size in sizes" :key="size">
+        <label class="container" v-for="size in sizes" :key="size">
           <input type="checkbox" :value="size" v-model="filters.sizes" />
+          <span class="checkmark"></span>
           {{ size }}
         </label>
       </div>
@@ -90,8 +95,9 @@ const filteredProducts = computed(() => {
       <!-- Color filters -->
       <div class="filter-group">
         <h4>Color</h4>
-        <label v-for="color in colors" :key="color">
+        <label class="container" v-for="color in colors" :key="color">
           <input type="checkbox" :value="color" v-model="filters.colors" />
+          <span class="checkmark"></span>
           {{ color }}
         </label>
       </div>
