@@ -16,6 +16,13 @@ const username = ref('')
 const address = ref('')
 const accountType = ref('CUSTOMER')
 
+/**
+ * submit login form
+ * redirect to app shell if successful, set error message if not
+ * @returns {Promise<void>}
+ * 
+ * @author Zirun Wang
+ */
 async function submitLogin() {
   error.value = ''
   loading.value = true
@@ -30,6 +37,13 @@ async function submitLogin() {
   }
 }
 
+/**
+ * submit register form
+ * redirect to app shell if successful, set error message if not
+ * @returns {Promise<void>}
+ * 
+ * @author Zirun Wang
+ */
 async function submitRegister() {
   error.value = ''
   loading.value = true
