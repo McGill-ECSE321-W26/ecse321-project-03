@@ -1,5 +1,23 @@
 # Vue 3 + Vite
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 1. Development guide
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+To talk to the Spring Boot API from the UI:
+
+1. **Add or extend `src/api/client.js`.** Define async functions that call backend (for example `/accounts/...`, `/items/...`). 
+
+2. **Use those functions from the relevant `.vue` file.** Import them in `<script setup>`, call them from event handlers or `onMounted` with **`await`**, and wrap logic in **`try` / `catch`** so failures surface in the UI.
+
+## 2. Important files
+
+| File | Purpose |
+|------|---------|
+| `index.html` | Entry; HTML shell; loads `src/main.js` and mounts the app on `#app`. |
+| `src/main.js` | App entry: global styles, Vue app, Pinia, router, `mount("#app")`. |
+| `src/App.vue` | Root component; renders the active route via `<RouterView />`. |
+| `vite.config.js` | Vite and Vue plugin; dev **proxy** forwards `/accounts`, `/items`, `/images`, `/carts`, `/orders`, `/inventory` to the backend. |
+| `src/api/client.js` | **Backend access:** `fetch` helpers, shared `API_BASE`, error handling. |
+| `src/session/storage.js` | Login session in `sessionStorage` (`saveSession`, `clearSession`, `getSession`, `isLoggedIn`). |
+| `src/router/index.js` | Route definitions (`/login`, `/app`) and **navigation guards** (auth vs guest) using `session/storage`. |
+| `src/style.css` | Global CSS shared across views. |
+
