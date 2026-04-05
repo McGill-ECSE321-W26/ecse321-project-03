@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { loginWithEmailPassword, registerAccount } from '../api/client'
+import { loginWithEmailPassword, registerAccount } from '../api/account'
 import { saveSession } from '../session/storage'
 
 const router = useRouter()
