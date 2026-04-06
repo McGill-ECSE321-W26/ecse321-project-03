@@ -19,6 +19,7 @@ const router = createRouter({
       component: AppShellView,
       meta: { requiresAuth: true },
     },
+    { path: '/app/account', redirect: '/app' },
     { path: '/', redirect: '/app' },
     { path: '/:pathMatch(.*)*', redirect: '/app' },
     { path: '/product/:id', name: 'product', component: SpecificItemView },
