@@ -2,7 +2,7 @@
 
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useOrderInfo } from '../session/orderInfo.js'; 
+import { useOrderInfo } from '../api/orderInfo.js'; 
 import { getSession, isLoggedIn } from '../session/storage.js';
 
 
