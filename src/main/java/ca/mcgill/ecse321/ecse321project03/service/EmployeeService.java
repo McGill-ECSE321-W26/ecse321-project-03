@@ -1,7 +1,10 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
+import ca.mcgill.ecse321.ecse321project03.model.Employee;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
+import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 import jakarta.transaction.Transactional;
@@ -39,8 +42,7 @@ public class EmployeeService {
 
     /**
      * Helper method to determine if a user is a Manager member from their user ID. Throws an error if it isn't the case.
-     * @param userID
-     * @return
+     * @param userID id of the account
      */
     private void checkIfManager(int userID) {
         if(managerRepository.findByAccount_Id(userID) == null) {

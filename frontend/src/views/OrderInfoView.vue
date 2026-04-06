@@ -224,6 +224,7 @@ onMounted(() => {
 }
 
 .box__background {
+  
   width: 921px;
   height: 612px;
   border: 5px solid #3D3C3C;
@@ -264,7 +265,7 @@ onMounted(() => {
   height: 61px;
   background: #FFFFFF; 
   border: 5px solid #3D3C3C;  
-  background-image: url('../assets/return-button.png');
+  background-image: url('../assets/images/return-button.png');
   background-size: 80%;      
   background-repeat: no-repeat;  
   background-position: center;
