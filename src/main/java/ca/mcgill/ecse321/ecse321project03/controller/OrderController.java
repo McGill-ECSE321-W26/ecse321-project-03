@@ -19,7 +19,7 @@ import java.util.List;
  * @author Yani Zhang
  */
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/order")
 public class OrderController {
 
     @Autowired

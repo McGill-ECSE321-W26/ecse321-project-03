@@ -1,4 +1,7 @@
 <script setup>
+
+console.log("OrdersListView script loaded")
+
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
@@ -31,36 +34,66 @@ const orders = ref([])
 const loading = ref(false)
 const error = ref(null)
 
-
-/**
- * Function to load the orders from the backend
- * @author Sonia Ly
- */
 async function loadOrders() {
   loading.value = true
   error.value = null
 
   try {
-    const data = await getAllOrders()
+    console.log("session:", session.value)
 
-    console.log("Backend response: ", data)
+    const data = await getAllOrders(3152)
+    console.log("Backend response:", data)
 
-    // 🔥 Adapt this depending on your backend response shape
+    console.log("First object:", data[0])
+
     orders.value = data.map(o => ({
       orderId: o.id,
-      customer: o.customerName,
-      employee: o.employeeName,
-      status: o.status,
-      orderDate: o.orderDate,
+      customer: o.customerId,
+      employee: o.assigneeId,
+      status: o.orderState,
+      orderDate: new Date(o.orderDate).toLocaleDateString(),
     }))
 
+    console.log("Mapped orders:", orders.value)
   } catch (err) {
     error.value = err.message
-    console.error(err)
+    console.error("loadOrders error:", err)
   } finally {
     loading.value = false
   }
 }
+
+//
+// /**
+//  * Function to load the orders from the backend
+//  * @author Sonia Ly
+//  */
+// async function loadOrders() {
+//   loading.value = true
+//   error.value = null
+//
+//   try {
+//     const data = await getAllOrders(session.value.id)
+//
+//     console.log("Backend response: ", data)
+//
+//     // 🔥 Adapt this depending on your backend response shape
+//     orders.value = data.map(o => ({
+//       orderId: o.id,
+//       customer: o.customerName,
+//       employee: o.employeeName,
+//       status: o.status,
+//       orderDate: o.orderDate,
+//     }))
+//
+//   } catch (err) {
+//     error.value = err.message
+//     console.error(err)
+//   } finally {
+//     loading.value = false
+//   }
+// }
+
 
 /**
  * Once the page boards, call your backend
@@ -115,6 +148,7 @@ function searchOrders() {
 </script>
 
 <template>
+
   <div class="page">
     <header class="top">
       <div class="logo-block">
