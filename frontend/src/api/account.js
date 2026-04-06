@@ -34,3 +34,21 @@ export async function registerAccount(payload) {
   if (!res.ok) throw new Error(readErrorMessage(data))
   return data
 }
+
+export async function getAccountById(accountId) {
+  const res = await fetch(`${API_BASE}/accounts/${accountId}`)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readErrorMessage(data))
+  return data
+}
+
+export async function updateAddress(accountId, address) {
+  const res = await fetch(`${API_BASE}/accounts/${accountId}/address`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readErrorMessage(data))
+  return data
+}

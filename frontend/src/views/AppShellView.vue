@@ -3,6 +3,8 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
+import CartView from './CartView.vue'
+import CheckoutView from './CheckoutView.vue'
 
 const router = useRouter();
 const session = ref(getSession());
@@ -49,6 +51,13 @@ function pickTab(tab) {
         >
           Inventory
         </button>
+        <button
+            type="button"
+            :class="{ on: activeTab === 'cart' }"
+            @click="pickTab('cart')"
+        >
+          Cart
+        </button>
       </nav>
       <button type="button" class="ghost" @click="logout">Log out</button>
     </header>
@@ -62,6 +71,12 @@ function pickTab(tab) {
         <p class="muted">
           Manage stock and items. Managers only. (Coming soon.)
         </p>
+      </section>
+      <section v-show="activeTab === 'cart'">
+        <CartView @go-checkout="pickTab('checkout')" />
+      </section>
+      <section v-show="activeTab === 'checkout'">
+        <CheckoutView @order-placed="pickTab('shop')" />
       </section>
     </main>
   </div>

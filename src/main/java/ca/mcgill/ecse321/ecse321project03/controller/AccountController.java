@@ -2,6 +2,7 @@ package ca.mcgill.ecse321.ecse321project03.controller;
 
 import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
+import ca.mcgill.ecse321.ecse321project03.dto.AddressUpdateDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
@@ -148,6 +149,12 @@ public class AccountController {
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PutMapping("/{id}/address")
+    public AccountResponseDto updateAddress(@PathVariable int id, @RequestBody AddressUpdateDto updateDto) {
+        Account account = accountService.updateAddress(id, updateDto.getAddress());
+        return accountService.toAccountResponseDto(account);
     }
 /*
 
