@@ -52,3 +52,20 @@ export async function updateAddress(accountId, address) {
   if (!res.ok) throw new Error(readErrorMessage(data))
   return data
 }
+
+/**
+ * Update account. Body matches AccountCreationDto (username, email, password, address; accountType optional).
+ * @param {number} id
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+export async function updateAccount(id, payload) {
+  const res = await fetch(`${API_BASE}/accounts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readErrorMessage(data))
+  return data
+}

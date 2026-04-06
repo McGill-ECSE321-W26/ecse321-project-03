@@ -69,9 +69,9 @@ questions or regrading
 ## Other important notes 
 - When running the application and tests, ensure that your computer’s system language is set to English so that decimal numbers are formatted with a period (.) instead of a comma (,), which is required for the tests to pass.
 
-
-
-
+# Credits
+The [user icon](.frontend/src/assets/images/user.png) is from:
+<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>
 
 
 

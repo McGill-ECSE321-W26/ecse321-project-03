@@ -5,6 +5,7 @@ import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
 import CartView from './CartView.vue'
 import CheckoutView from './CheckoutView.vue'
+import AccountDetailView from "./AccountDetailView.vue";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -24,18 +25,20 @@ function pickTab(tab) {
   if (tab === "inventory" && !isManager.value) return;
   activeTab.value = tab;
 }
+
+function refreshSession() {
+  session.value = getSession();
+}
 </script>
 
 <template>
   <div class="shell">
     <header class="top">
-      <div class="title-block">
-        <h1 class="brand">Papa's Fashionistaria</h1>
-        <span class="muted" v-if="session">
-          {{ session.username }} · {{ session.accountType?.toLowerCase() }}
-        </span>
-      </div>
-      <nav class="nav-tabs">
+      <div class="logo-block">
+        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
+      </div>  
+
+    <nav class="nav-tabs">
         <button
           type="button"
           :class="{ on: activeTab === 'shop' }"
@@ -43,6 +46,23 @@ function pickTab(tab) {
         >
           Shop
         </button>
+
+        <button
+          type="button"
+          :class="{ on: activeTab === 'orders' }"
+          @click="pickTab('orders')"
+        >
+          Orders
+        </button>
+
+        <button
+          type="button"
+          :class="{ on: activeTab === 'cart' }"
+          @click="pickTab('cart')"
+        >
+          Cart
+        </button>
+
         <button
           v-if="isManager"
           type="button"
@@ -51,26 +71,46 @@ function pickTab(tab) {
         >
           Inventory
         </button>
-        <button
-            type="button"
-            :class="{ on: activeTab === 'cart' }"
-            @click="pickTab('cart')"
-        >
-          Cart
-        </button>
+
+        <button type="button" class="logout-link" @click="logout">Log out</button>
       </nav>
-      <button type="button" class="ghost" @click="logout">Log out</button>
+
+      <div class="user-block">
+        <button
+          type="button"
+          class="user-profile-btn"
+          :class="{ on: activeTab === 'account' }"
+          aria-label="Open account details"
+          :aria-current="activeTab === 'account' ? 'page' : undefined"
+          @click="pickTab('account')"
+        >
+          <img src="../assets/images/user.png" alt="" class="user-icon-img" width="28" height="28" />
+        </button>
+        <div class="user-text">
+          Hi {{ session?.username }}!
+          <div class="points">✨50 Points</div>
+        </div>
+      </div>
     </header>
 
     <main class="main">
       <section v-show="activeTab === 'shop'">
         <Catalog />
       </section>
-      <section v-show="activeTab === 'inventory'" class="card">
-        <h2>Inventory</h2>
-        <p class="muted">
-          Manage stock and items. Managers only. (Coming soon.)
-        </p>
+
+      <section v-show="activeTab === 'orders'">
+        <Orders />
+      </section>
+      <section v-show="activeTab === 'cart'">
+        <Cart />
+      </section>
+
+      <section v-show="activeTab === 'inventory'">
+         <Inventory />      
+      </section>
+
+      <section v-show="activeTab === 'account'">
+        <AccountDetailView @session-updated="refreshSession" />
       </section>
       <section v-show="activeTab === 'cart'">
         <CartView @go-checkout="pickTab('checkout')" />
@@ -83,6 +123,7 @@ function pickTab(tab) {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
 .shell {
   min-height: 100vh;
   background: #f7f4f1;
@@ -92,63 +133,116 @@ function pickTab(tab) {
 .top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem 1.5rem;
-  padding: 1rem 1.5rem;
-  background: #fff;
-  border-bottom: 1px solid #e8e0db;
-}
+  background: #FFE5F9;
+  border-bottom: 4px solid #3D3C3C;
+  height: 11vh;
 
-.title-block {
+}
+.user-block {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 12px;
+  height: 11vh;
+  font-family: 'Jersey 10';
+  color: #1209ab;
+  font-size: 4vh;
+  margin-right: 20px;
+  margin-top: 20px;
+  line-height: 1;
 }
 
-.brand {
-  font-family: Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  margin: 0;
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
 }
 
-.muted {
-  color: #6b5e58;
-  font-size: 0.85rem;
+.user-profile-btn:hover {
+  background: rgba(18, 9, 171, 0.08);
 }
+
+.user-profile-btn:focus-visible {
+  outline: 2px solid #1209ab;
+  outline-offset: 2px;
+}
+
+.user-profile-btn.on {
+  background: rgba(18, 9, 171, 0.12);
+  box-shadow: inset 0 0 0 2px #1209ab;
+}
+
+.user-icon-img {
+  display: block;
+  width: clamp(26px, 3.5vh, 36px);
+  height: clamp(26px, 3.5vh, 36px);
+  object-fit: contain;
+}
+
+.user-text {
+  text-align: right;
+}
+
+.points {
+  margin-top: 4px;
+}
+
+.logo-block {
+  height: 100%;           
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 90%;            
+  width: auto;            
+  object-fit: contain;
+  margin-left: 20px;
+}
+
 
 .nav-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 100px;
   flex: 1;
   justify-content: center;
+  align-items: center; 
+  height: 100%;
 }
 
 .nav-tabs button {
-  padding: 0.5rem 1.25rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: #5c524d;
-  font-size: 0.95rem;
+  font-family: 'Jersey 10';
+  color: #1209AB;
+  font-size: 4vh;
   cursor: pointer;
+
+  background: transparent; 
+  border: none;
+  outline: none;
+  padding: 4px 8px;
 }
 
 .nav-tabs button.on {
-  background: #2c2420;
-  color: #faf7f5;
+  background: transparent; 
+  border-bottom: 3px solid #1209AB;
 }
 
-.ghost {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid #d4ccc4;
-  border-radius: 6px;
-  background: #fff;
-  color: #4a423e;
-  font-size: 0.85rem;
+.logout-link {
+  font-family: 'Jersey 10';
+  color: #1209AB;
+  font-size: 2vh;
   cursor: pointer;
+
+  background: #FFFFFF; 
+  border: 2px solid #1209AB;
+  outline: none;
+  padding: 4px 8px;
 }
+
 
 .main {
   max-width: 100%;
@@ -156,16 +250,5 @@ function pickTab(tab) {
   margin: 0 auto;
 }
 
-.card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.75rem;
-  box-shadow: 0 8px 24px rgba(40, 32, 28, 0.06);
-}
 
-.card h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
 </style>
