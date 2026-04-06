@@ -66,7 +66,6 @@ const orders = ref([
 
 const sortKey = ref('orderId')
 const sortAsc = ref(true)
-const fillerRowCount = 10
 
 const displayedOrders = computed(() => {
   const sorted = [...orders.value].sort((a, b) => {
@@ -230,13 +229,6 @@ function searchOrders() {
             <div class="td">{{ order.orderDate }}</div>
           </div>
 
-          <div v-for="n in fillerRowCount" :key="`filler-${n}`" class="tr filler">
-            <div class="td">—</div>
-            <div class="td">Dummy Customer {{ n }}</div>
-            <div class="td">Employee {{ n }}</div>
-            <div class="td">Waiting</div>
-            <div class="td">2025/04/{{ String((n % 30) + 1).padStart(2, '0') }}</div>
-          </div>
         </div>
       </section>
     </main>
@@ -484,11 +476,11 @@ function searchOrders() {
 }
 
 .tr:nth-child(odd) {
-  background: #e2e2e2;
+  background: #eae8e8;
 }
 
 .tr:nth-child(even) {
-  background: #ededed;
+  background: #f4f4f4;
 }
 
 .td {
@@ -499,10 +491,6 @@ function searchOrders() {
   border-right: 4px solid #4c4c4c;
   font-size: 1rem;
   padding: 10px 12px;
-}
-
-.filler {
-  color: #4c4c4c;
 }
 
 @media (max-width: 1100px) {
