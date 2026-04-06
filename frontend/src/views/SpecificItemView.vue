@@ -71,19 +71,40 @@
           {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
         </button>
       </div>
+     <!-- Manager-only Restock Button -->
+      <div v-if="isManager" class="button">
+        <button class="cart-btn" @click="showRestockForm = true">
+          Restock
+        </button>
+      </div>
 
     </div>
+
+    <!-- Restock Modal using RestockItemView.vue -->
+    <RestockItemView
+      :visible="showRestockForm"
+      :product="product"
+      @close="showRestockForm = false"
+      @restock="handleRestockSubmit"
+    />
   </div>
 </template>
 
 <script>
-import { getProduct, addToCart } from '../api/item.js'
+import { getSession } from '../session/storage'
+import { addToCart } from '../api/item.js'
+import RestockItemView from './RestockItemView.vue'  // <-- Import your actual RestockItemView
 
 export default {
   name: 'SpecificItemView',
+  components: { RestockItemView },
 
   data() {
+    const session = getSession()
     return {
+      isManager: true,
+      //session?.accountType === 'MANAGER',
+      showRestockForm: false,
       qty: 0,
       selectedColor: null, 
       selectedSize: null,  // Added size tracking
@@ -177,6 +198,13 @@ export default {
       await addToCart(1, this.selectedVariant.id, this.qty)
       this.added = true
       setTimeout(() => this.added = false, 2000)
+    },
+
+    handleRestockSubmit(restockData) {
+      restockData.forEach(r => {
+        const variant = this.product.variants.find(v => v.id === r.id)
+        if (variant) variant.stock += r.quantity
+      })
     }
   }
 }
