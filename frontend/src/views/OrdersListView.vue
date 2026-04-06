@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
 import Catalog from "./Catalog.vue";
+import { getAllOrders } from '../api/order.js'
 
 const router = useRouter()
 const session = ref(getSession())
@@ -26,43 +27,47 @@ const columns = [
   { key: 'orderDate', label: 'Order Date' },
 ]
 
-const orders = ref([
-  {
-    orderId: '26123732',
-    customer: 'Alice Martin',
-    employee: 'Bob',
-    status: 'In Preparation',
-    orderDate: '2025/03/30',
-  },
-  {
-    orderId: '26123733',
-    customer: 'Emma Stone',
-    employee: 'Lina',
-    status: 'Ready for Pickup',
-    orderDate: '2025/03/31',
-  },
-  {
-    orderId: '26123734',
-    customer: 'Noah Kim',
-    employee: 'Chris',
-    status: 'Baking',
-    orderDate: '2025/04/01',
-  },
-  {
-    orderId: '26123735',
-    customer: 'Sophia Chen',
-    employee: 'Maya',
-    status: 'Delivered',
-    orderDate: '2025/04/01',
-  },
-  {
-    orderId: '26123736',
-    customer: 'Liam Patel',
-    employee: 'Owen',
-    status: 'Awaiting Payment',
-    orderDate: '2025/04/02',
-  },
-])
+const orders = ref([])
+const loading = ref(false)
+const error = ref(null)
+
+
+/**
+ * Function to load the orders from the backend
+ * @author Sonia Ly
+ */
+async function loadOrders() {
+  loading.value = true
+  error.value = null
+
+  try {
+    const data = await getAllOrders()
+
+    console.log("Backend response: ", data)
+
+    // 🔥 Adapt this depending on your backend response shape
+    orders.value = data.map(o => ({
+      orderId: o.id,
+      customer: o.customerName,
+      employee: o.employeeName,
+      status: o.status,
+      orderDate: o.orderDate,
+    }))
+
+  } catch (err) {
+    error.value = err.message
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+/**
+ * Once the page boards, call your backend
+ */
+onMounted(() => {
+  loadOrders()
+})
 
 const sortKey = ref('orderId')
 const sortAsc = ref(true)
