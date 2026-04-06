@@ -1,9 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+// backend URL
+// in production this would be a deployed URL set in the environment variables
+// in our case we use localhost:8080
 const backend = process.env.VITE_PROXY_TARGET || 'http://localhost:8080'
 
-// https://vite.dev/config/
+// documentation: https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
   server: {

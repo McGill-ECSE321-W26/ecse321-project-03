@@ -1,9 +1,12 @@
+// session storage will be used to store the account information
+// they will be used for authentication and authorization for calls to the backend
 const KEY_ID = 'boutique_accountId'
 const KEY_TYPE = 'boutique_accountType'
 const KEY_EMAIL = 'boutique_email'
 const KEY_USERNAME = 'boutique_username'
 
-/** sessionStorage: survives refresh in this tab; cleared when the tab/window is closed. */
+/** sessionStorage: survives refresh in this tab; 
+ * cleared when the tab/window is closed. */
 export function saveSession(account) {
   sessionStorage.setItem(KEY_ID, String(account.id))
   sessionStorage.setItem(KEY_TYPE, account.accountType ?? 'CUSTOMER')

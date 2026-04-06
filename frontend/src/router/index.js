@@ -30,6 +30,11 @@ const router = createRouter({
   ],
 })
 
+/**
+ * redirect to login page if user is not logged in and the route requires authentication
+ * redirect to app shell if user is logged in and the route is guest only
+ * redirect to the target route after login (if redirect query parameter is queried)
+ */
 router.beforeEach((to) => {
   const loggedIn = isLoggedIn()
   if (to.meta.requiresAuth && !loggedIn) {

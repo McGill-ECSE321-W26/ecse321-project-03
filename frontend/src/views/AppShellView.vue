@@ -1,32 +1,30 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { clearSession, getSession } from '../session/storage'
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { clearSession, getSession } from "../session/storage";
+import Catalog from "./Catalog.vue";
 
-const router = useRouter()
-const session = ref(getSession())
+const router = useRouter();
+const session = ref(getSession());
 
-const isManager = computed(() => session.value?.accountType === 'MANAGER')
-const isEmployee = computed(() => session.value?.accountType === 'EMPLOYEE')
+const isManager = computed(() => session.value?.accountType === "MANAGER");
+const isEmployee = computed(() => session.value?.accountType === "EMPLOYEE");
 
-const activeTab = ref('shop')
+const activeTab = ref("shop");
 
 function logout() {
-  clearSession()
-  router.replace({ name: 'login' })
+  clearSession();
+  router.replace({ name: "login" });
 }
 
 // display inventory tab only for managers
 function pickTab(tab) {
-  if (tab === 'inventory' && !isManager.value) return
-  activeTab.value = tab
+  if (tab === "inventory" && !isManager.value) return;
 
-  if (tab === 'shop') {
-    router.push({ name: 'shop' })
-  } else if (tab === 'inventory') {
-    router.push({ name: 'inventory' })
-  } else if (tab === 'ordersList') {
-    router.push({ name: 'ordersList' })
+  if (tab === "orders") {
+    router.push({name: "ordersList"})
+  } else {
+    activeTab.value = tab;
   }
 }
 </script>
@@ -34,16 +32,35 @@ function pickTab(tab) {
 <template>
   <div class="shell">
     <header class="top">
-      <div class="title-block">
-        <h1 class="brand">Papa's Fashionistaria</h1>
-        <span class="muted" v-if="session">
-          {{ session.username }} · {{ session.accountType?.toLowerCase() }}
-        </span>
-      </div>
-      <nav class="nav-tabs">
-        <button type="button" :class="{ on: activeTab === 'shop' }" @click="pickTab('shop')">
+      <div class="logo-block">
+        <img src="../assets/images/logo.png" class="logo-img" />
+      </div>  
+
+    <nav class="nav-tabs">
+        <button
+          type="button"
+          :class="{ on: activeTab === 'shop' }"
+          @click="pickTab('shop')"
+        >
           Shop
         </button>
+
+        <button
+          type="button"
+          :class="{ on: activeTab === 'orders' }"
+          @click="pickTab('orders')"
+        >
+          Orders
+        </button>
+
+        <button
+          type="button"
+          :class="{ on: activeTab === 'cart' }"
+          @click="pickTab('cart')"
+        >
+          Cart
+        </button>
+
         <button
           v-if="isManager"
           type="button"
@@ -52,27 +69,39 @@ function pickTab(tab) {
         >
           Inventory
         </button>
-        <button type="button" :class="{ on: activeTab === 'Orders' }" @click="pickTab('ordersList')">
-          Orders
+
+        <button
+          type="button"
+          :class="logout-link"
+          @click="logout">Log out
         </button>
+
       </nav>
-      <button type="button" class="ghost" @click="logout">Log out</button>
+
+      <div class="user-block">
+        Hi {{ session?.username }}!
+        <div class="points">✨50 Points</div>
+      </div> 
     </header>
 
     <main class="main">
-      <section v-show="activeTab === 'shop'" class="card">
-        <h2>Shop</h2>
-        <p class="muted">Browse the boutique catalog. (Coming soon.)</p>
+      <section v-show="activeTab === 'shop'">
+        <Catalog />
       </section>
-      <section v-show="activeTab === 'inventory'" class="card">
-        <h2>Inventory</h2>
-        <p class="muted">Manage stock and items. Managers only. (Coming soon.)</p>
+
+      <section v-show="activeTab === 'cart'">
+        <Cart />
+      </section>
+
+      <section v-show="activeTab === 'inventory'">
+         <Inventory />      
       </section>
     </main>
   </div>
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
 .shell {
   min-height: 100vh;
   background: #f7f4f1;
@@ -82,80 +111,84 @@ function pickTab(tab) {
 .top {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem 1.5rem;
-  padding: 1rem 1.5rem;
-  background: #fff;
-  border-bottom: 1px solid #e8e0db;
-}
+  background: #FFE5F9;
+  border-bottom: 4px solid #3D3C3C;
+  height: 11vh;
 
-.title-block {
+}
+.user-block {
+  height: 11vh;
+  font-family: 'Jersey 10';
+  color: #1209AB;
+  font-size: 4vh;
+  margin-right: 20px;
+  margin-top: 20px;
+  line-height: 1;
+} 
+
+.points {
+  margin-left: -20px;
+
+} 
+
+.logo-block {
+  height: 100%;           
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
 }
 
-.brand {
-  font-family: Georgia, serif;
-  font-size: 1.35rem;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  margin: 0;
+.logo-img {
+  height: 90%;            
+  width: auto;            
+  object-fit: contain;
+  margin-left: 20px;
 }
 
-.muted {
-  color: #6b5e58;
-  font-size: 0.85rem;
-}
 
 .nav-tabs {
   display: flex;
-  gap: 0.5rem;
+  gap: 100px;
   flex: 1;
   justify-content: center;
+  align-items: center; 
+  height: 100%;
 }
 
 .nav-tabs button {
-  padding: 0.5rem 1.25rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: #5c524d;
-  font-size: 0.95rem;
+  font-family: 'Jersey 10';
+  color: #1209AB;
+  font-size: 4vh;
   cursor: pointer;
+
+  background: transparent; 
+  border: none;
+  outline: none;
+  padding: 4px 8px;
 }
 
 .nav-tabs button.on {
-  background: #2c2420;
-  color: #faf7f5;
+  background: transparent; 
+  border-bottom: 3px solid #1209AB;
 }
 
-.ghost {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid #d4ccc4;
-  border-radius: 6px;
-  background: #fff;
-  color: #4a423e;
-  font-size: 0.85rem;
+.logout-link {
+  font-family: 'Jersey 10';
+  color: #1209AB;
+  font-size: 2vh;
   cursor: pointer;
+
+  background: #FFFFFF; 
+  border: 2px solid #1209AB;
+  outline: none;
+  padding: 4px 8px;
 }
+
 
 .main {
-  max-width: 720px;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
 }
 
-.card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.75rem;
-  box-shadow: 0 8px 24px rgba(40, 32, 28, 0.06);
-}
 
-.card h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-}
 </style>

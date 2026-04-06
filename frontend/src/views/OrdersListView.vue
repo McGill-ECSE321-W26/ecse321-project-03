@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
+import Catalog from "./Catalog.vue";
 
 const router = useRouter()
 const session = ref(getSession())
@@ -111,38 +112,40 @@ function searchOrders() {
 
 <template>
   <div class="page">
-    <header class="topbar">
-      <div class="brand-block">
-        <div class="logo-wrap">
-          <img
-              class="logo"
-              src="https://upload.wikimedia.org/wikipedia/en/thumb/6/64/Papa%27s_Pizzeria_logo.svg/512px-Papa%27s_Pizzeria_logo.svg.png"
-              alt="Papa's Pizzeria"
-          />
-        </div>
-        <div class="title-block">
-          <h1 class="brand">Papa's Fashionistaria</h1>
-          <span class="muted" v-if="session">
-            {{ session.username }} · {{ session.accountType?.toLowerCase() }}
-          </span>
-        </div>
+    <header class="top">
+      <div class="logo-block">
+        <img src="../assets/images/logo.png" class="logo-img" />
       </div>
 
-      <nav class="nav-links">
+      <nav class="nav-tabs">
         <button
             type="button"
-            class="nav-link"
-            :class="{ active: activeTab === 'shop' }"
+            :class="{ on: activeTab === 'shop' }"
             @click="pickTab('shop')"
         >
           Shop
         </button>
 
         <button
+            type="button"
+            :class="{ on: activeTab === 'orders' }"
+            @click="pickTab('orders')"
+        >
+          Orders
+        </button>
+
+        <button
+            type="button"
+            :class="{ on: activeTab === 'cart' }"
+            @click="pickTab('cart')"
+        >
+          Cart
+        </button>
+
+        <button
             v-if="isManager"
             type="button"
-            class="nav-link"
-            :class="{ active: activeTab === 'inventory' }"
+            :class="{ on: activeTab === 'inventory' }"
             @click="pickTab('inventory')"
         >
           Inventory
@@ -150,26 +153,31 @@ function searchOrders() {
 
         <button
             type="button"
-            class="nav-link"
-            :class="{ active: activeTab === 'orders' }"
-            @click="pickTab('orders')"
-        >
-          Orders
+            :class="logout-link"
+            @click="logout">Log out
         </button>
+
       </nav>
 
-      <div class="right-box">
-        <div class="points-box">
-          <div class="greeting">Hi {{ session?.username || 'Victoire' }}!</div>
-          <div class="points-row">
-            <span class="sparkle">✦</span>
-            <span class="sparkle">✧</span>
-            <span class="points">50 Points</span>
-          </div>
-        </div>
-        <button type="button" class="ghost" @click="logout">Log out</button>
+      <div class="user-block">
+        Hi {{ session?.username }}!
+        <div class="points">✨50 Points</div>
       </div>
     </header>
+
+    <main class="main">
+      <section v-show="activeTab === 'shop'">
+        <Catalog />
+      </section>
+
+      <section v-show="activeTab === 'cart'">
+        <Cart />
+      </section>
+
+      <section v-show="activeTab === 'inventory'">
+        <Inventory />
+      </section>
+    </main>
 
     <main class="content">
       <aside class="sidebar">
@@ -236,175 +244,134 @@ function searchOrders() {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&family=Inconsolata:wght@400;500;600;700&display=swap');
+
 :global(*) {
   box-sizing: border-box;
 }
 
 :global(body) {
   margin: 0;
-  font-family: 'Courier New', monospace;
   background: #efefef;
 }
 
 .page {
   min-height: 100vh;
-  background: #efefef;
-  color: #111;
+  background: #f7f4f1;
+  color: #2c2420;
+  font-family: 'Inconsolata', monospace;
 }
 
-.topbar {
-  min-height: 116px;
-  background: #efddef;
-  border-bottom: 3px solid #4c4c4c;
-  display: grid;
-  grid-template-columns: 320px 1fr 280px;
-  align-items: center;
-  gap: 12px;
-  padding: 0 12px;
-}
-
-.brand-block {
-  height: 100%;
+/* ===== HEADER ===== */
+.top {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  background: #FFE5F9;
+  border-bottom: 4px solid #3D3C3C;
+  height: 11vh;
 }
 
-.logo-wrap {
-  width: 110px;
-  height: 78px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: #f8f5f5;
-  border: 2px solid #c9bcbc;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.brand {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.muted {
-  color: #6b5e58;
-  font-size: 0.85rem;
-}
-
-.nav-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.nav-link {
-  padding: 0.55rem 1.2rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: #2121b8;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 6px;
-}
-
-.nav-link.active {
-  background: #2c2420;
-  color: #faf7f5;
-  text-decoration: none;
-}
-
-.right-box {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.points-box {
-  text-align: right;
-  color: #2121b8;
-  font-weight: 700;
-}
-
-.greeting {
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-
-.points-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.95rem;
-}
-
-.sparkle {
-  color: #e3b64f;
-  font-size: 1rem;
+.user-block {
+  height: 11vh;
+  font-family: 'Jersey 10', monospace;
+  color: #1209AB;
+  font-size: 4vh;
+  margin-right: 20px;
+  margin-top: 20px;
+  line-height: 1;
 }
 
 .points {
-  font-size: 1rem;
+  margin-left: -20px;
 }
 
-.ghost {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid #d4ccc4;
-  border-radius: 6px;
-  background: #fff;
-  color: #4a423e;
-  font-size: 0.85rem;
+.logo-block {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 90%;
+  width: auto;
+  object-fit: contain;
+  margin-left: 20px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 100px;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-tabs button {
+  font-family: 'Jersey 10', monospace;
+  color: #1209AB;
+  font-size: 4vh;
   cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 4px 8px;
+}
+
+.nav-tabs button.on {
+  background: transparent;
+  border-bottom: 3px solid #1209AB;
+}
+
+.logout-link {
+  font-family: 'Jersey 10', monospace;
+  color: #1209AB;
+  font-size: 2vh;
+  cursor: pointer;
+  background: #FFFFFF;
+  border: 2px solid #1209AB;
+  outline: none;
+  padding: 4px 8px;
+}
+
+/* ===== ORDERS PAGE ===== */
+.main {
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
 }
 
 .content {
   display: grid;
   grid-template-columns: 238px 1fr;
-  min-height: calc(100vh - 116px);
+  min-height: calc(100vh - 11vh);
 }
 
+/* Sidebar inspired by catalog */
 .sidebar {
-  background: #efefef;
+  background: linear-gradient(to right, #ffe5f9 49%, #ffffff 100%);
   border-right: 4px solid #4c4c4c;
-  padding: 26px 14px;
+  padding: 24px 16px;
+  font-family: 'Inconsolata', monospace;
 }
 
 .filter-title {
   margin: 8px 0 28px;
-  font-size: 30px;
-  font-weight: 400;
+  font-size: 1.6rem;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 28px;
 }
 
 .field-group label {
-  display: block;
-  font-size: 25px;
-  margin-bottom: 12px;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .field-group input {
@@ -413,8 +380,8 @@ function searchOrders() {
   border: none;
   border-radius: 999px;
   padding: 0 18px;
-  font-size: 18px;
-  font-family: inherit;
+  font-size: 1rem;
+  font-family: 'Inconsolata', monospace;
   background: #e8e8e8;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
@@ -424,49 +391,54 @@ function searchOrders() {
   align-items: center;
   justify-content: center;
   min-width: 140px;
-  height: 56px;
-  margin: 8px 0 36px 30px;
-  border-radius: 20px;
+  height: 48px;
+  margin: 8px 0 28px 0;
+  border-radius: 16px;
   border: 1px solid #5e4159;
-  background: linear-gradient(#f6dff0, #edd2e3);
-  font-family: inherit;
-  font-size: 28px;
+  background: #f7f7f7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  font-family: 'Inconsolata', monospace;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .checkbox-row {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: 24px;
-  margin: 46px 0 28px;
+  gap: 10px;
+  font-size: 1rem;
+  margin: 24px 0 28px;
 }
 
 .checkbox-row input {
-  width: 30px;
-  height: 30px;
+  width: 18px;
+  height: 18px;
 }
 
 .dummy-panel {
-  margin-top: 40px;
+  margin-top: 32px;
   padding: 14px;
-  border: 2px dashed #bba9c4;
-  background: #f6f0f7;
-  font-size: 18px;
+  border-radius: 16px;
+  background: #f7f7f7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-size: 0.95rem;
 }
 
 .dummy-panel h3 {
   margin: 0 0 10px;
-  font-size: 22px;
+  font-size: 1.1rem;
 }
 
 .dummy-panel p {
   margin: 8px 0;
 }
 
+/* Table section */
 .table-section {
   display: flex;
   flex-direction: column;
+  background: white;
 }
 
 .table-header,
@@ -477,7 +449,7 @@ function searchOrders() {
 
 .table-header {
   background: #cbb8e5;
-  min-height: 94px;
+  min-height: 84px;
   border-bottom: 4px solid #4c4c4c;
 }
 
@@ -485,12 +457,13 @@ function searchOrders() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   border-right: 4px solid #4c4c4c;
-  font-size: 26px;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
   padding: 8px;
+  text-align: center;
 }
 
 .th:last-child,
@@ -499,8 +472,7 @@ function searchOrders() {
 }
 
 .sort-arrow {
-  font-size: 28px;
-  transform: translateY(-2px);
+  font-size: 1rem;
 }
 
 .table-body {
@@ -508,7 +480,7 @@ function searchOrders() {
 }
 
 .tr {
-  min-height: 98px;
+  min-height: 88px;
 }
 
 .tr:nth-child(odd) {
@@ -525,7 +497,7 @@ function searchOrders() {
   justify-content: center;
   text-align: center;
   border-right: 4px solid #4c4c4c;
-  font-size: 24px;
+  font-size: 1rem;
   padding: 10px 12px;
 }
 
@@ -534,19 +506,22 @@ function searchOrders() {
 }
 
 @media (max-width: 1100px) {
-  .topbar {
-    grid-template-columns: 1fr;
-    padding: 12px;
+  .nav-tabs {
+    gap: 30px;
   }
 
-  .nav-links,
-  .right-box {
-    justify-content: center;
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 4px solid #4c4c4c;
   }
 
   .th,
   .td {
-    font-size: 20px;
+    font-size: 0.9rem;
   }
 }
 </style>
