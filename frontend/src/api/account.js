@@ -35,13 +35,19 @@ export async function registerAccount(payload) {
   return data
 }
 
-/**
- * Fetch account by id (response has no password field).
- * @param {number} id
- * @returns {Promise<Object>}
- */
-export async function getAccountById(id) {
-  const res = await fetch(`${API_BASE}/accounts/${id}`)
+export async function getAccountById(accountId) {
+  const res = await fetch(`${API_BASE}/accounts/${accountId}`)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readErrorMessage(data))
+  return data
+}
+
+export async function updateAddress(accountId, address) {
+  const res = await fetch(`${API_BASE}/accounts/${accountId}/address`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address }),
+  })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(readErrorMessage(data))
   return data
