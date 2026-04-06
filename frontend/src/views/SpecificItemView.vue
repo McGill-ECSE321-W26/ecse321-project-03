@@ -2,7 +2,6 @@
   <div class="desktop">
     <div class="window">
 
-      <!-- purple header -->
       <div class="title-bar">
         <button class="back-btn" @click="$router.back()">← Back</button>
         <span class="title-name">{{ product.name }}</span>
@@ -10,15 +9,13 @@
 
       <div class="window-body">
 
-        <!-- left: image and stock -->
         <div class="left">
           <div class="image">
             <img :src="product.imageUrl" :alt="product.name" />
           </div>
-          <p class="stock">Stock left: {{ product.stock }} items</p>
+          <p class="stock">Stock left: {{ selectedVariant ? selectedVariant.stock : 'Select Color & Size' }}</p>
         </div>
 
-        <!-- right: details -->
         <div class="right">
 
           <div class="row">
@@ -36,7 +33,7 @@
             <div class="qty-ctrl">
               <button @click="qty > 0 && qty--">-</button>
               <span>{{ qty }}</span>
-              <button @click="qty < product.stock && qty++">+</button>
+              <button @click="selectedVariant && qty < selectedVariant.stock && qty++">+</button>
             </div>
           </div>
 
@@ -44,19 +41,31 @@
             <span class="lbl">Colors:</span>
             <div class="color-grid">
               <button
-                v-for="c in product.colors"
-                :key="c"
+                v-for="color in uniqueColors"
+                :key="color"
                 class="color-btn"
-                :class="{ active: selectedColor === c }"
-                @click="selectedColor = c"
-              >{{ c }}</button>
+                :class="{ active: selectedColor === color }"
+                @click="handleSelectColor(color)"
+              >{{ color }}</button>
+            </div>
+          </div>
+
+          <div class="colors-block" v-if="selectedColor">
+            <span class="lbl">Sizes:</span>
+            <div class="color-grid">
+              <button
+                v-for="size in availableSizesForColor"
+                :key="size"
+                class="color-btn"
+                :class="{ active: selectedSize === size }"
+                @click="handleSelectSize(size)"
+              >{{ size }}</button>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- add to cart -->
       <div class="button">
         <button class="cart-btn" @click="handleAddToCart">
           {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
@@ -76,16 +85,22 @@ export default {
   data() {
     return {
       qty: 0,
-      selectedColor: null,  // single color, not an array
+      selectedColor: null, 
+      selectedSize: null,  // Added size tracking
       added: false,
       loading: false,
       product: {
         id: 1,
         name: 'Flowy Blouse',
         price: 29.99,
-        stock: 23,
         imageUrl: 'https://images.unsplash.com/photo-1584030373081-f37b7bb4fa8e?w=400&q=80',
-        colors: ['White', 'Brown', 'Black', 'Grey', 'Yellow', 'Green', 'Orange', 'Blue', 'Purple', 'Pink', 'Red']
+        // Updated mock data to reflect variants with both colors and sizes
+        variants: [
+          { id: 101, color: 'White', size: 'S', stock: 12 },
+          { id: 102, color: 'White', size: 'M', stock: 5 },
+          { id: 103, color: 'Black', size: 'S', stock: 23 },
+          { id: 104, color: 'Black', size: 'L', stock: 0 } 
+        ]
       },
     }
   },
@@ -98,17 +113,68 @@ export default {
   // },
   // ─────────────────────────────────────────────────────
 
+  computed: {
+    // Finds all unique colors
+    uniqueColors() {
+      if (!this.product || !this.product.variants) return [];
+      const colors = this.product.variants.map(v => v.color);
+      return [...new Set(colors)]; 
+    },
+    
+    // Finds sizes available specifically for the chosen color
+    availableSizesForColor() {
+      if (!this.product || !this.product.variants || !this.selectedColor) return [];
+      const variantsWithColor = this.product.variants.filter(v => v.color === this.selectedColor);
+      return variantsWithColor.map(v => v.size);
+    },
+
+    // Pinpoints the exact variant ID based on the color + size picked
+    selectedVariant() {
+      if (!this.product || !this.selectedColor || !this.selectedSize) return null;
+      return this.product.variants.find(
+        v => v.color === this.selectedColor && v.size === this.selectedSize
+      );
+    }
+  },
+
   methods: {
+    handleSelectColor(color) {
+      this.selectedColor = color;
+      this.selectedSize = null; // Reset size when color changes
+      this.qty = 0;             // Reset quantity to prevent going over stock
+    },
+
+    handleSelectSize(size) {
+      this.selectedSize = size;
+      
+      // Auto-adjust quantity so it doesn't exceed the newly selected size's stock
+      this.$nextTick(() => {
+        if (this.selectedVariant && this.qty > this.selectedVariant.stock) {
+          this.qty = this.selectedVariant.stock;
+        } else if (this.qty === 0 && this.selectedVariant && this.selectedVariant.stock > 0) {
+          this.qty = 1;
+        }
+      });
+    },
+
     async handleAddToCart() {
-      if (!this.selectedColor) {
-        alert('Please select a color!')
-        return
+      if (!this.selectedColor || !this.selectedSize) {
+        alert("Please select both a color and a size!");
+        return;
       }
+      
       if (this.qty === 0) {
-        alert('Please select a quantity!')
-        return
+        alert("Please select a valid quantity!");
+        return;
       }
-      await addToCart(1, this.product.id, this.qty)
+
+      if (this.qty > this.selectedVariant.stock) {
+        alert("Not enough stock for this variant!");
+        return;
+      }
+
+      // Sends accountId (1), the specific variant id, and qty
+      await addToCart(1, this.selectedVariant.id, this.qty)
       this.added = true
       setTimeout(() => this.added = false, 2000)
     }
