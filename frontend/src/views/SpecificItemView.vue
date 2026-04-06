@@ -2,12 +2,10 @@
   <div class="desktop">
     <div class="window">
 
-      <!-- purple header -->
       <div class="title-bar"></div>
 
       <div class="window-body">
 
-        <!-- left: image and stock -->
         <div class="left">
           <div class="image">
             <img :src="product.imageUrl" :alt="product.name" />
@@ -15,7 +13,6 @@
           <p class="stock">Stock left: {{ selectedVariant ? selectedVariant.stock : 'Select a color' }}</p>
         </div>
 
-        <!-- right: details -->
         <div class="right">
 
           <div class="row">
@@ -33,7 +30,7 @@
             <div class="qty-ctrl">
               <button @click="qty > 0 && qty--">-</button>
               <span>{{ qty }}</span>
-              <button @click="qty < product.stock && qty++">+</button>
+              <button @click="selectedVariant && qty < selectedVariant.stock && qty++">+</button>
             </div>
           </div>
 
@@ -41,19 +38,18 @@
             <span class="lbl">Colors:</span>
             <div class="color-grid">
               <button
-                v-for="c in product.colors"
-                :key="c"
+                v-for="variant in product.variants"
+                :key="variant.id"
                 class="color-btn"
-                :class="{ active: selectedColor === c }"
-                @click="selectedColor = c"
-              >{{ c }}</button>
+                :class="{ active: selectedVariant && selectedVariant.id === variant.id }"
+                @click="handleSelectVariant(variant)"
+              >{{ variant.color }}</button>
             </div>
           </div>
 
         </div>
       </div>
 
-      <!-- add to cart -->
       <div class="button">
         <button class="cart-btn" @click="handleAddToCart">
           {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
@@ -73,46 +69,53 @@ export default {
   data() {
     return {
       qty: 0,
-      selectedColors: null,
+      selectedVariant: null, // Replaced selectedColors with selectedVariant
       added: false,
       loading: false,
       product: {
         id: 1,
         name: 'Flowy Blouse',
         price: 29.99,
-        stock: 23,
         imageUrl: 'https://images.unsplash.com/photo-1584030373081-f37b7bb4fa8e?q=80&w=782&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        colors: ['White', 'Brown', 'Black', 'Grey', 'Yellow', 'Green', 'Orange', 'Blue', 'Purple', 'Pink', 'Red']
+        // Transformed global stock/colors into an array of variant objects
+        variants: [
+          { id: 101, color: 'White', stock: 12 },
+          { id: 102, color: 'Brown', stock: 5 },
+          { id: 103, color: 'Black', stock: 23 },
+          { id: 104, color: 'Grey', stock: 0 } // Example of out of stock
+        ]
       },
     }
   },
 
-  // ── uncomment when backend is ready ──────────────────
-  // async mounted() {
-  //   const id = this.$route.params.id
-  //   this.product = await getProduct(id)
-  //   this.loading = false
-  // },
-  // ─────────────────────────────────────────────────────
-
   methods: {
-    async handleAddToCart() {
-  if (!this.selectedVariant || this.qty === 0) {
-    alert("Please select a color and quantity!");
-    return;
-  }
-  
-  // Make sure they aren't ordering more than the specific variant has in stock
-  if (this.qty > this.selectedVariant.stock) {
-     alert("Not enough stock for this variant!");
-     return;
-  }
+    handleSelectVariant(variant) {
+      this.selectedVariant = variant;
+      
+      // Auto-adjust quantity if it exceeds the new variant's stock, 
+      // or set it to 1 if it was 0 and stock is available
+      if (this.qty > variant.stock) {
+        this.qty = variant.stock;
+      } else if (this.qty === 0 && variant.stock > 0) {
+        this.qty = 1;
+      }
+    },
 
-  // Pass the userId (e.g., 1), the specific variant ID, and quantity
-  await addToCart(1, this.selectedVariant.id, this.qty)
-  this.added = true
-  setTimeout(() => this.added = false, 2000)
-}
+    async handleAddToCart() {
+      if (!this.selectedVariant || this.qty === 0) {
+        alert("Please select a color and valid quantity!");
+        return;
+      }
+      
+      if (this.qty > this.selectedVariant.stock) {
+        alert("Not enough stock for this variant!");
+        return;
+      }
+
+      await addToCart(1, this.selectedVariant.id, this.qty)
+      this.added = true
+      setTimeout(() => this.added = false, 2000)
+    }
   }
 }
 </script>
