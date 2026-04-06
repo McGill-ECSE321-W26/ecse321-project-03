@@ -1,10 +1,9 @@
 <script setup>
-
+import Header from '../views/Header.vue'; // Ensure this path matches where you saved the Header component
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useOrderInfo } from '../api/orderInfo.js'; 
 import { getSession, isLoggedIn } from '../session/storage.js';
-
 
 const route = useRoute();
 const router = useRouter();
@@ -13,13 +12,11 @@ const selectedStatus = ref('');
 const selectedEmployeeId = ref(null);
 const isSelfAssignChecked = ref(false);
 
-
 async function saveButtonAction() {
   const session = getSession();
   const orderId = order.value.orderId;
   const accountId = session.accountId;
 
-  // 1. Logic for EMPLOYEE (Check self-assignment and status update)
   if (account.value.accountType === 'EMPLOYEE') {
     if (isSelfAssignChecked.value) {
       const employeeId = employees.value.find(e => e.account.id === accountId).employeeId;
@@ -30,12 +27,10 @@ async function saveButtonAction() {
     }
   }
 
-  // 2. Logic for CUSTOMER (Check status/cancellation)
   if (account.value.accountType === 'CUSTOMER' && selectedStatus.value) {
     await updateOrderStatus(orderId, selectedStatus.value, accountId);
   }
 
-  // 3. Logic for MANAGER (Check employee assignment and status)
   if (account.value.accountType === 'MANAGER') {
     if (selectedEmployeeId.value) {
       await assignEmployee(orderId, selectedEmployeeId.value, accountId);
@@ -44,160 +39,136 @@ async function saveButtonAction() {
       await updateOrderStatus(orderId, selectedStatus.value, accountId);
     }
   }
-  
 };
 
 onMounted(() => {
-  //1. Check if the user is logged in
   if (!isLoggedIn()) {
-    router.push('/login'); // Redirect to login page if not logged in
+    router.push('/login');
     return;
   }
-
-  //2. get the ids
-  const orderId = route.params.id; // id comes from router
-  const session = getSession(); // id comes from local storage
-
-  // 3. Initialize the data fetch
+  const orderId = route.params.id;
+  const session = getSession();
   init(session.accountId, orderId);
 });
-
-
 </script>
 
-
-
 <template>
-  <div class="container">
-    <div class="box__wrapper">
-      <div class="box__background"></div>
-      
-      <div class="box">
-        <div class="title__rectangle">
-          Order Information
-          <button class="buttonReturn" @click="$router.back()"></button> 
-        </div> 
+  <div class="page-layout">
+    <Header activeTab="orders" />
 
-        <div class="main__content">
-          <div class="order__summary__container">
+    <div class="container">
+      <div class="box__wrapper">
+        <div class="box__background"></div>
+        
+        <div class="box">
+          <div class="title__rectangle">
+            Order Information
+            <button class="buttonReturn" @click="$router.back()"></button> 
+          </div> 
 
-            <div class="order__summary__text">
-                <strong>Order ID:</strong> 
-                <div>{{ order?.orderId ?? 0 }}</div>
-            </div>
-
-            <div class="order__summary__text">
-              <strong>Total Items:</strong> 
-              <div>{{ order?.items?.length ?? 0 }}</div>
-            </div>
-
-            <button class="buttonViewItems">View Items</button> 
-          </div>
-
-          <div class="info__container">
-            <div class="text__info__rectangle">
-              <span class="label">Employee ID:</span>
-              <span class="underscores">_______</span>    
-              <div v-if="order?.assigneeId !==0" class="box__ID">
-                {{ order?.assigneeId }}
+          <div class="main__content">
+            <div class="order__summary__container">
+              <div class="order__summary__text">
+                  <strong>Order ID:</strong> 
+                  <div>{{ order?.orderId ?? 0 }}</div>
               </div>
+              <div class="order__summary__text">
+                <strong>Total Items:</strong> 
+                <div>{{ order?.items?.length ?? 0 }}</div>
+              </div>
+              <button class="buttonViewItems">View Items</button> 
+            </div>
 
-              <div v-else-if="account?.accountType === 'CUSTOMER'" class="box__employeeID">
-                None
+            <div class="info__container">
+              <div class="text__info__rectangle">
+                <span class="label">Employee ID:</span>
+                <span class="underscores">_______</span>    
+                <div v-if="order?.assigneeId !==0" class="box__ID">
+                  {{ order?.assigneeId }}
+                </div>
+                <div v-else-if="account?.accountType === 'CUSTOMER'" class="box__employeeID">
+                  None
+                </div> 
+                <input v-else-if="account?.accountType === 'EMPLOYEE'" 
+                type="checkbox" class="checkBox" v-model="isSelfAssignChecked"/> 
+                
+                <select v-else-if="account?.accountType === 'MANAGER'"
+                  class="box__ID" v-model="selectedEmployeeId">
+                  <option :value="null">None</option>
+                  <option v-for="employee in employees" 
+                      :key="employee.id" 
+                      :value="employee.id">
+                      {{ employee.id }}
+                  </option>
+                </select> 
               </div> 
 
-              <input v-else-if="account?.accountType === 'EMPLOYEE'" 
-              type="checkbox" class="checkBox" v-model="isSelfAssignChecked"/> 
+              <div class="text__info__rectangle">
+                <span class="label">Customer ID:</span>
+                <span class="underscores">_______</span>  
+                <div class="box__ID">
+                  {{ order?.customerId  }}
+                </div>
+              </div>
+
+              <div class="text__info__rectangle">
+                <span class="label">Status:</span>
+                <span class="underscores">______</span>  
+                <template v-if="account?.accountType === 'CUSTOMER'">
+                  <select v-model="selectedStatus" class="box__date__state">
+                    <option :value="order?.orderState">{{ order?.orderState }} </option>
+                    <option v-if="canCancelOrder()" value="Cancelled">Cancel</option>
+                  </select>
+                </template>
+                <template v-else-if="account?.accountType === 'EMPLOYEE'">
+                  <select v-model="selectedStatus" class="box__date__state">
+                    <option value="">{{ order?.orderState }} </option>
+                    <option v-if="order?.orderState === 'Ordered'" value="Ordered">Ordered</option>
+                    <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
+                    <option v-if="order?.orderState === 'InPreparation'" value="InPreparation">InPreparation</option>
+                    <option v-if="order?.orderState === 'InPreparation'" value="Prepared">Prepared</option>
+                    <option v-if="order?.orderState === 'Prepared'" value="Prepared">Prepared</option>
+                    <option v-if="order?.orderState === 'Prepared'" value="Delivered">Delivered</option>
+                  </select>
+                </template>
+                <template v-else-if="account?.accountType === 'MANAGER'">
+                  <select v-model="selectedStatus" class="box__date__state">
+                    <option value="">{{ order?.orderState }} </option>
+                    <option v-if="order?.orderState === 'Ordered'" value="Ordered">Ordered</option>
+                    <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
+                    <option v-if="order?.orderState === 'Ordered'" value="Cancelled">Cancelled</option>
+                    <option v-if="order?.orderState === 'InPreparation'" value="InPreparation">InPreparation</option>
+                    <option v-if="order?.orderState === 'InPreparation'" value="Prepared">Prepared</option>
+                    <option v-if="order?.orderState === 'InPreparation'" value="Cancelled">Cancelled</option>
+                    <option v-if="order?.orderState === 'Prepared'" value="Prepared">Prepared</option>
+                    <option v-if="order?.orderState === 'Prepared'" value="Delivered">Delivered</option>
+                    <option v-if="order?.orderState === 'Prepared'" value="Cancelled">Cancelled</option>
+                  </select>
+                </template>
+                <div v-else class="box__date__state">{{ order?.orderState }}</div>
+              </div>
+
+              <div class="text__info__rectangle">
+                <span class="label">Order Date:</span>
+                <span class="underscores">__</span>
+                <div class="box__date__state">
+                  {{ order?.orderDate }}
+                </div>
+              </div>
               
-
-              <select v-else-if="account?.accountType === 'MANAGER'"
-                class="box__ID" v-model="selectedEmployeeId">
-                <option :value="null">None</option>
-                <option v-for="employee in employees" 
-                    :key="employee.id" 
-                    :value="employee.id">
-                    {{ employee.id }}
-                </option>
-              </select> 
-            </div> 
-
-            <div class="text__info__rectangle">
-              <span class="label">Customer ID:</span>
-              <span class="underscores">_______</span>  
-              <div class="box__ID">
-                {{ order?.customerId  }}
-              </div>
+              <div class="text__info__rectangle">
+                <span class="label">Deliv. Date:</span>
+                <span class="underscores">_</span>
+                <div class="box__date__state">
+                  {{ order?.delivDate }}
+                </div>
+              </div>  
             </div>
-
-            <div class="text__info__rectangle">
-              <span class="label">Status:</span>
-              <span class="underscores">______</span>  
-
-              <template v-if="account?.accountType === 'CUSTOMER'">
-                <select v-model="selectedStatus" class="box__date__state">
-                  <option :value="order?.orderState">{{ order?.orderState }} </option>
-                  <option v-if="canCancelOrder()" value="Cancelled">Cancel</option>
-                </select>
-              </template>
-              
-              <template v-else-if="account?.accountType === 'EMPLOYEE'">
-                <select v-model="selectedStatus" class="box__date__state">
-                  <option value="">{{ order?.orderState }} </option>
-                  <option v-if="order?.orderState === 'Ordered'" value="Ordered">Ordered</option>
-                  <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
-
-                  <option v-if="order?.orderState === 'InPreparation'" value="InPreparation">InPreparation</option>
-                  <option v-if="order?.orderState === 'InPreparation'" value="Prepared">Prepared</option>
-
-                  <option v-if="order?.orderState === 'Prepared'" value="Prepared">Prepared</option>
-                  <option v-if="order?.orderState === 'Prepared'" value="Delivered">Delivered</option>
-                </select>
-              </template>
-
-              <template v-else-if="account?.accountType === 'MANAGER'">
-                <select v-model="selectedStatus" class="box__date__state">
-                  <option value="">{{ order?.orderState }} </option>
-                  <option v-if="order?.orderState === 'Ordered'" value="Ordered">Ordered</option>
-                  <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
-                  <option v-if="order?.orderState === 'Ordered'" value="Cancelled">Cancelled</option>
-
-                  <option v-if="order?.orderState === 'InPreparation'" value="InPreparation">InPreparation</option>
-                  <option v-if="order?.orderState === 'InPreparation'" value="Prepared">Prepared</option>
-                  <option v-if="order?.orderState === 'InPreparation'" value="Cancelled">Cancelled</option>
-
-                  <option v-if="order?.orderState === 'Prepared'" value="Prepared">Prepared</option>
-                  <option v-if="order?.orderState === 'Prepared'" value="Delivered">Delivered</option>
-                  <option v-if="order?.orderState === 'Prepared'" value="Cancelled">Cancelled</option>
-                </select>
-              </template>
-
-              <template v-else>
-                <div class="box__date__state">{{ order?.orderState }}</div>
-              </template>
-            </div>
-            
-
-
-            <div class="text__info__rectangle">
-              <span class="label">Order Date:</span>
-              <span class="underscores">__</span>
-              <div class="box__date__state">
-                {{ order?.orderDate }}
-              </div>
-            </div>
-            
-            <div class="text__info__rectangle">
-              <span class="label">Deliv. Date:</span>
-              <span class="underscores">_</span>
-              <div class="box__date__state">
-                {{ order?.delivDate }}
-              </div>
-            </div>  
           </div>
-        </div>
 
-        <div class="footer">
-          <button class="buttonSave" @click = "saveButtonAction">Save changes</button> 
+          <div class="footer">
+            <button class="buttonSave" @click="saveButtonAction">Save changes</button> 
+          </div>
         </div>
       </div>
     </div>
@@ -207,13 +178,21 @@ onMounted(() => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap');
 
+/* NEW: Wraps header and content */
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f7f4f1; /* Match AppShell background color */
+}
+
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  flex: 1; /* Takes up remaining height below header */
   width: 100%;
-  background-color: #FFFFFF;
   font-family: 'Inconsolata';
   color : #000000;
 }
@@ -224,7 +203,6 @@ onMounted(() => {
 }
 
 .box__background {
-  
   width: 921px;
   height: 612px;
   border: 5px solid #3D3C3C;
@@ -271,7 +249,6 @@ onMounted(() => {
   background-position: center;
   cursor: pointer;
 }
-
 
 .main__content {
   flex: 1;
@@ -368,5 +345,4 @@ onMounted(() => {
 .underscores {
   color: #FFFFFF; 
 }
-
 </style>
