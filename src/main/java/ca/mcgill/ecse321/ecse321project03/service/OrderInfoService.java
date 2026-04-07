@@ -30,9 +30,13 @@ public class OrderInfoService {
      */
     @Transactional
     public List<Order> viewOrders(int userID) {
-        checkIfStaffMember(userID);
-        
-        return (List<Order>) orderRepository.findAll();
+        // If staff member, return all customers
+        if (checkIfStaffMember(userID)) {
+            return (List<Order>) orderRepository.findAll();
+        }
+        // If customer, return only their list
+        return (List<Order>) orderRepository.findByCustomer_Id(userID);
+
     }
     
 
@@ -101,9 +105,12 @@ public class OrderInfoService {
      * @param userID
      * @return
      */
-    private void checkIfStaffMember(int userID) {
+    private boolean checkIfStaffMember(int userID) {
         if(roleRepository.findByAccount_Id(userID) == null){
-            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
+            return false;
+            // throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
         }
+
+        return true;
     }
 }

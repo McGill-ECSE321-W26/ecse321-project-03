@@ -15,6 +15,9 @@ const colors = [
   "Green",
   "Orange",
   "Blue",
+  "Purple",
+  "Pink",
+  "Red",
 ];
 
 const showForm = ref(false);
@@ -29,43 +32,51 @@ if (session && session.accountType === "MANAGER") {
 const filters = ref({
   outOfStock: false,
   lowStock: false,
-  sizes: ["XS"], // XS checked by default (as in screenshot)
-  colors: ["White", "Blue"], // White & Blue checked by default
+  sizes: ["XS", "S", "M", "L", "XL"],
+  colors: [
+    "White",
+    "Brown",
+    "Black",
+    "Grey",
+    "Yellow",
+    "Green",
+    "Orange",
+    "Blue",
+    "Purple",
+    "Pink",
+    "Red",
+  ],
 });
 
-const products = ref([
-  {
-    id: 1,
-    name: "Flowy Blouse",
-    image: "/images/blouse.jpg",
-    sizes: ["XS", "S"],
-    color: "White",
-  },
-  {
-    id: 2,
-    name: "Tailored Shirt",
-    image: "/images/shirt.jpg",
-    sizes: ["XS", "M", "L"],
-    color: "Blue",
-  },
-  {
-    id: 3,
-    name: "V-Neck sweater",
-    image: "/images/sweater.jpg",
-    sizes: ["XS", "S", "M"],
-    color: "White",
-  },
-]);
+function toggleAll(type) {
+  if (type === "sizes") {
+    filters.value.sizes =
+      filters.value.sizes.length === sizes.length ? [] : [...sizes];
+  } else if (type === "colors") {
+    filters.value.colors =
+      filters.value.colors.length === colors.length ? [] : [...colors];
+  }
+}
+
+const products = ref([]);
 
 const filteredProducts = computed(() => {
   return products.value.filter((product) => {
+    if (!filters.value.outOfStock && product.totalStock === 0) return false;
+    if (!filters.value.lowStock && product.hasLowStock) return false;
+
     const sizeMatch =
       filters.value.sizes.length === 0 ||
-      product.sizes.some((s) => filters.value.sizes.includes(s));
+      filters.value.sizes.some((s) => product.availableSizes.includes(s));
+
     const colorMatch =
       filters.value.colors.length === 0 ||
-      filters.value.colors.includes(product.color);
-    return sizeMatch && colorMatch;
+      filters.value.colors.some((c) => product.availableColors.includes(c));
+
+    const priceMatch =
+      maxPrice.value === PRICE_LIMIT || product.price <= maxPrice.value;
+
+    return sizeMatch && colorMatch && priceMatch;
   });
 });
 
@@ -105,9 +116,29 @@ const addItem = (newItem) => {
         >
       </div>
 
+      <!-- Price slider -->
+      <div class="filter-group">
+        <h4>Price</h4>
+        <input
+          type="range"
+          min="0"
+          :max="PRICE_LIMIT"
+          step="5"
+          v-model.number="maxPrice"
+        />
+        <span class="price-label">
+          Up to: {{ maxPrice === PRICE_LIMIT ? "No limit" : "$" + maxPrice }}
+        </span>
+      </div>
+
       <!-- Size filters -->
       <div class="filter-group">
         <h4>Size</h4>
+        <span class="toggle-all" @click="toggleAll('sizes')">
+          {{
+            filters.sizes.length === sizes.length ? "Deselect all" : "All sizes"
+          }}
+        </span>
         <label class="container" v-for="size in sizes" :key="size">
           <input type="checkbox" :value="size" v-model="filters.sizes" />
           <span class="checkmark"></span>
@@ -118,6 +149,13 @@ const addItem = (newItem) => {
       <!-- Color filters -->
       <div class="filter-group">
         <h4>Color</h4>
+        <span class="toggle-all" @click="toggleAll('colors')">
+          {{
+            filters.colors.length === colors.length
+              ? "Deselect all"
+              : "All colors"
+          }}
+        </span>
         <label class="container" v-for="color in colors" :key="color">
           <input type="checkbox" :value="color" v-model="filters.colors" />
           <span class="checkmark"></span>
@@ -145,15 +183,24 @@ const addItem = (newItem) => {
         <p>Create new</p>
       </div>-->
 
-      <!-- Product cards (filtered) -->
-      <div
-        class="product-card"
-        v-for="product in filteredProducts"
-        :key="product.id"
-      >
-        <img :src="imgUrl" alt="test" style="width: 200px" />
-        <p>{{ product.name }}</p>
-      </div>
+      <template v-else>
+        <!-- Create Product Card -->
+        <div class="product-card create-card">
+          <div class="plus-icon">+</div>
+          <p>Create new</p>
+        </div>
+
+        <!-- Product Cards -->
+        <div
+          class="product-card"
+          v-for="product in filteredProducts"
+          :key="product.id"
+        >
+          <img :src="product.image" :alt="product.name" />
+          <p>{{ product.name }}</p>
+          <p>${{ product.price?.toFixed(2) }}</p>
+        </div>
+      </template>
     </main>
   </div>
 
@@ -181,6 +228,7 @@ const addItem = (newItem) => {
   display: flex;
   flex-direction: column;
   padding: 16px;
+  padding-right: 30px;
   gap: 16px;
 }
 
@@ -202,6 +250,29 @@ const addItem = (newItem) => {
   gap: 8px;
   font-family: monospace;
   font-size: 1rem;
+}
+
+.toggle-all {
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #555;
+}
+
+.toggle-all:hover {
+  color: #000;
+}
+
+.price-label {
+  font-size: 0.9rem;
+  margin-top: 2px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #1209ab;
+  background-color: #ffffff;
+  cursor: pointer;
 }
 
 /* --- Product Grid --- */
