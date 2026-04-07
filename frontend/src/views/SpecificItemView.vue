@@ -4,20 +4,19 @@
 
       <div class="title-bar">
         <button class="back-btn" @click="$router.back()">← Back</button>
-        <span class="title-name">{{ product.name }}</span>
+        <span class="title-name">{{ product?.name || 'Loading...' }}</span>
       </div>
 
-      <div class="window-body">
+      <div class="window-body" v-if="!loading && product">
 
         <div class="left">
           <div class="image">
             <img :src="product.imageUrl" :alt="product.name" />
           </div>
-          <p class="stock">Stock left: {{ selectedVariant ? selectedVariant.stock : 'Select Color & Size' }}</p>
+          <p class="stock">Stock left: {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : 'Select Color & Size' }}</p>
         </div>
 
         <div class="right">
-
           <div class="row">
             <span class="lbl">Name:</span>
             <span class="val">{{ product.name }}</span>
@@ -25,7 +24,7 @@
 
           <div class="row">
             <span class="lbl">Price:</span>
-            <span class="val">${{ product.price.toFixed(2) }}</span>
+            <span class="val">${{ product.price?.toFixed(2) }}</span>
           </div>
 
           <div class="row">
@@ -33,7 +32,7 @@
             <div class="qty-ctrl">
               <button @click="qty > 0 && qty--">-</button>
               <span>{{ qty }}</span>
-              <button @click="selectedVariant && qty < selectedVariant.stock && qty++">+</button>
+              <button @click="selectedVariant && qty < (selectedVariant.stockLevel || selectedVariant.stock) && qty++">+</button>
             </div>
           </div>
 
@@ -71,7 +70,7 @@
           {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
         </button>
       </div>
-     <!-- Manager-only Restock Button -->
+      
       <div v-if="isManager" class="button">
         <button class="cart-btn" @click="showRestockForm = true">
           Restock
@@ -80,7 +79,6 @@
 
     </div>
 
-    <!-- Restock Modal using RestockItemView.vue -->
     <RestockItemView
       :visible="showRestockForm"
       :product="product"
@@ -92,8 +90,8 @@
 
 <script>
 import { getSession } from '../session/storage'
-import { addToCart } from '../api/item.js'
-import RestockItemView from './RestockItemView.vue'  // <-- Import your actual RestockItemView
+import { addToCart, getProduct } from '../api/item.js'
+import RestockItemView from './RestockItemView.vue'
 
 export default {
   name: 'SpecificItemView',
@@ -102,54 +100,54 @@ export default {
   data() {
     const session = getSession()
     return {
-      isManager: true,
-      //session?.accountType === 'MANAGER',
+      session: session,
+      isManager: session?.accountType === 'MANAGER',
       showRestockForm: false,
       qty: 0,
-      selectedColor: null, 
-      selectedSize: null,  // Added size tracking
+      selectedColor: null,
+      selectedSize: null,
       added: false,
-      loading: false,
-      product: {
-        id: 1,
-        name: 'Flowy Blouse',
-        price: 29.99,
-        imageUrl: 'https://images.unsplash.com/photo-1584030373081-f37b7bb4fa8e?w=400&q=80',
-        // Updated mock data to reflect variants with both colors and sizes
-        variants: [
-          { id: 101, color: 'White', size: 'S', stock: 12 },
-          { id: 102, color: 'White', size: 'M', stock: 5 },
-          { id: 103, color: 'Black', size: 'S', stock: 23 },
-          { id: 104, color: 'Black', size: 'L', stock: 0 } 
-        ]
-      },
+      loading: true,
+      product: null,
     }
   },
 
-  // ── uncomment when backend is ready ──────────────────
-  // async mounted() {
-  //   const id = this.$route.params.id
-  //   this.product = await getProduct(id, 1)
-  //   this.loading = false
-  // },
-  // ─────────────────────────────────────────────────────
+  async mounted() {
+  const id = this.$route.params.id;
+  try {
+    const responseDto = await getProduct(id, this.session?.accountId || 1);
+    console.log('Response:', responseDto); // remove once working
+
+    this.product = {
+      id: responseDto.id ?? responseDto.item?.id,
+      name: responseDto.name ?? responseDto.item?.name,
+      price: responseDto.price ?? responseDto.item?.price,
+      imageUrl: responseDto.imageUrls && responseDto.imageUrls.length > 0
+        ? `http://localhost:8080${responseDto.imageUrls[0]}`
+        : '../assets/images/placeholder.jpg',
+      variants: responseDto.variants || []
+    };
+  } catch (error) {
+    console.error("Failed to load specific item:", error);
+    alert("Item not found!");
+  } finally {
+    this.loading = false;
+  }
+},
 
   computed: {
-    // Finds all unique colors
     uniqueColors() {
       if (!this.product || !this.product.variants) return [];
-      const colors = this.product.variants.map(v => v.color);
-      return [...new Set(colors)]; 
-    },
-    
-    // Finds sizes available specifically for the chosen color
-    availableSizesForColor() {
-      if (!this.product || !this.product.variants || !this.selectedColor) return [];
-      const variantsWithColor = this.product.variants.filter(v => v.color === this.selectedColor);
-      return variantsWithColor.map(v => v.size);
+      return [...new Set(this.product.variants.map(v => v.color))];
     },
 
-    // Pinpoints the exact variant ID based on the color + size picked
+    availableSizesForColor() {
+      if (!this.product || !this.product.variants || !this.selectedColor) return [];
+      return this.product.variants
+        .filter(v => v.color === this.selectedColor)
+        .map(v => v.size);
+    },
+
     selectedVariant() {
       if (!this.product || !this.selectedColor || !this.selectedSize) return null;
       return this.product.variants.find(
@@ -161,18 +159,17 @@ export default {
   methods: {
     handleSelectColor(color) {
       this.selectedColor = color;
-      this.selectedSize = null; // Reset size when color changes
-      this.qty = 0;             // Reset quantity to prevent going over stock
+      this.selectedSize = null;
+      this.qty = 0;
     },
 
     handleSelectSize(size) {
       this.selectedSize = size;
-      
-      // Auto-adjust quantity so it doesn't exceed the newly selected size's stock
       this.$nextTick(() => {
-        if (this.selectedVariant && this.qty > this.selectedVariant.stock) {
-          this.qty = this.selectedVariant.stock;
-        } else if (this.qty === 0 && this.selectedVariant && this.selectedVariant.stock > 0) {
+        const stock = this.selectedVariant?.stockLevel || this.selectedVariant?.stock || 0;
+        if (this.selectedVariant && this.qty > stock) {
+          this.qty = stock;
+        } else if (this.qty === 0 && this.selectedVariant && stock > 0) {
           this.qty = 1;
         }
       });
@@ -183,27 +180,33 @@ export default {
         alert("Please select both a color and a size!");
         return;
       }
-      
       if (this.qty === 0) {
         alert("Please select a valid quantity!");
         return;
       }
 
-      if (this.qty > this.selectedVariant.stock) {
+      const stock = this.selectedVariant.stockLevel || this.selectedVariant.stock;
+      if (this.qty > stock) {
         alert("Not enough stock for this variant!");
         return;
       }
 
-      // Sends accountId (1), the specific variant id, and qty
-      await addToCart(1, this.selectedVariant.id, this.qty)
-      this.added = true
-      setTimeout(() => this.added = false, 2000)
+      try {
+        await addToCart(this.session?.accountId || 1, this.selectedVariant.id, this.qty)
+        this.added = true
+        setTimeout(() => this.added = false, 2000)
+      } catch (error) {
+        alert(error.message);
+      }
     },
 
     handleRestockSubmit(restockData) {
       restockData.forEach(r => {
         const variant = this.product.variants.find(v => v.id === r.id)
-        if (variant) variant.stock += r.quantity
+        if (variant) {
+          if (variant.stockLevel !== undefined) variant.stockLevel += r.quantity;
+          if (variant.stock !== undefined) variant.stock += r.quantity;
+        }
       })
     }
   }

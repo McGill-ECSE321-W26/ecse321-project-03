@@ -149,4 +149,19 @@ public class ItemDefinitionController {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
     }
+
+    @GetMapping("/{itemId}")
+public ResponseEntity<?> getItemById(@RequestParam int accountId, @PathVariable int itemId) {
+    try {
+        Item item = itemDefinitionService.getItemById(itemId); // you may need to add this service method too
+        List<ItemType> variants = itemDefinitionService.getItemTypesForItem(itemId);
+        List<String> imageUrls = imageService.findImagesForItem(itemId).stream()
+                .map(im -> IMAGE_URL_PREFIX + im.getKey())
+                .collect(Collectors.toList());
+        ItemDefinitionResponseDto response = new ItemDefinitionResponseDto(item, variants, imageUrls);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    } catch (Ecse321Project03Exception e) {
+        return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+    }
+}
 }

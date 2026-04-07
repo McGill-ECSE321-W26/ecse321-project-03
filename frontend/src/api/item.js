@@ -1,42 +1,47 @@
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+import { API_BASE, readErrorMessage } from './base.js'
 
-// GET /api/products/{id}
-export async function getProduct(id) {
-  const res = await fetch(`${API_BASE}/products/${id}`)
-  if (!res.ok) throw new Error('Failed to fetch product')
-  return res.json()
+const base = API_BASE || 'http://localhost:8080'
+
+// GET all items
+export async function getAllItems(accountId) {
+  const url = `${base}/items?accountId=${accountId}`
+  const res = await fetch(url)
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to fetch items: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : []
 }
 
-// GET /api/products
-export async function getAllProducts() {
-  const res = await fetch(`${API_BASE}/products`)
-  if (!res.ok) throw new Error('Failed to fetch products')
-  return res.json()
+export async function getProduct(id, accountId) {
+  const res = await fetch(`${base}/items/${id}?accountId=${accountId}`)
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to fetch product: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : null
 }
 
-// POST /api/cart
-export async function addToCart(productId, quantity, colors) {
-  const res = await fetch(`${API_BASE}/cart`, {
+// POST add to cart (Updated to match your Vue component!)
+export async function addToCart(accountId, variantId, quantity) {
+  const res = await fetch(`${base}/cart`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, quantity, colors })
+    body: JSON.stringify({ accountId, variantId, quantity })
   })
-  if (!res.ok) throw new Error('Failed to add to cart')
-  return res.json()
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to add to cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text).catch(() => true) : true
 }
 
-// GET /api/cart
+// GET cart
 export async function getCart() {
-  const res = await fetch(`${BASE_URL}/cart`)
-  if (!res.ok) throw new Error('Failed to fetch cart')
-  return res.json()
+  const res = await fetch(`${base}/cart`)
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to fetch cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : []
 }
 
-// DELETE /api/cart/:productId
+// DELETE from cart
 export async function removeFromCart(productId) {
-  const res = await fetch(`${BASE_URL}/cart/${productId}`, {
-    method: 'DELETE'
-  })
-  if (!res.ok) throw new Error('Failed to remove from cart')
-  return res.json()
+  const res = await fetch(`${base}/cart/${productId}`, { method: 'DELETE' })
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to remove from cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text).catch(() => true) : true
 }
