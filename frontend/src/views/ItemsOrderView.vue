@@ -34,8 +34,7 @@ function formatPrice(value) {
 }
 
 function goBackToOrders() {
-  router.push({ name: 'ordersList' });
-}
+  router.push('/app?tab=orders');}
 
 </script>
 
@@ -64,7 +63,31 @@ function goBackToOrders() {
             </div>
           </div>
         </section>
+
+        <section class="card-block checkout-card">
+          <h2>DELIVERY METHODS</h2>
+
+          <div class="method-row single-method-row">
+            <div class="method-details">
+              <div class="method-header-row">
+                <h3>Standard</h3>
+                <span class="method-fee">FREE</span>
+              </div>
+              <p>4-10 business days</p>
+            </div>
+          </div>
+
+        </section>
+
+        <section class="card-block checkout-card">
+          <h2>BILLING ADDRESS</h2>
+          <label class="radio-row single-option">
+            <span>My billing address and shipping address are the same</span>
+          </label>
+        </section>
       </section>
+
+
 
       <aside class="checkout-sidebar">
         <section class="card-block summary-card">

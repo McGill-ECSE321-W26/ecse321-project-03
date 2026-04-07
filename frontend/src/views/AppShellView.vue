@@ -42,6 +42,12 @@ async function findNumberOfPoints() {
 }
 onMounted(() => {
   findNumberOfPoints();
+
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+  const tab = urlParams.get('tab');
+  if (tab) {
+    activeTab.value = tab;
+  }
 });
 
 function refreshSession() {
