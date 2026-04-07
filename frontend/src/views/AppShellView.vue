@@ -1,25 +1,26 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { clearSession, getSession } from '../session/storage'
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+import { clearSession, getSession } from "../session/storage";
+import Catalog from "./Catalog.vue";
 
-const router = useRouter()
-const session = ref(getSession())
+const router = useRouter();
+const session = ref(getSession());
 
-const isManager = computed(() => session.value?.accountType === 'MANAGER')
-const isEmployee = computed(() => session.value?.accountType === 'EMPLOYEE')
+const isManager = computed(() => session.value?.accountType === "MANAGER");
+const isEmployee = computed(() => session.value?.accountType === "EMPLOYEE");
 
-const activeTab = ref('shop')
+const activeTab = ref("shop");
 
 function logout() {
-  clearSession()
-  router.replace({ name: 'login' })
+  clearSession();
+  router.replace({ name: "login" });
 }
 
 // display inventory tab only for managers
 function pickTab(tab) {
-  if (tab === 'inventory' && !isManager.value) return
-  activeTab.value = tab
+  if (tab === "inventory" && !isManager.value) return;
+  activeTab.value = tab;
 }
 </script>
 
@@ -33,7 +34,11 @@ function pickTab(tab) {
         </span>
       </div>
       <nav class="nav-tabs">
-        <button type="button" :class="{ on: activeTab === 'shop' }" @click="pickTab('shop')">
+        <button
+          type="button"
+          :class="{ on: activeTab === 'shop' }"
+          @click="pickTab('shop')"
+        >
           Shop
         </button>
         <button
@@ -49,13 +54,14 @@ function pickTab(tab) {
     </header>
 
     <main class="main">
-      <section v-show="activeTab === 'shop'" class="card">
-        <h2>Shop</h2>
-        <p class="muted">Browse the boutique catalog. (Coming soon.)</p>
+      <section v-show="activeTab === 'shop'">
+        <Catalog />
       </section>
       <section v-show="activeTab === 'inventory'" class="card">
         <h2>Inventory</h2>
-        <p class="muted">Manage stock and items. Managers only. (Coming soon.)</p>
+        <p class="muted">
+          Manage stock and items. Managers only. (Coming soon.)
+        </p>
       </section>
     </main>
   </div>
@@ -130,9 +136,9 @@ function pickTab(tab) {
 }
 
 .main {
-  max-width: 720px;
+  max-width: 100%;
+  max-height: 100%;
   margin: 0 auto;
-  padding: 2rem 1.25rem;
 }
 
 .card {
