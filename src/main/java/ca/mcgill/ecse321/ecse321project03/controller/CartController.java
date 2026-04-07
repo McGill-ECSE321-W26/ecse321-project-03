@@ -1,23 +1,20 @@
 package ca.mcgill.ecse321.ecse321project03.controller;
 
-import ca.mcgill.ecse321.ecse321project03.dto.CartCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartItemDto;
-import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
-import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
+import ca.mcgill.ecse321.ecse321project03.dto.CartItemResponseDto;
+import ca.mcgill.ecse321.ecse321project03.dto.CartItemQuantityUpdateDto;
+import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
+import ca.mcgill.ecse321.ecse321project03.dto.ItemTypeDto;
 import ca.mcgill.ecse321.ecse321project03.model.Cart;
 import ca.mcgill.ecse321.ecse321project03.model.CartItem;
+import ca.mcgill.ecse321.ecse321project03.model.ItemImage;
 import ca.mcgill.ecse321.ecse321project03.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
 
 /**
  * REST controller responsible for handling cart-related API endpoints.
@@ -35,35 +32,24 @@ public class CartController {
      * Creates a new cart for a user.
      *
      * @param id the id of the user
-     * @param cartCreationDto the cart creation data
-     * @return a ResponseEntity containing the created CartDto if successful,
-     *         or an ErrorDto if cart creation fails
+     * @return the created cart
      */
     @PostMapping("/{id}")
-    public ResponseEntity<?> createNewCart(@PathVariable int id, @RequestBody CartCreationDto cartCreationDto) {
-        try {
-            Cart cart = cartService.createNewCart(id);
-            return new ResponseEntity<>(new CartDto(cart), HttpStatus.CREATED);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public CartDto createNewCart(@PathVariable int id) {
+        Cart cart = cartService.createNewCart(id);
+        return new CartDto(cart);
     }
 
     /**
      * Deletes a user's cart.
      *
      * @param id the id of the user
-     * @return a ResponseEntity with NO_CONTENT status if successful,
-     *         or an ErrorDto if deletion fails
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCart(@PathVariable int id) {
-        try {
-            cartService.deleteCart(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCart(@PathVariable int id) {
+        cartService.deleteCart(id);
     }
 
     /**
@@ -71,33 +57,76 @@ public class CartController {
      *
      * @param id the id of the user
      * @param cartItemDto the cart item data containing the item type and quantity
-     * @return a ResponseEntity containing the saved CartItemDto if successful,
-     *         or an ErrorDto if the operation fails
+     * @return the created cart item
      */
     @PostMapping("/{id}/items")
-    public ResponseEntity<?> addItemToCart(@PathVariable int id, @RequestBody CartItemDto cartItemDto) {
-        try {
-            CartItem cartItem = cartService.addItemToCart(id, cartItemDto);
-            return new ResponseEntity<>(new CartItemDto(cartItem), HttpStatus.CREATED);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public CartItemDto addItemToCart(@PathVariable int id, @RequestBody CartItemDto cartItemDto) {
+        CartItem cartItem = cartService.addItemToCart(id, cartItemDto);
+        return new CartItemDto(cartItem);
     }
+
+    /**
+     * Retrieves all items in a user's cart.
+     *
+     * @param id the id of the user
+     * @return the list of cart items in the user's cart
+     */
+    @GetMapping("/{id}/items")
+    public List<CartItemResponseDto> getCartItems(@PathVariable int id) {
+        return cartService.getCartItems(id).stream()
+                .map(cartItem -> {
+                    int generalItemId = cartItem.getCartItemId().getItemType().getGeneralItem().getId();
+
+                    ItemImage firstImage = cartService.getFirstImageForCartItem(generalItemId);
+                    ItemImageDto imageDto = firstImage == null ? null : new ItemImageDto(firstImage);
+
+                    return new CartItemResponseDto(
+                            cartItem.getQuantity(),
+                            new ItemTypeDto(cartItem.getCartItemId().getItemType()),
+                            new CartDto(cartItem.getCartItemId().getCart()),
+                            imageDto
+                    );
+                })
+                .toList();
+    }
+
+    /**
+     * Removes one item type entirely from a user's cart.
+     *
+     * @param id the id of the user
+     * @param itemTypeId the id of the item type to remove
+     */
+    @DeleteMapping("/{id}/items/{itemTypeId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeItemFromCart(@PathVariable int id, @PathVariable int itemTypeId) {
+        cartService.removeItemFromCart(id, itemTypeId);
+    }
+
+    /**
+     * Updates the quantity of one item type in a user's cart.
+     *
+     * @param id the id of the user
+     * @param itemTypeId the id of the item type to update
+     * @param updateDto the cart item data containing the new quantity
+     * @return the updated cart item
+     */
+    @PutMapping("/{id}/items/{itemTypeId}")
+    public CartItemDto updateCartItemQuantity(@PathVariable int id, @PathVariable int itemTypeId,
+                                              @RequestBody CartItemQuantityUpdateDto updateDto) {
+        CartItem cartItem = cartService.updateCartItemQuantity(id, itemTypeId, updateDto.getQuantity());
+        return new CartItemDto(cartItem);
+    }
+
 
     /**
      * Retrieves the total price of all items in a user's cart.
      *
      * @param id the id of the user
-     * @return a ResponseEntity containing the cart total price if successful,
-     *         or an ErrorDto if the request fails
+     * @return the total cart price
      */
     @GetMapping("/{id}/total")
-    public ResponseEntity<?> findCartTotalPrice(@PathVariable int id) {
-        try {
-            double total = cartService.findCartTotalPrice(id);
-            return new ResponseEntity<>(total, HttpStatus.OK);
-        } catch (Ecse321Project03Exception e) {
-            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
-        }
+    public double findCartTotalPrice(@PathVariable int id) {
+        return cartService.findCartTotalPrice(id);
     }
 }

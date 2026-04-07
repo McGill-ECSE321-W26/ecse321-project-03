@@ -4,6 +4,7 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
+import ca.mcgill.ecse321.ecse321project03.service.AccountService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,10 @@ public class OrderController {
 
     @Autowired
     private OrderInfoService orderInfoService;
-
+    
     @Autowired
-    private RoleRepository roleRepository;
+    private AccountService accountService;
 
-    @Autowired
-    private OrderRepository orderRepository;
 
 
     /**
@@ -198,5 +197,10 @@ public class OrderController {
                                            @RequestParam int accountId, @RequestParam boolean usePoints) {
             String message = orderService.redeemLoyaltyPts(accountId, orderId, usePoints);
             return message;
+    }
+
+    @GetMapping("/{id}/loyalty-points")
+    public int getLoyaltyPoints(@PathVariable int id) {
+        return accountService.getLoyaltyPoints(id);
     }
 }
