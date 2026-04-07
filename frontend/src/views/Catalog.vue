@@ -87,6 +87,7 @@ import { getAllItems } from "../api/item.js";
 import { getSession } from "../session/storage";
 import { useRouter } from "vue-router";
 import AddItemView from "./AddItemView.vue";
+import { createItem } from "../api/item.js"; 
 
 const session = getSession();
 const router = useRouter();
@@ -147,10 +148,45 @@ const filteredProducts = computed(() => {
   });
 });
 
-function addItem(createdDto) {
-  products.value.push(mapDto(createdDto));
-  showForm.value = false;
+
+
+async function addItem(createdDto, imageFiles = null) {
+  try {
+    const variants = [];
+    for (const size of createdDto.sizes) {
+      for (const color of createdDto.colors) {
+        variants.push({
+          size,
+          color,
+          initialStock: createdDto.quantity
+        });
+      }
+    }
+
+    const payload = {
+      name: createdDto.name,
+      price: createdDto.price,
+      tag: createdDto.tag,
+      variants
+    };
+
+    const savedItem = await createItem(session?.accountId || 1, payload, imageFiles);
+
+    
+    loading.value = true;
+    const data = await getAllItems(session?.accountId || 1);
+    products.value = data.map(mapDto);
+    showForm.value = false;
+
+  } catch (error) {
+    console.error("Failed to save the new item:", error);
+    alert(`Could not create the item: ${error.message}`);
+  } finally {
+    loading.value = false;
+  }
 }
+
+
 
 onMounted(async () => {
   try {
@@ -174,7 +210,7 @@ onMounted(async () => {
   background-color: white;
 }
 
-/* --- Sidebar --- */
+
 .filters {
   background: linear-gradient(to right, #ffe5f9 49%, #ffffff 100%);
   min-width: 160px;

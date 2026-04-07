@@ -27,7 +27,8 @@ const submitForm = () => {
     price: null,
     colors: [],
     sizes: [],
-    tag: ""
+    tag: "",
+    quantity: 1
   };
 };
 </script>
@@ -64,7 +65,7 @@ const submitForm = () => {
               <input type="number" step="0.01" min="0" v-model.number="item.price" placeholder="0.00" required />
 
               <label>Quantity:</label>
-              <input type="number" min="1" placeholder="1" />
+              <input type="number" min="1" placeholder="1" v-model.number="item.quantity" />
 
               <label>Colors:</label>
               <div class="color-grid">
