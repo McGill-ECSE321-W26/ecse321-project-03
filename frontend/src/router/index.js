@@ -1,11 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import { isLoggedIn } from '../session/storage'
 import LoginView from '../views/LoginView.vue'
 import AppShellView from '../views/AppShellView.vue'
 import SpecificItemView from '../views/SpecificItemView.vue'
+import ItemsOrderView from '../views/ItemsOrderView.vue'
+import OrdersListView from "../views/OrdersListView.vue";
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/login',
@@ -17,6 +19,20 @@ const router = createRouter({
       path: '/app',
       name: 'app',
       component: AppShellView,
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/order-items/:id',
+      name: 'order-items',
+      component: ItemsOrderView,
+      meta: { requiresAuth: true },
+    },
+
+          {
+      path: '/orders',
+      name: 'ordersList',
+      component: OrdersListView,
       meta: { requiresAuth: true },
     },
     { path: '/app/account', redirect: '/app' },
