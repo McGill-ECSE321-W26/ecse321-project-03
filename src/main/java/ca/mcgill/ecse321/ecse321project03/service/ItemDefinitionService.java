@@ -402,4 +402,16 @@ public class ItemDefinitionService {
         }
         return null;
     }
+
+        /**
+     * Returns a single item by id.
+     *
+     * @param itemId the item id
+     * @return the Item entity
+     */
+    public Item getItemById(int itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                        "No item found with id " + itemId));
+    }
 }
