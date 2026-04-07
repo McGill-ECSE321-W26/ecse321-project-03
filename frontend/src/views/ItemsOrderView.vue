@@ -32,6 +32,11 @@ const subtotal = computed(() =>
 function formatPrice(value) {
   return `$ ${Number(value || 0).toFixed(2)}`
 }
+
+function goBackToOrders() {
+  router.push({ name: 'ordersList' });
+}
+
 </script>
 
 <template>
@@ -97,7 +102,7 @@ function formatPrice(value) {
         </div>
       </section>
 
-        <button type="button" class="btn" @click="router.back()">BACK TO ORDER</button>
+        <button type="button" class="btn" @click="goBackToOrders">BACK TO ORDERS</button>
 
       </aside>
     </div>

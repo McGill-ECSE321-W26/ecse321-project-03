@@ -82,7 +82,8 @@ async function loadOrders() {
  * Once the page loads, call your backend
  */
 onMounted(() => {
-  loadOrders()
+  loadOrders();
+
 })
 
 const sortKey = ref('orderId')

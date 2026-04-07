@@ -22,8 +22,14 @@ const isSelfAssignChecked = ref(false);
 
 
 function goToItemsView() {
-  if (order.value?.orderId) {
-    router.push(`/order-items/${order.value.orderId}`);
+  const id = props.orderId;
+  if (id) {
+    emit('close'); // Close the popup first
+
+    router.push({
+      name: 'order-items',
+      params: { id: id }
+    });
   }
 }
 
