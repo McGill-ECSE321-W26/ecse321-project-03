@@ -157,6 +157,10 @@ public class OrderService {
             itemTypeRepository.save(itemType);
         }
 
+        double finalPriceAfterDiscount = calculateFinalPriceAfterDiscount(customer.getId(), order.getId());
+        order.setTotalPriceAfterDiscount(finalPriceAfterDiscount);
+        orderRepository.save(order);
+
         // 5) Clear cart
         cartItemRepository.deleteAll(cartItems);
 
@@ -459,13 +463,16 @@ public class OrderService {
     }
 
     /**
-     * Redeem your loyalty points
+     * Returns a message describing the discount saved on an order based on the account's loyalty level.
+     * Loyalty points are not consumed in this calculation.
+     *
      * @param accountId id of the user
-     * @param orderId id of the order for which you want to redeem the points
+     * @param orderId id of the order for which the discount message is requested
+     * @return a message describing how much money was saved
      * @author Emily Sun and Sonia Ly
      */
     @Transactional
-    public String redeemLoyaltyPts (int accountId, int orderId, boolean usePts){
+    public String redeemLoyaltyPts (int accountId, int orderId){
         Account accountFromDB = accountRepository.findById(accountId).orElse(null);
         Order orderFromDB = orderRepository.findById(orderId).orElse(null);
 
@@ -480,13 +487,10 @@ public class OrderService {
                     "This order does not belong to the account with id " + accountId + ".");
         }
 
-        if (!usePts){
-            return "Points not used.";
-        }
-
         double price = findOrderPrice(orderFromDB);
-        double moneySaved = useLoyaltyPoints(accountFromDB) * price;
-        if(useLoyaltyPoints(accountFromDB) == 0.0){
+        double discountRate = useLoyaltyPoints(accountFromDB);
+        double moneySaved = discountRate * price;
+        if (discountRate == 0.0) {
             return "You don't have enough points to get a discount :(";
         }
         return "You saved $" + String.format("%.2f", moneySaved) + " on this order!";
@@ -500,30 +504,27 @@ public class OrderService {
      */
     private double useLoyaltyPoints(Account account){
         int lytPts = account.getLoyaltyPts();
-        if(lytPts < 10){
-            //no discount
+        if (lytPts < 5) {
+            // 0-4 pts -> 0% off
             return 0.0;
-        }
-        else if (lytPts < 15){
-            // 10-14 pts -> 10% off
+        } else if (lytPts < 10) {
+            // 5-9 pts -> 1% off
+            return 0.01;
+        } else if (lytPts < 15) {
+            // 10-14 pts -> 2% off
+            return 0.02;
+        } else if (lytPts < 20) {
+            // 15-19 pts -> 5% off
+            return 0.05;
+        } else if (lytPts < 35) {
+            // 20-34 pts -> 10% off
             return 0.1;
-        }
-        else if (lytPts < 20){
-            //15-19 pts -> 20% off
+        } else {
+            // 35+ pts -> 20% off
             return 0.2;
         }
-        else if (lytPts < 25){
-            //20-24 pts -> 30% off
-            return 0.3;
-        }
-        else if (lytPts < 35){
-            //25-34 pts -> 40% off
-            return 0.4;
-        }else{
-            // lytpts >= 35 -> 50% off (caps off at 50%)
-            return 0.5;
-        }
     }
+
 
     /**
      * Find the total price of an order
@@ -532,20 +533,50 @@ public class OrderService {
      */
     public double findOrderPrice(Order orderFromDB){
         double price = 0.00;
-        Cart cart = cartRepository.findByAccount_Id(orderFromDB.getCustomer().getId());
-        List <CartItem> cartItemList = cartItemRepository.findByCartItemId_Cart(cart);
+        List<OrderItem> orderItemList = orderItemRepository.findByOrderItemId_Order(orderFromDB);
 
-
-        for (CartItem cartItem : cartItemList){
-            ItemType itemType = cartItem.getCartItemId().getItemType();
+        for (OrderItem orderItem : orderItemList){
+            ItemType itemType = orderItem.getOrderItemId().getItemType();
             Item item = itemType.getGeneralItem();
             double itemPrice = item.getPrice();
-            int quantity = cartItem.getQuantity();
-
-            price += itemPrice*quantity;
+            int quantity = orderItem.getQuantity();
+            price += itemPrice * quantity;
         }
 
         return price;
+    }
+
+    /**
+     * Calculates the final order price after applying the loyalty discount.
+     * Loyalty points are not consumed by this calculation.
+     *
+     * @param accountId id of the user
+     * @param orderId id of the order
+     * @return final price after discount
+     */
+    @Transactional
+    public double calculateFinalPriceAfterDiscount(int accountId, int orderId) {
+        Account accountFromDB = accountRepository.findById(accountId).orElse(null);
+        Order orderFromDB = orderRepository.findById(orderId).orElse(null);
+
+        if (accountFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No person with id " + accountId + " found.");
+        }
+        if (orderFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
+                    "No order with id " + orderId + " found.");
+        }
+        if (orderFromDB.getCustomer() == null || orderFromDB.getCustomer().getId() != accountId) {
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN,
+                    "This order does not belong to the account with id " + accountId + ".");
+        }
+
+        double price = findOrderPrice(orderFromDB);
+        double discountRate = useLoyaltyPoints(accountFromDB);
+        double finalPriceAfterDiscount = price - (discountRate * price);
+
+        return Math.max(finalPriceAfterDiscount, 0.0);
     }
 
     /**

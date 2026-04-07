@@ -3,7 +3,6 @@ import { computed, ref, onMounted } from 'vue'
 import { getSession } from '../session/storage'
 import {
   placeOrder as placeOrderRequest,
-  redeemLoyaltyPoints,
   getLoyaltyPoints,
 } from '../api/checkout.js'
 import { getAccountById, updateAddress } from '../api/account.js'
@@ -18,8 +17,6 @@ const subtotal = computed(() =>
     cartItems.value.reduce((sum, item) => sum + item.itemType.generalItem.price * item.quantity, 0),
 )
 const availablePoints = ref(0)
-const useLoyaltyPoints = ref(false)
-const shippingMethod = ref('standard')
 const billingSameAsShipping = ref(true)
 
 const currentAddress = ref('')
@@ -32,21 +29,17 @@ const loyaltyError = ref('')
 
 const cartItems = ref([])
 
-const shippingFee = computed(() => (shippingMethod.value === 'express' ? 12.0 : 0.0))
 const discountRate = computed(() => {
-  if (!useLoyaltyPoints.value) return 0
   const pts = availablePoints.value
-  if (pts < 10) return 0
-  if (pts < 15) return 0.1
-  if (pts < 20) return 0.2
-  if (pts < 25) return 0.3
-  if (pts < 35) return 0.4
-  return 0.5
+  if (pts < 5) return 0
+  if (pts < 10) return 0.01
+  if (pts < 15) return 0.02
+  if (pts < 20) return 0.05
+  if (pts < 35) return 0.1
+  return 0.2
 })
 const discount = computed(() => subtotal.value * discountRate.value)
-const taxableSubtotal = computed(() => Math.max(subtotal.value - discount.value, 0))
-const tax = computed(() => taxableSubtotal.value * 0.15)
-const total = computed(() => taxableSubtotal.value + tax.value + shippingFee.value)
+const total = computed(() => Math.max(subtotal.value - discount.value, 0))
 
 async function loadLoyaltyPoints() {
   try {
@@ -117,23 +110,14 @@ function formatPrice(value) {
   return `$ ${value.toFixed(2)}`
 }
 
-function removeItem(itemId) {
-  cartItems.value = cartItems.value.filter((item) => item.itemType.id !== itemId)
-}
-
 async function placeOrder() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
 
-    const order = await placeOrderRequest({
+    await placeOrderRequest({
       customerId: accountId,
       delivDate: new Date(), // or your selected date if you add one
     })
-
-    if (useLoyaltyPoints.value) {
-      await redeemLoyaltyPoints(order.id, accountId, true)
-    }
-
     window.alert('Order placed successfully.')
     emit('order-placed')
   } catch (error) {
@@ -146,7 +130,6 @@ async function placeOrder() {
 <template>
   <div class="checkout-page">
     <section class="checkout-main">
-      <div class="checkout-step">1. DELIVERY</div>
       <section class="card-block checkout-card">
         <div class="section-header">
           <div>
@@ -183,8 +166,7 @@ async function placeOrder() {
       <section class="card-block checkout-card">
         <h2>DELIVERY METHODS</h2>
 
-        <label class="radio-row method-row">
-          <input v-model="shippingMethod" type="radio" value="standard" />
+        <div class="method-row single-method-row">
           <div class="method-details">
             <div class="method-header-row">
               <h3>Standard</h3>
@@ -192,18 +174,8 @@ async function placeOrder() {
             </div>
             <p>4-10 business days</p>
           </div>
-        </label>
+        </div>
 
-        <label class="radio-row method-row">
-          <input v-model="shippingMethod" type="radio" value="express" />
-          <div class="method-details">
-            <div class="method-header-row">
-              <h3>Express</h3>
-              <span class="method-fee">{{ formatPrice(12) }}</span>
-            </div>
-            <p>2-3 business days</p>
-          </div>
-        </label>
       </section>
 
       <section class="card-block checkout-card">
@@ -224,15 +196,11 @@ async function placeOrder() {
         </div>
         <div class="summary-line">
           <span>Shipping:</span>
-          <span>{{ shippingFee === 0 ? 'FREE' : formatPrice(shippingFee) }}</span>
+          <span>FREE</span>
         </div>
         <div class="summary-line">
-          <span>Discount (estimate):</span>
+          <span>Discount:</span>
           <span>-{{ formatPrice(discount) }}</span>
-        </div>
-        <div class="summary-line">
-          <span>Total Tax:</span>
-          <span>{{ formatPrice(tax) }}</span>
         </div>
         <div class="summary-line total-line">
           <span>Total:</span>
@@ -244,21 +212,17 @@ async function placeOrder() {
         <h2>LOYALTY POINTS</h2>
         <p v-if="loyaltyError" class="checkout-error">{{ loyaltyError }}</p>
         <div class="loyalty-line">
-          <span>Available:</span>
+          <span>Loyalty Points You Have!</span>
           <span>{{ availablePoints }} points</span>
         </div>
         <div class="loyalty-line">
           <span>Discount Rate:</span>
-          <span>{{ Math.round(discountRate * 100) }}%</span>
+          <span>{{ Math.round(discountRate * 100) }}% (VIP estimate)</span>
         </div>
         <div class="loyalty-line">
-          <span>Estimated Discount:</span>
+          <span>Discount:</span>
           <span>-{{ formatPrice(discount) }}</span>
         </div>
-        <label class="checkbox-row">
-          <input v-model="useLoyaltyPoints" type="checkbox" />
-          <span>Use my loyalty points</span>
-        </label>
       </section>
 
       <section class="card-block cart-card">
@@ -275,9 +239,6 @@ async function placeOrder() {
             <h3>{{ item.itemType.generalItem.name }}</h3>
             <p>SIZE: {{ item.itemType.size }}</p>
             <p>COLOUR: {{ item.itemType.color }}</p>
-            <button type="button" class="text-btn" @click="removeItem(item.itemType.id)">
-              REMOVE
-            </button>
           </div>
           <div class="mini-product-price">
             {{ formatPrice(item.itemType.generalItem.price * item.quantity) }}
@@ -291,6 +252,8 @@ async function placeOrder() {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+
 .checkout-page {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(320px, 380px);
@@ -439,6 +402,10 @@ async function placeOrder() {
   font-size: 0.95rem;
 }
 
+.single-method-row {
+  display: block;
+}
+
 .method-row {
   margin-top: 1.2rem;
 }
@@ -509,7 +476,8 @@ async function placeOrder() {
 .place-order-btn {
   width: 100%;
   padding: 1rem;
-  font-size: 1.8rem;
+  font-size: 2.5rem;
+  font-family: 'Jersey 10', sans-serif;
 }
 
 .secondary-btn:disabled,

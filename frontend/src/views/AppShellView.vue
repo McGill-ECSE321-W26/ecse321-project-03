@@ -106,7 +106,7 @@ function refreshSession() {
       </section>
 
       <section v-show="activeTab === 'cart'">
-        <Cart />
+        <CartView @go-checkout="pickTab('checkout')" />
       </section>
 
       <section v-show="activeTab === 'inventory'">
@@ -115,9 +115,6 @@ function refreshSession() {
 
       <section v-show="activeTab === 'account'">
         <AccountDetailView @session-updated="refreshSession" />
-      </section>
-      <section v-show="activeTab === 'cart'">
-        <CartView @go-checkout="pickTab('checkout')" />
       </section>
       <section v-show="activeTab === 'checkout'">
         <CheckoutView @order-placed="pickTab('shop')" />
