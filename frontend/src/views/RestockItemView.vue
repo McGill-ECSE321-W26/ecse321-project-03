@@ -114,7 +114,6 @@ const submit = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 12px;
 }
 
 .modal-header-bar {

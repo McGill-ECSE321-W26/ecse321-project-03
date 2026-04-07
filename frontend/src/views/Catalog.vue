@@ -7,14 +7,8 @@ const imgUrl = new URL("./assets/images/blouse.jpg", import.meta.url).href;
 
 const sizes = ["XS", "S", "M", "L", "XL"];
 const colors = [
-  "White",
-  "Brown",
-  "Black",
-  "Grey",
-  "Yellow",
-  "Green",
-  "Orange",
-  "Blue",
+  "White","Brown","Black","Grey","Yellow",
+  "Green","Orange","Blue","Purple","Pink","Red"
 ];
 
 const showForm = ref(false);
