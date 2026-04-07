@@ -40,6 +40,12 @@ async function loadOrders() {
     const data = await getAllOrders(session.value.accountId)
     console.log("Backend response:", data)
 
+    // Handle null, undefined, or empty list
+    if (!data || data.length === 0) {
+      orders.value = []
+      return
+    }
+
     console.log("First object:", data[0])
 
     orders.value = data.map(o => ({
@@ -51,8 +57,8 @@ async function loadOrders() {
     }))
 
     console.log("Mapped orders:", orders.value)
+
   } catch (err) {
-    error.value = err.message
     error.value = err.message
     console.error("loadOrders error:", err)
   } finally {

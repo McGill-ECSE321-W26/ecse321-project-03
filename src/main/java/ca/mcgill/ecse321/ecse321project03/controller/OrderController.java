@@ -31,12 +31,10 @@ public class OrderController {
 
     @Autowired
     private OrderInfoService orderInfoService;
-
+    
     @Autowired
-    private RoleRepository roleRepository;
+    private AccountService accountService;
 
-    @Autowired
-    private OrderRepository orderRepository;
 
 
     /**
