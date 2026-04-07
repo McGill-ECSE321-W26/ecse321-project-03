@@ -37,11 +37,13 @@ function refreshSession() {
 <template>
   <div class="shell">
     <header class="top">
-      <div class="logo-block">
-        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
-      </div>  
-
-    <nav class="nav-tabs">
+      <div class="title-block">
+        <h1 class="brand">Papa's Fashionistaria</h1>
+        <span class="muted" v-if="session">
+          {{ session.username }} · {{ session.accountType?.toLowerCase() }}
+        </span>
+      </div>
+      <nav class="nav-tabs">
         <button
           type="button"
           :class="{ on: activeTab === 'shop' }"

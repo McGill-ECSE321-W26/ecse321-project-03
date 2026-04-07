@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -144,6 +145,22 @@ public class ItemDefinitionService {
      */
     public List<ItemType> getItemTypesForItem(int itemId) {
         return itemTypeRepository.findByGeneralItem_Id(itemId);
+    }
+
+    /**
+     * Returns all items 
+     *
+     * @param accountId the account id 
+     * @return list of all items 
+     */
+    public List<Item> getAllItems(int accountId) {
+        Account account = accountRepository.findById(accountId).orElse(null);
+        if (account == null) {
+            throw new Ecse321Project03Exception(HttpStatus.UNAUTHORIZED, "User not logged in.");
+        }
+        List<Item> items = new ArrayList<>();
+        itemRepository.findAll().forEach(items::add);
+        return items;
     }
 
     /**
