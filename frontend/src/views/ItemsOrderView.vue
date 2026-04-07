@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { getSession, isLoggedIn } from '../session/storage'
 import { useOrderInfo } from '../api/orderInfo.js'
 // IMPORT HEADER
-import Header from '../views/Header.vue' 
 
 const route = useRoute()
 const router = useRouter()
@@ -36,7 +35,6 @@ function formatPrice(value) {
 
 <template>
   <div class="page-container">
-    <Header activeTab="orders" />
 
     <div class="checkout-page">
       <section class="checkout-main">
