@@ -15,8 +15,8 @@ const quantity = ref(0)
 // Reset selections when modal opens
 watch(() => props.visible, (val) => {
   if (val && props.product) {
-    selectedColor.value = null
-    selectedSize.value = null
+    selectedColor.value = ''
+    selectedSize.value = ''
     quantity.value = 0
   }
 })
@@ -67,19 +67,20 @@ const submit = () => {
         <input :value="product?.name || ''" disabled />
 
         <label>Color:</label>
-        <select v-model="selectedColor">
+        <select v-model="selectedColor" required>
           <option value="" disabled>Select a color</option>
           <option v-for="color in uniqueColors" :key="color" :value="color">{{ color }}</option>
         </select>
+        
 
         <label>Size:</label>
-        <select v-model="selectedSize" :disabled="!selectedColor">
+        <select v-model="selectedSize" :disabled="!selectedColor" required>
           <option value="" disabled>Select a size</option>
           <option v-for="size in sizesForColor" :key="size" :value="size">{{ size }}</option>
         </select>
 
         <label>Quantity:</label>
-        <input type="number" min="1" v-model.number="quantity" />
+              <input type="number" min="1" placeholder="1" />
 
         <div class="button-container">
           <button class="restock-btn" @click="submit">Done</button>
@@ -157,6 +158,16 @@ const submit = () => {
 .form label {
   font-weight: bold;
   margin-top: 6px;
+}
+
+/* Gray placeholder text */
+select:invalid {
+  color: #727272; /* gray */
+}
+
+/* Black text when a valid option is selected */
+select {
+  color: #000; /* default for selected option */
 }
 
 .form input,

@@ -56,7 +56,7 @@ const submitForm = () => {
 
               <label>Tag:</label>
               <select v-model="item.tag" required>
-                <option value="" disabled>Select a tag</option>
+                <option value="" disabled >Select a tag</option>
                 <option v-for="tag in tags" :key="tag" :value="tag">{{ tag }}</option>
               </select>
 
@@ -183,6 +183,16 @@ const submitForm = () => {
   grid-template-columns: 100px 1fr;
   gap: 10px;
   align-items: center;
+}
+
+/* Gray placeholder text */
+select:invalid {
+  color: #727272; /* gray */
+}
+
+/* Black text when a valid option is selected */
+select {
+  color: #000; /* default for selected option */
 }
 
 .form input,
