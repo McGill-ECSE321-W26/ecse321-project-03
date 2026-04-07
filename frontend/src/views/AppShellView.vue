@@ -3,8 +3,6 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
-import CartView from './CartView.vue'
-import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
 
 const router = useRouter();
@@ -115,12 +113,6 @@ function refreshSession() {
 
       <section v-show="activeTab === 'account'">
         <AccountDetailView @session-updated="refreshSession" />
-      </section>
-      <section v-show="activeTab === 'cart'">
-        <CartView @go-checkout="pickTab('checkout')" />
-      </section>
-      <section v-show="activeTab === 'checkout'">
-        <CheckoutView @order-placed="pickTab('shop')" />
       </section>
     </main>
   </div>

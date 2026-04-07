@@ -219,18 +219,7 @@ public class AccountService {
         return accountRepository.save(accountFromDB);
     }
 
-    public int getLoyaltyPoints(int accountId) {
-        Account account = accountRepository.findById(accountId).orElse(null);
-        if (account == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
-                    "No account found with id " + accountId);
-        }
-        return account.getLoyaltyPts();
-    }
 
-    public Account updateAddress(int id, String address) {
-        Account account = findAccountById(id);
-        account.setAddress(address);
-        return accountRepository.save(account);
-    }
+
+
 }
