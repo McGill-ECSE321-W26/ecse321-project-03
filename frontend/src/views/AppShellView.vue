@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
@@ -7,6 +7,7 @@ import CartView from './CartView.vue'
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
 import OrdersListView from "./OrdersListView.vue";
+import { getAccountById } from "../api/account.js";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -27,9 +28,27 @@ function pickTab(tab) {
 
 }
 
+const points = ref(0);
+async function findNumberOfPoints() {
+  if (session.value.accountId) {
+    try {
+      const account = await getAccountById(session.value.accountId);
+      points.value = account?.loyaltyPts;
+    } catch (error) {
+      console.error(err);
+      window.alert(error.message)
+    }
+  }
+}
+onMounted(() => {
+  findNumberOfPoints();
+});
+
 function refreshSession() {
   session.value = getSession();
+  findNumberOfPoints();
 }
+
 </script>
 
 <template>
@@ -84,7 +103,7 @@ function refreshSession() {
         </button>
         <div class="user-text">
           Hi {{ session?.username }}!
-          <div class="points">✨50 Points</div>
+          <div class="points">✨{{ points }} Points</div>
         </div>
       </div>
     </header>
