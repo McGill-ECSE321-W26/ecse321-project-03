@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
 import Catalog from "./Catalog.vue";
 import { getAllOrders } from '../api/order.js'
+import OrderInfoView from '../views/OrderInfoView.vue';
 
 const router = useRouter()
 const session = ref(getSession())
@@ -24,11 +25,22 @@ const columns = [
   { key: 'employee', label: 'Employees' },
   { key: 'status', label: 'Status' },
   { key: 'orderDate', label: 'Order Date' },
+  { key: 'actions', label: 'View Order' },
 ]
 
 const orders = ref([])
 const loading = ref(false)
 const error = ref(null)
+
+const showOrderPopup = ref(false)
+const selectedOrderId = ref(null)
+
+// 3. Create a function to open the popup
+function openOrderDetails(id) {
+  selectedOrderId.value = id
+  showOrderPopup.value = true
+}
+
 
 async function loadOrders() {
   loading.value = true
@@ -128,6 +140,13 @@ function sortBy(key) {
 
 function searchOrders() {
   appliedFilters.value = { ...filters.value }
+}
+
+function handlePopupClose(shouldRefresh) {
+  showOrderPopup.value = false; // Close the popup
+  if (shouldRefresh === true) {
+    loadOrders(); // This re-runs the GET request to update your table!
+  }
 }
 
 </script>
@@ -258,11 +277,23 @@ function searchOrders() {
             <div class="td">{{ order.employee }}</div>
             <div class="td">{{ order.status }}</div>
             <div class="td">{{ order.orderDate }}</div>
+            <div class="td">
+              <button class="view-btn" @click="openOrderDetails(order.orderId)">
+                View Info
+              </button>
+            </div>
+
           </div>
 
         </div>
       </section>
     </main>
+    <OrderInfoView
+        v-if="showOrderPopup"
+        :orderId="selectedOrderId"
+        @close="handlePopupClose"
+    />
+
   </div>
 </template>
 
@@ -516,6 +547,17 @@ function searchOrders() {
 }
 
 
+.view-btn {
+  background: linear-gradient(to top, #FFFFFF 0%, #FFEEFB 30%, #FDCEE9 80%);
+  border-radius: 20px;
+  width: 100px;
+  height: 20px;
+  border: 1px solid #000000;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: 'Inconsolata', monospace;
+}
+
 /* Table section */
 .table-section {
   display: flex;
@@ -526,7 +568,7 @@ function searchOrders() {
 .table-header,
 .tr {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
+  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
 }
 
 .table-header {

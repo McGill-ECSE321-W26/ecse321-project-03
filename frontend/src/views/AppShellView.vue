@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
 import CartView from './CartView.vue'
+import AccountDetailView from "./OrdersListView.vue";
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
 
@@ -70,14 +71,7 @@ function refreshSession() {
           Cart
         </button>
 
-        <button
-          v-if="isManager"
-          type="button"
-          :class="{ on: activeTab === 'inventory' }"
-          @click="pickTab('inventory')"
-        >
-          Inventory
-        </button>
+
 
         <button type="button" class="logout-link" @click="logout">Log out</button>
       </nav>
@@ -105,13 +99,14 @@ function refreshSession() {
         <Catalog />
       </section>
 
+      <section v-show="activeTab === 'shop'">
+        <Catalog />
+      </section>
+
       <section v-show="activeTab === 'cart'">
         <Cart />
       </section>
 
-      <section v-show="activeTab === 'inventory'">
-         <Inventory />      
-      </section>
 
       <section v-show="activeTab === 'account'">
         <AccountDetailView @session-updated="refreshSession" />
