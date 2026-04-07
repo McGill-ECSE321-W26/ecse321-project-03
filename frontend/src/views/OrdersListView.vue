@@ -1,7 +1,4 @@
 <script setup>
-
-console.log("OrdersListView script loaded")
-
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
@@ -13,13 +10,12 @@ const session = ref(getSession())
 
 const isManager = computed(() => session.value?.accountType === 'MANAGER')
 const isEmployee = computed(() => session.value?.accountType === 'EMPLOYEE')
+const isStaff = computed(() => isManager.value || isEmployee.value)
 
 const activeTab = ref('orders')
 
 const filters = ref({
-  email: 'alice@example.com',
-  customerId: 'CUST-1042',
-  showPastOrders: false,
+  customerName: '',
 })
 
 const columns = [
@@ -41,7 +37,7 @@ async function loadOrders() {
   try {
     console.log("session:", session.value)
 
-    const data = await getAllOrders(3152)
+    const data = await getAllOrders(session.value.accountId)
     console.log("Backend response:", data)
 
     console.log("First object:", data[0])
@@ -57,46 +53,15 @@ async function loadOrders() {
     console.log("Mapped orders:", orders.value)
   } catch (err) {
     error.value = err.message
+    error.value = err.message
     console.error("loadOrders error:", err)
   } finally {
     loading.value = false
   }
 }
 
-//
-// /**
-//  * Function to load the orders from the backend
-//  * @author Sonia Ly
-//  */
-// async function loadOrders() {
-//   loading.value = true
-//   error.value = null
-//
-//   try {
-//     const data = await getAllOrders(session.value.id)
-//
-//     console.log("Backend response: ", data)
-//
-//     // 🔥 Adapt this depending on your backend response shape
-//     orders.value = data.map(o => ({
-//       orderId: o.id,
-//       customer: o.customerName,
-//       employee: o.employeeName,
-//       status: o.status,
-//       orderDate: o.orderDate,
-//     }))
-//
-//   } catch (err) {
-//     error.value = err.message
-//     console.error(err)
-//   } finally {
-//     loading.value = false
-//   }
-// }
-
-
 /**
- * Once the page boards, call your backend
+ * Once the page loads, call your backend
  */
 onMounted(() => {
   loadOrders()
@@ -106,7 +71,16 @@ const sortKey = ref('orderId')
 const sortAsc = ref(true)
 
 const displayedOrders = computed(() => {
-  const sorted = [...orders.value].sort((a, b) => {
+  let filtered = [...orders.value]
+
+  if (isStaff.value && appliedFilters.value.customerName.trim()) {
+    const search = appliedFilters.value.customerName.trim().toLowerCase()
+    filtered = filtered.filter(order =>
+        (order.customer || '').toLowerCase().includes(search)
+    )
+  }
+
+  filtered.sort((a, b) => {
     const aVal = a[sortKey.value]
     const bVal = b[sortKey.value]
 
@@ -115,7 +89,11 @@ const displayedOrders = computed(() => {
     return 0
   })
 
-  return sorted
+  return filtered
+})
+
+const appliedFilters = ref({
+  customerName: '',
 })
 
 function logout() {
@@ -143,8 +121,9 @@ function sortBy(key) {
 }
 
 function searchOrders() {
-  console.log('Dummy search triggered with:', filters.value)
+  appliedFilters.value = { ...filters.value }
 }
+
 </script>
 
 <template>
@@ -152,7 +131,7 @@ function searchOrders() {
   <div class="page">
     <header class="top">
       <div class="logo-block">
-        <img src="../assets/images/logo.png" class="logo-img" />
+        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
       </div>
 
       <nav class="nav-tabs">
@@ -191,15 +170,32 @@ function searchOrders() {
 
         <button
             type="button"
-            :class="logout-link"
-            @click="logout">Log out
+            class="logout-link"
+            @click="logout"
+        >
+          Log out
         </button>
-
       </nav>
 
       <div class="user-block">
-        Hi {{ session?.username }}!
-        <div class="points">✨50 Points</div>
+        <button
+            type="button"
+            class="user-profile-btn"
+            aria-label="Open account details"
+        >
+          <img
+              src="../assets/images/user.png"
+              alt=""
+              class="user-icon-img"
+              width="28"
+              height="28"
+          />
+        </button>
+
+        <div class="user-text">
+          Hi {{ session?.username }}!
+          <div class="points">✨50 Points</div>
+        </div>
       </div>
     </header>
 
@@ -219,31 +215,21 @@ function searchOrders() {
 
     <main class="content">
       <aside class="sidebar">
-        <h2 class="filter-title">Filter By:</h2>
+        <h3 class="filter-title">Filter By:</h3>
 
-        <div class="field-group">
-          <label>Customer email:</label>
-          <input v-model="filters.email" type="text" placeholder="alice@example.com" />
+        <div v-if="isStaff" class="filter-group">
+          <h4>Customer</h4>
+          <label class="filter-label">Name</label>
+          <input
+              v-model="filters.customerName"
+              type="text"
+              placeholder="Alice"
+          />
         </div>
 
-        <div class="field-group">
-          <label>Customer ID:</label>
-          <input v-model="filters.customerId" type="text" placeholder="CUST-1042" />
-        </div>
-
-        <button class="search-btn" @click="searchOrders">Search</button>
-
-        <label class="checkbox-row">
-          <input v-model="filters.showPastOrders" type="checkbox" />
-          <span>Show past orders</span>
-        </label>
-
-        <div class="dummy-panel">
-          <h3>Dummy Notes</h3>
-          <p>Current employee: Bob Rossi</p>
-          <p>Shift: Morning Shift</p>
-          <p>Location: Downtown Branch</p>
-        </div>
+        <button v-if="isStaff" class="search-btn" @click="searchOrders">
+          Search
+        </button>
       </aside>
 
       <section class="table-section">
@@ -302,7 +288,59 @@ function searchOrders() {
   height: 11vh;
 }
 
+.logo-block {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  height: 90%;
+  width: auto;
+  object-fit: contain;
+  margin-left: 20px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 100px;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.nav-tabs button {
+  font-family: 'Jersey 10', monospace;
+  color: #1209AB;
+  font-size: 4vh;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 4px 8px;
+}
+
+.nav-tabs button.on {
+  background: transparent;
+  border-bottom: 3px solid #1209AB;
+}
+
+.logout-link {
+  font-family: 'Jersey 10', monospace;
+  color: #1209AB;
+  font-size: 2vh;
+  cursor: pointer;
+  background: #FFFFFF;
+  border: 2px solid #1209AB;
+  outline: none;
+  padding: 4px 8px;
+}
+
 .user-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   height: 11vh;
   font-family: 'Jersey 10', monospace;
   color: #1209AB;
@@ -312,8 +350,39 @@ function searchOrders() {
   line-height: 1;
 }
 
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.user-profile-btn:hover {
+  background: rgba(18, 9, 171, 0.08);
+}
+
+.user-profile-btn:focus-visible {
+  outline: 2px solid #1209ab;
+  outline-offset: 2px;
+}
+
+.user-icon-img {
+  display: block;
+  width: clamp(26px, 3.5vh, 36px);
+  height: clamp(26px, 3.5vh, 36px);
+  object-fit: contain;
+}
+
+.user-text {
+  text-align: right;
+}
+
 .points {
-  margin-left: -20px;
+  margin-top: 4px;
 }
 
 .logo-block {
@@ -381,89 +450,65 @@ function searchOrders() {
 /* Sidebar inspired by catalog */
 .sidebar {
   background: linear-gradient(to right, #ffe5f9 49%, #ffffff 100%);
-  border-right: 4px solid #4c4c4c;
-  padding: 24px 16px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
   font-family: 'Inconsolata', monospace;
 }
 
 .filter-title {
-  margin: 8px 0 28px;
-  font-size: 1.6rem;
-  font-weight: 700;
+  margin: 0;
+  font-size: 1.2rem;
   text-decoration: underline;
 }
 
-.field-group {
+.filter-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 28px;
 }
 
-.field-group label {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.field-group input {
-  width: 100%;
-  height: 42px;
-  border: none;
-  border-radius: 999px;
-  padding: 0 18px;
-  font-size: 1rem;
-  font-family: 'Inconsolata', monospace;
-  background: #e8e8e8;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-}
-
-.search-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 140px;
-  height: 48px;
-  margin: 8px 0 28px 0;
-  border-radius: 16px;
-  border: 1px solid #5e4159;
-  background: #f7f7f7;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-  font-family: 'Inconsolata', monospace;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1rem;
-  margin: 24px 0 28px;
-}
-
-.checkbox-row input {
-  width: 18px;
-  height: 18px;
-}
-
-.dummy-panel {
-  margin-top: 32px;
-  padding: 14px;
-  border-radius: 16px;
-  background: #f7f7f7;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  font-size: 0.95rem;
-}
-
-.dummy-panel h3 {
-  margin: 0 0 10px;
+.filter-group h4 {
+  text-decoration: underline;
+  margin-bottom: 4px;
   font-size: 1.1rem;
 }
 
-.dummy-panel p {
-  margin: 8px 0;
+.filter-label,
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 1rem;
 }
+
+.filter-group input[type="text"] {
+  border: none;
+  outline: none;
+  background: white;
+  padding: 6px 8px;
+  font-size: 1rem;
+  font-family: 'Inconsolata', monospace;
+}
+
+.checkbox-row input {
+  width: 16px;
+  height: 16px;
+}
+
+.search-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 1rem;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid #2c2420;
+  padding: 8px 12px;
+  align-self: flex-start;
+}
+
 
 /* Table section */
 .table-section {

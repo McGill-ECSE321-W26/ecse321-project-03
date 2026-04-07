@@ -9,6 +9,9 @@ import ca.mcgill.ecse321.ecse321project03.service.OrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ca.mcgill.ecse321.ecse321project03.model.Role;
+import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 
 import java.util.List;
 
@@ -27,6 +30,12 @@ public class OrderController {
 
     @Autowired
     private OrderInfoService orderInfoService;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
 
     /**
