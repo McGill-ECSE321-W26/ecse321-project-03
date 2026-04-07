@@ -18,13 +18,35 @@ export async function getProduct(id, accountId) {
   return text ? JSON.parse(text) : null
 }
 
-// POST add to cart (Updated to match your Vue component!)
+export async function createCart(accountId) {
+  const res = await fetch(`${base}/carts/${accountId}`, {
+    method: 'POST',
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to create cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : null
+}
+
 export async function addToCart(accountId, variantId, quantity) {
-  const res = await fetch(`${base}/cart`, {
+  const tryAdd = async () => fetch(`${base}/carts/${accountId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ accountId, variantId, quantity })
-  })
+    body: JSON.stringify({ itemType: { id: variantId }, quantity })
+  });
+
+  let res = await tryAdd();
+
+  
+  if (!res.ok) {
+    const text = await res.text();
+    if (text.includes("doesn't have a cart")) {
+      await createCart(accountId);
+      res = await tryAdd();
+    } else {
+      throw new Error(`Failed to add to cart: ${readErrorMessage(text)}`);
+    }
+  }
+
   const text = await res.text()
   if (!res.ok) throw new Error(`Failed to add to cart: ${readErrorMessage(text)}`)
   return text ? JSON.parse(text) : true
