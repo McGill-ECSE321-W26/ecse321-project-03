@@ -1,26 +1,42 @@
-const API_URL = "http://localhost:8080/items";
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
 
-//getAllItems
-export async function getAllItems(accountId) {
-  console.log("[GET ALL ITEMS] accountId:", accountId);
+// GET /api/products/{id}
+export async function getProduct(id) {
+  const res = await fetch(`${API_BASE}/products/${id}`)
+  if (!res.ok) throw new Error('Failed to fetch product')
+  return res.json()
+}
 
-  const url = `${API_URL}?accountId=${accountId}`;
-  console.log("[GET ALL ITEMS] Request URL:", url);
+// GET /api/products
+export async function getAllProducts() {
+  const res = await fetch(`${API_BASE}/products`)
+  if (!res.ok) throw new Error('Failed to fetch products')
+  return res.json()
+}
 
-  const response = await fetch(url, {
-    method: "GET",
-  });
+// POST /api/cart
+export async function addToCart(productId, quantity, colors) {
+  const res = await fetch(`${API_BASE}/cart`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ productId, quantity, colors })
+  })
+  if (!res.ok) throw new Error('Failed to add to cart')
+  return res.json()
+}
 
-  console.log("[GET ALL ITEMS] Response status:", response.status);
+// GET /api/cart
+export async function getCart() {
+  const res = await fetch(`${BASE_URL}/cart`)
+  if (!res.ok) throw new Error('Failed to fetch cart')
+  return res.json()
+}
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("[GET ALL ITEMS] Error response:", errorText);
-    throw new Error("Failed to fetch items");
-  }
-
-  const data = await response.json();
-  console.log("[GET ALL ITEMS] Data received:", data);
-
-  return data;
+// DELETE /api/cart/:productId
+export async function removeFromCart(productId) {
+  const res = await fetch(`${BASE_URL}/cart/${productId}`, {
+    method: 'DELETE'
+  })
+  if (!res.ok) throw new Error('Failed to remove from cart')
+  return res.json()
 }

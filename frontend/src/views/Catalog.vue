@@ -80,27 +80,15 @@ const filteredProducts = computed(() => {
   });
 });
 
-onMounted(async () => {
-  try {
-    const data = await getAllItems(session.accountId);
-    products.value = data.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.imageUrls && item.imageUrls.length > 0 ? `http://localhost:8080${item.imageUrls[0]}`: "../assets/images/placeholder.jpg",
-      availableSizes: [...new Set(item.variants.map((v) => v.size))],
-      availableColors: [...new Set(item.variants.map((v) => v.color))],
-      totalStock: item.variants.reduce((sum, v) => sum + v.stockLevel, 0),
-      hasLowStock: item.variants.some(
-        (v) => v.stockLevel > 0 && v.stockLevel <= 5,
-      ),
-    }));
-  } catch (e) {
-    console.error("Failed to load products:", e);
-  } finally {
-    loading.value = false;
-  }
-});
+const addItem = (newItem) => {
+  products.value.push({
+    id: Date.now(), // temporary ID (frontend only)
+    ...newItem,
+    image: "/images/blouse.jpg"
+  });
+
+  showForm.value = false;
+};
 </script>
 
 
