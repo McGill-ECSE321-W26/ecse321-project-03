@@ -28,33 +28,20 @@ export async function getLoyaltyPoints(accountId) {
 }
 
 /**
- * Redeems loyalty points for an existing order.
+ * * Calculates the final total price of an order after loyalty discount.
  *
  * @param {number} orderId
  * @param {number} accountId
- * @param {boolean} usePoints
- * @returns {Promise<string>}
+ * @returns {Promise<number>}
  * @author Yani Zhang
  */
-export async function redeemLoyaltyPoints(orderId, accountId, usePoints) {
+export async function calculateFinalPriceAfterDiscount(orderId, accountId) {
     const params = new URLSearchParams({
         accountId: String(accountId),
-        usePoints: String(usePoints),
     })
 
-    const res = await fetch(`${API_BASE}/orders/redeem-loyalty/${orderId}?${params}`, {
-        method: 'POST',
-    })
-
-    const text = await res.text().catch(() => '')
-    if (!res.ok) {
-        try {
-            const parsed = JSON.parse(text)
-            throw new Error(readErrorMessage(parsed))
-        } catch {
-            throw new Error(text || 'Failed to redeem loyalty points')
-        }
-    }
-
-    return text
+    const res = await fetch(`${API_BASE}/orders/${orderId}/final-price?${params}`)
+    const data = await res.json().catch(() => 0)
+    if (!res.ok) throw new Error(readErrorMessage(data))
+    return data
 }

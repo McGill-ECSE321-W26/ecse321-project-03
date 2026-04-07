@@ -14,10 +14,11 @@ const subtotal = computed(() =>
     cartItems.value.reduce((sum, item) => sum + item.itemType.generalItem.price * item.quantity, 0),
 )
 
-const tax = computed(() => subtotal.value * 0.15)
-const total = computed(() => subtotal.value + tax.value)
+const total = computed(() => subtotal.value)
 
 const canCheckout = computed(() => !loading.value && cartItems.value.length > 0)
+// for test
+//const canCheckout = computed(() => !loading.value)
 
 async function loadCartItems() {
   loading.value = true
@@ -157,8 +158,8 @@ function goToCheckout() {
         <span>{{ formatPrice(subtotal) }}</span>
       </div>
       <div class="summary-line">
-        <span>Estimated Tax:</span>
-        <span>{{ formatPrice(tax) }}</span>
+        <span>Discount:</span>
+        <span>TBD</span>
       </div>
 
       <div class="summary-line total-line">
@@ -167,7 +168,7 @@ function goToCheckout() {
       </div>
 
       <p class="checkout-note">
-        Shipping, discounts, and loyalty points are calculated at checkout.
+        Discounts and loyalty points are calculated at checkout.
       </p>
     </div>
 
@@ -188,9 +189,11 @@ function goToCheckout() {
   grid-template-columns: minmax(0, 2fr) minmax(280px, 360px);
   gap: 1.5rem;
   padding: 1.5rem;
+  font-family: inherit;
+  color: #1f1713;
 }
 .card-block {
-  background: #f8eef8;
+  background: #fff;
   border: 1px solid #e3d4ea;
   box-shadow: 0 4px 18px rgba(44, 36, 32, 0.06);
 }
@@ -203,11 +206,13 @@ function goToCheckout() {
   display: grid;
   grid-template-columns: 2.6fr 1fr 1fr 1fr;
   align-items: center;
-  background: #d9c0ea;
+  background: #d8bff1;
   color: #1f1713;
+  font-size: 0.95rem;
   font-weight: 700;
+  letter-spacing: 0.03em;
   padding: 1.25rem 1.5rem;
-  border-bottom: 2px solid #8c7a92;
+  border-bottom: 1px solid #3d3c3c;
 }
 
 .cart-row {
@@ -215,7 +220,7 @@ function goToCheckout() {
   grid-template-columns: 2.6fr 1fr 1fr 1fr;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #d7d1cc;
+  border-bottom: 1px solid #e3d4ea;
 }
 
 .product-info {
@@ -229,13 +234,14 @@ function goToCheckout() {
   height: 120px;
   border-radius: 10px;
   flex-shrink: 0;
+  border: 1px solid #e3d4ea;
 }
 
 .placeholder-image {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f4d9e5, #cdd9f4);
+  background: #f7f7f7;
   color: #3a2d27;
   font-size: 2rem;
   font-weight: 700;
@@ -244,12 +250,12 @@ function goToCheckout() {
 .product-text h3 {
   margin: 0 0 0.45rem;
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .product-text p {
   margin: 0.15rem 0;
-  color: #7a706a;
+  color: #4b3b35;
   font-size: 0.95rem;
 }
 
@@ -258,7 +264,8 @@ function goToCheckout() {
   padding: 0;
   border: none;
   background: transparent;
-  color: #4b3b35;
+  color: #1209ab;
+  font: inherit;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -270,36 +277,51 @@ function goToCheckout() {
 
 .quantity-select {
   padding: 0.45rem 0.75rem;
-  border: 1px solid #cabfd2;
-  border-radius: 8px;
+  border: 1.75px solid #3d3c3c;
+  border-radius: 0;
   background: #fff;
   color: #2c2420;
+  font: inherit;
 }
 
 .summary-panel {
   padding: 1.25rem;
+  align-self: start;
 }
 
 .checkout-btn {
   width: 100%;
   margin-bottom: 1.2rem;
-  padding: 1rem;
-  border: 2px solid #3a33cc;
-  background: #d9c0ea;
+  padding: 0.95rem 1.5rem;
+  border: 2px solid #8f8a8c;
+  border-radius: 999px;
+  background: #eccfe5;
   color: #2f2ad1;
-  font-size: 1.8rem;
-  font-weight: 700;
+  font-family: 'Jersey 10', sans-serif;
+  font-size: 2rem;
+  line-height: 1;
+  font-weight: 400;
   cursor: pointer;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
 }
 
 .checkout-btn:disabled {
-  opacity: 0.65;
+  opacity: 1;
   cursor: not-allowed;
+  background: #efddea;
+  color: #8a8892;
+  border-color: #9a9498;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+}
+
+.checkout-btn:hover:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
 }
 
 .checkout-disabled-note {
   margin: -0.4rem 0 1rem;
-  color: #7a706a;
+  color: #4b3b35;
   font-size: 0.9rem;
 }
 
@@ -307,7 +329,7 @@ function goToCheckout() {
 .summary-section,
 .info-section {
   padding-top: 1rem;
-  border-top: 1px solid #bca7d1;
+  border-top: 1px solid #e3d4ea;
 }
 
 .summary-section h2,
@@ -338,12 +360,41 @@ function goToCheckout() {
 .info-section p {
   margin: 0.85rem 0;
   text-decoration: underline;
+  color: #1209ab;
 }
 
 .empty-state {
   padding: 2rem 1.5rem;
-  color: #6f645f;
+  color: #4b3b35;
 }
+
+.products-col,
+.price-col,
+.quantity-col,
+.total-col,
+.item-cell,
+.summary-line,
+.checkout-disabled-note,
+.checkout-note,
+.empty-state,
+.info-section p,
+.remove-btn,
+.quantity-select{
+  font-family: inherit;
+}
+
+.remove-btn:hover,
+.info-section p:hover {
+  opacity: 0.8;
+}
+
+.quantity-select:focus,
+.checkout-btn:focus,
+.remove-btn:focus {
+  outline: 2px solid #1209ab;
+  outline-offset: 2px;
+}
+
 
 @media (max-width: 1100px) {
   .cart-page {

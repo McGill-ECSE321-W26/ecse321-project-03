@@ -40,6 +40,8 @@ public class Order {
     @JoinColumn(nullable = true)
     private Employee assignee;
 
+    private double totalPriceAfterDiscount;
+
     //------------------------
     // CONSTRUCTOR
     //------------------------
@@ -51,6 +53,7 @@ public class Order {
         delivDate = aDelivDate;
         orderState = aOrderState;
         assignee = aAssignee;
+        totalPriceAfterDiscount = 0;
         if (!setCustomer(aCustomer)) {
             throw new RuntimeException("Unable to create Order due to aCustomer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
@@ -105,6 +108,13 @@ public class Order {
         return wasSet;
     }
 
+    public boolean setTotalPriceAfterDiscount(double aFinalPriceAfterDiscount) {
+        boolean wasSet = false;
+        totalPriceAfterDiscount = aFinalPriceAfterDiscount;
+        wasSet = true;
+        return wasSet;
+    }
+
     // Getter methods
     public int getId() {
         return id;
@@ -130,6 +140,10 @@ public class Order {
     /* Code from template association_GetOne */
     public Employee getAssignee() {
         return assignee;
+    }
+
+    public double getTotalPriceAfterDiscount() {
+        return totalPriceAfterDiscount;
     }
 
 
