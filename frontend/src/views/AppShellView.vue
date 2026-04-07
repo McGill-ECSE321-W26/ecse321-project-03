@@ -6,6 +6,7 @@ import Catalog from "./Catalog.vue";
 import CartView from './CartView.vue'
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
+import OrdersListView from "./OrdersListView.vue";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -22,13 +23,8 @@ function logout() {
 
 // display inventory tab only for managers
 function pickTab(tab) {
-  if (tab === "inventory" && !isManager.value) return;
-
-  if (tab === "orders") {
-    router.push({name: "ordersList"})
-  } else {
     activeTab.value = tab;
-  }
+
 }
 
 function refreshSession() {
@@ -98,8 +94,9 @@ function refreshSession() {
         <Catalog />
       </section>
 
-      <section v-show="activeTab === 'shop'">
-        <Catalog />
+
+      <section v-show="activeTab === 'orders'">
+        <OrdersListView />
       </section>
 
       <section v-show="activeTab === 'cart'">

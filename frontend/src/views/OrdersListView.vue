@@ -119,15 +119,7 @@ function logout() {
   router.replace({ name: 'login' })
 }
 
-function pickTab(tab) {
-  if (tab === 'inventory' && !isManager.value) {
-    return activeTab.value = tab
-  } else if (tab === 'orders') {
-    router.push({ name: 'orderList' })
-  } else {
-   router.push({ name: 'appShell' })
-  }
-}
+
 
 function sortBy(key) {
   if (sortKey.value === key) {
@@ -154,89 +146,7 @@ function handlePopupClose(shouldRefresh) {
 <template>
 
   <div class="page">
-    <header class="top">
-      <div class="logo-block">
-        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
-      </div>
 
-      <nav class="nav-tabs">
-        <button
-            type="button"
-            :class="{ on: activeTab === 'shop' }"
-            @click="pickTab('shop')"
-        >
-          Shop
-        </button>
-
-        <button
-            type="button"
-            :class="{ on: activeTab === 'orders' }"
-            @click="pickTab('orders')"
-        >
-          Orders
-        </button>
-
-        <button
-            type="button"
-            :class="{ on: activeTab === 'cart' }"
-            @click="pickTab('cart')"
-        >
-          Cart
-        </button>
-
-        <button
-            v-if="isManager"
-            type="button"
-            :class="{ on: activeTab === 'inventory' }"
-            @click="pickTab('inventory')"
-        >
-          Inventory
-        </button>
-
-        <button
-            type="button"
-            class="logout-link"
-            @click="logout"
-        >
-          Log out
-        </button>
-      </nav>
-
-      <div class="user-block">
-        <button
-            type="button"
-            class="user-profile-btn"
-            aria-label="Open account details"
-        >
-          <img
-              src="../assets/images/user.png"
-              alt=""
-              class="user-icon-img"
-              width="28"
-              height="28"
-          />
-        </button>
-
-        <div class="user-text">
-          Hi {{ session?.username }}!
-          <div class="points">✨50 Points</div>
-        </div>
-      </div>
-    </header>
-
-    <main class="main">
-      <section v-show="activeTab === 'shop'">
-        <Catalog />
-      </section>
-
-      <section v-show="activeTab === 'cart'">
-        <Cart />
-      </section>
-
-      <section v-show="activeTab === 'inventory'">
-        <Inventory />
-      </section>
-    </main>
 
     <main class="content">
       <aside class="sidebar">
