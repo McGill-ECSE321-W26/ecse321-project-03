@@ -48,8 +48,8 @@ async function loadOrders() {
 
     orders.value = data.map(o => ({
       orderId: o.id,
-      customer: o.customerId,
-      employee: o.assigneeId,
+      customer: o.customerName,
+      employee: o.assigneeName,
       status: o.orderState,
       orderDate: new Date(o.orderDate).toLocaleDateString(),
     }))

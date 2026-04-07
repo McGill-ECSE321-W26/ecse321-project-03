@@ -20,7 +20,9 @@ public class OrderResponseDto { // This class is for the attributes that must be
     private Date delivDate;
     private String orderState;
     private int customerId;
+    private String customerName;
     private int assigneeId;
+    private String assigneeName;
     private List<OrderItemDto> items;
 
     @SuppressWarnings("unused")
@@ -42,7 +44,9 @@ public class OrderResponseDto { // This class is for the attributes that must be
         this.delivDate = order.getDelivDate();
         this.orderState = order.getOrderState().toString();
         this.customerId = order.getCustomer().getId();
+        this.customerName = order.getCustomer().getUsername();
         this.assigneeId = (order.getAssignee() == null) ? 0 : order.getAssignee().getId();
+        this.assigneeName = (order.getAssignee() == null) ? "Not assigned" : order.getAssignee().getAccount().getUsername();
 
         this.items = new ArrayList<>();
         for (OrderItem oi : orderItems) {
@@ -76,6 +80,14 @@ public class OrderResponseDto { // This class is for the attributes that must be
 
     public int getAssigneeId() {
         return assigneeId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public String getAssigneeName() {
+        return assigneeName;
     }
 
     public List<OrderItemDto> getItems() {return items;}

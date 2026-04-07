@@ -3,6 +3,7 @@ import { isLoggedIn } from '../session/storage'
 import LoginView from '../views/LoginView.vue'
 import AppShellView from '../views/AppShellView.vue'
 import SpecificItemView from '../views/SpecificItemView.vue'
+import OrdersListView from "../views/OrdersListView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
