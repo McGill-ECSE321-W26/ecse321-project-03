@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -120,6 +121,30 @@ public class ItemDefinitionController {
         try {
             itemDefinitionService.deleteItem(accountId, itemId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
+        }
+    }
+
+    /**
+     * Get all items and their variants 
+     *
+     * @param accountId the authenticated account 
+     * @return ItemDefinitionResponseDto 
+     * @author Victoire Bergeron 
+     */
+    @GetMapping
+    public ResponseEntity<?> getAllItems(@RequestParam int accountId) {
+        try {
+            List<Item> items = itemDefinitionService.getAllItems(accountId);
+            List<ItemDefinitionResponseDto> response = items.stream().map(item -> {
+                List<ItemType> variants = itemDefinitionService.getItemTypesForItem(item.getId());
+                List<String> imageUrls = imageService.findImagesForItem(item.getId()).stream()
+                        .map(im -> IMAGE_URL_PREFIX + im.getKey())
+                        .collect(Collectors.toList());
+                return new ItemDefinitionResponseDto(item, variants, imageUrls);
+            }).collect(Collectors.toList());
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), e.getStatus());
         }
