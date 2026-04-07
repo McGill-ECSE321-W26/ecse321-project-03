@@ -20,6 +20,7 @@ export function useOrderInfo() {
 
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
 
         }  
     };
@@ -31,6 +32,7 @@ export function useOrderInfo() {
 
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
 
         }  
     };
@@ -41,6 +43,7 @@ export function useOrderInfo() {
             employees.value = response.data; //store employees in variable
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     };
 
@@ -62,6 +65,7 @@ export function useOrderInfo() {
             order.value = response.data; // Update local state with new data
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     }; 
     
@@ -73,6 +77,7 @@ export function useOrderInfo() {
             order.value = response.data;
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     };
 
