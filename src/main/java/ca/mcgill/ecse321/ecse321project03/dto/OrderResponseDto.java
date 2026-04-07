@@ -22,6 +22,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
     private int customerId;
     private int assigneeId;
     private List<OrderItemDto> items;
+    private double totalPriceAfterDiscount;
 
     @SuppressWarnings("unused")
     public OrderResponseDto() {
@@ -43,6 +44,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
         this.orderState = order.getOrderState().toString();
         this.customerId = order.getCustomer().getId();
         this.assigneeId = (order.getAssignee() == null) ? 0 : order.getAssignee().getId();
+        this.totalPriceAfterDiscount = order.getTotalPriceAfterDiscount();
 
         this.items = new ArrayList<>();
         for (OrderItem oi : orderItems) {
@@ -79,4 +81,8 @@ public class OrderResponseDto { // This class is for the attributes that must be
     }
 
     public List<OrderItemDto> getItems() {return items;}
+
+    public double getTotalPrice() {
+        return totalPriceAfterDiscount;
+    }
 }

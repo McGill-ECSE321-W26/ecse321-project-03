@@ -4,7 +4,6 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
-import ca.mcgill.ecse321.ecse321project03.service.AccountService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +27,6 @@ public class OrderController {
 
     @Autowired
     private OrderInfoService orderInfoService;
-
-    @Autowired
-    private AccountService accountService;
 
 
     /**
@@ -179,24 +175,15 @@ public class OrderController {
     }
 
     /**
-     * Redeems loyalty points for a specific order belonging to an account.
+     * Calculates the final total price of an order after applying the loyalty discount.
      *
-     *
-     * @param orderId the ID of the order where points are redeemed
-     * @param accountId the ID of the account using loyalty points
-     * @param usePoints the choice of redeeming loyalty points
-     * @return a ResponseEntity containing the updated AccountResponseDto if successful,
-     *         or an ErrorDto if redemption fails
+     * @param orderId the id of the order
+     * @param accountId the id of the account requesting the discounted total
+     * @return the final price after discount
      */
-    @PostMapping("/redeem-loyalty/{orderId}")
-    public String redeemLoyaltyPtsInOrder( @PathVariable int orderId,
-                                           @RequestParam int accountId, @RequestParam boolean usePoints) {
-            String message = orderService.redeemLoyaltyPts(accountId, orderId, usePoints);
-            return message;
+    @GetMapping("/{orderId}/final-price")
+    public double calculateFinalPriceAfterDiscount(@PathVariable int orderId, @RequestParam int accountId) {
+        return orderService.calculateFinalPriceAfterDiscount(accountId, orderId);
     }
 
-    @GetMapping("/{id}/loyalty-points")
-    public int getLoyaltyPoints(@PathVariable int id) {
-        return accountService.getLoyaltyPoints(id);
-    }
 }
