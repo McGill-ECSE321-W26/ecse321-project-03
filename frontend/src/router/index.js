@@ -3,6 +3,7 @@ import { isLoggedIn } from '../session/storage'
 import LoginView from '../views/LoginView.vue'
 import AppShellView from '../views/AppShellView.vue'
 import SpecificItemView from '../views/SpecificItemView.vue'
+import ItemsOrderView from '../views/ItemsOrderView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,15 @@ const router = createRouter({
       component: AppShellView,
       meta: { requiresAuth: true },
     },
+
+    {
+      path: '/order-items/:id',
+      name: 'order-items',
+      component: ItemsOrderView,
+      meta: { requiresAuth: true },
+    },
+
+ 
     { path: '/app/account', redirect: '/app' },
     { path: '/', redirect: '/app' },
     { path: '/:pathMatch(.*)*', redirect: '/app' },

@@ -1,16 +1,23 @@
 <script setup>
 import Header from '../views/Header.vue'; // Ensure this path matches where you saved the Header component
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import {useRoute, useRouter } from 'vue-router';
 import { useOrderInfo } from '../api/orderInfo.js'; 
 import { getSession, isLoggedIn } from '../session/storage.js';
 
-const route = useRoute();
+const route = useRoute()
 const router = useRouter();
 const { order, account, employees, loading, canCancelOrder, init, updateOrderStatus, assignEmployee } = useOrderInfo();
 const selectedStatus = ref('');
 const selectedEmployeeId = ref(null);
 const isSelfAssignChecked = ref(false);
+
+
+function goToItemsView() {
+  if (order.value?.orderId) {
+    router.push(`/order-items/${order.value.orderId}`);
+  }
+}
 
 async function saveButtonAction() {
   const session = getSession();
@@ -43,16 +50,6 @@ async function saveButtonAction() {
   }
 };
 
-onMounted(() => {
-  if (!isLoggedIn()) {
-    router.push('/login');
-    return;
-  }
-  const orderId = route.params.id;
-  const session = getSession();
-  init(session.accountId, orderId);
-});
-
 
 // FOR TESTING
 order.value = {
@@ -74,6 +71,18 @@ employees.value = [
 ];
 
 // FOR TESTING
+
+onMounted(() => {
+  if (!isLoggedIn()) {
+    router.push('/login');
+    return;
+  }
+  const orderId = route.params.id;
+  const session = getSession();
+  init(session.accountId, orderId);
+});
+
+
 </script>
 
 <template>
@@ -100,7 +109,7 @@ employees.value = [
                 <strong>Total Items:</strong> 
                 <div>{{ order?.items?.length ?? 0 }}</div>
               </div>
-              <button class="buttonViewItems">View Items</button> 
+              <button class="buttonViewItems" @click="goToItemsView">View Items</button> 
             </div>
 
             <div class="info__container">
