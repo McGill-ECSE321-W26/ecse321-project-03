@@ -22,11 +22,11 @@ onMounted(() => {
 })
 
 const orderItems = computed(() => order.value?.items || [])
-const total = computed(() => order.value?.totalPrice || order.value?.total || 0)
-const orderAddress = computed(() => order.value?.address || order.value?.shippingAddress || 'Address on file')
+const total = computed(() => order.value?.totalPriceAfterDiscount)
+const orderAddress = computed(() => order.value?.address)
 
 const subtotal = computed(() => 
-  orderItems.value.reduce((sum, item) => sum + (item.priceAtPurchase * item.quantity), 0)
+  orderItems.value.reduce((sum, item) => sum + (item.itemType.generalItem.price * item.quantity), 0)
 )
 
 function formatPrice(value) {
