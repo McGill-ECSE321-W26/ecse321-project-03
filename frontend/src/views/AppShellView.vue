@@ -4,7 +4,6 @@ import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
 import CartView from './CartView.vue'
-import AccountDetailView from "./OrdersListView.vue";
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
 
