@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
+import AccountDetailView from "./AccountDetailView.vue";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -27,13 +28,17 @@ function pickTab(tab) {
     activeTab.value = tab;
   }
 }
+
+function refreshSession() {
+  session.value = getSession();
+}
 </script>
 
 <template>
   <div class="shell">
     <header class="top">
       <div class="logo-block">
-        <img src="../assets/images/logo.png" class="logo-img" />
+        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
       </div>  
 
     <nav class="nav-tabs">
@@ -70,18 +75,25 @@ function pickTab(tab) {
           Inventory
         </button>
 
-        <button
-          type="button"
-          :class="logout-link"
-          @click="logout">Log out
-        </button>
-
+        <button type="button" class="logout-link" @click="logout">Log out</button>
       </nav>
 
       <div class="user-block">
-        Hi {{ session?.username }}!
-        <div class="points">✨50 Points</div>
-      </div> 
+        <button
+          type="button"
+          class="user-profile-btn"
+          :class="{ on: activeTab === 'account' }"
+          aria-label="Open account details"
+          :aria-current="activeTab === 'account' ? 'page' : undefined"
+          @click="pickTab('account')"
+        >
+          <img src="../assets/images/user.png" alt="" class="user-icon-img" width="28" height="28" />
+        </button>
+        <div class="user-text">
+          Hi {{ session?.username }}!
+          <div class="points">✨50 Points</div>
+        </div>
+      </div>
     </header>
 
     <main class="main">
@@ -95,6 +107,10 @@ function pickTab(tab) {
 
       <section v-show="activeTab === 'inventory'">
          <Inventory />      
+      </section>
+
+      <section v-show="activeTab === 'account'">
+        <AccountDetailView @session-updated="refreshSession" />
       </section>
     </main>
   </div>
@@ -117,19 +133,57 @@ function pickTab(tab) {
 
 }
 .user-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   height: 11vh;
   font-family: 'Jersey 10';
-  color: #1209AB;
+  color: #1209ab;
   font-size: 4vh;
   margin-right: 20px;
   margin-top: 20px;
   line-height: 1;
-} 
+}
+
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.user-profile-btn:hover {
+  background: rgba(18, 9, 171, 0.08);
+}
+
+.user-profile-btn:focus-visible {
+  outline: 2px solid #1209ab;
+  outline-offset: 2px;
+}
+
+.user-profile-btn.on {
+  background: rgba(18, 9, 171, 0.12);
+  box-shadow: inset 0 0 0 2px #1209ab;
+}
+
+.user-icon-img {
+  display: block;
+  width: clamp(26px, 3.5vh, 36px);
+  height: clamp(26px, 3.5vh, 36px);
+  object-fit: contain;
+}
+
+.user-text {
+  text-align: right;
+}
 
 .points {
-  margin-left: -20px;
-
-} 
+  margin-top: 4px;
+}
 
 .logo-block {
   height: 100%;           
