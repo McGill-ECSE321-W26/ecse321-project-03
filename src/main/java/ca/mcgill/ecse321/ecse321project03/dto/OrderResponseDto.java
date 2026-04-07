@@ -90,10 +90,10 @@ public class OrderResponseDto { // This class is for the attributes that must be
         return assigneeId;
     }
 
-    public List<OrderItemDto> getItems() {return items;}
-
     public double getTotalPrice() {
         return totalPriceAfterDiscount;
+    }
+    
     public String getCustomerName() {
         return customerName;
     }
