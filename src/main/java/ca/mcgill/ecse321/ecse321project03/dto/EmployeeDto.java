@@ -10,7 +10,7 @@ public class EmployeeDto {
 
     // constructor
     public EmployeeDto(Employee employee) {
-        this.employeeId = employee.getAccount().getId();
+        this.employeeId = employee.getId();
         this.account = new AccountResponseDto(employee.getAccount(), employee);
     }
 

@@ -1,12 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { getAllItems } from "../services/itemService";
+import { ref, computed } from "vue";
+import AddItemView from "./AddItemView.vue";
 import { getSession } from "../session/storage";
 
-const session = getSession();
-const loading = ref(true);
-const PRICE_LIMIT = 250; // slider max
-const maxPrice = ref(PRICE_LIMIT);
+const imgUrl = new URL("./assets/images/blouse.jpg", import.meta.url).href;
 
 const sizes = ["XS", "S", "M", "L", "XL"];
 const colors = [
@@ -22,6 +19,15 @@ const colors = [
   "Pink",
   "Red",
 ];
+
+const showForm = ref(false);
+//we have to change this to false later
+const isManager = ref(true);
+const session = getSession();
+
+if (session && session.accountType === "MANAGER") {
+  isManager.value = true
+};
 
 const filters = ref({
   outOfStock: false,
@@ -74,28 +80,17 @@ const filteredProducts = computed(() => {
   });
 });
 
-onMounted(async () => {
-  try {
-    const data = await getAllItems(session.accountId);
-    products.value = data.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      image: item.imageUrls?.[0] ?? "../assets/images/placeholder.jpg",
-      availableSizes: [...new Set(item.variants.map((v) => v.size))],
-      availableColors: [...new Set(item.variants.map((v) => v.color))],
-      totalStock: item.variants.reduce((sum, v) => sum + v.stockLevel, 0),
-      hasLowStock: item.variants.some(
-        (v) => v.stockLevel > 0 && v.stockLevel <= 5,
-      ),
-    }));
-  } catch (e) {
-    console.error("Failed to load products:", e);
-  } finally {
-    loading.value = false;
-  }
-});
+const addItem = (newItem) => {
+  products.value.push({
+    id: Date.now(), // temporary ID (frontend only)
+    ...newItem,
+    image: "/images/blouse.jpg"
+  });
+
+  showForm.value = false;
+};
 </script>
+
 
 <template>
   <div class="catalog">
@@ -171,7 +166,22 @@ onMounted(async () => {
 
     <!-- Right Product Grid -->
     <main class="product-grid">
-      <div v-if="loading" style="grid-column: 1/-1">Loading...</div>
+
+      <!-- Create New button card (only for managers) -->
+    <div 
+      class="product-card create-card" 
+      v-if="isManager"
+      @click="showForm = true"
+    >
+      <div class="plus-icon">+</div>
+      <p>Create new</p>
+    </div>
+
+      <!-- Create New button card 
+      <div class="product-card create-card" @click="showForm = true">
+        <div class="plus-icon">+</div>
+        <p>Create new</p>
+      </div>-->
 
       <template v-else>
         <!-- Create Product Card -->
@@ -193,6 +203,12 @@ onMounted(async () => {
       </template>
     </main>
   </div>
+
+  <AddItemView
+  v-if="showForm"
+  @close="showForm = false"
+  @create="addItem"
+/>
 </template>
 
 <style scoped>
