@@ -81,7 +81,7 @@ onMounted(async () => {
       id: item.id,
       name: item.name,
       price: item.price,
-      image: item.imageUrls?.[0] ?? "../assets/images/placeholder.jpg",
+      image: item.imageUrls && item.imageUrls.length > 0 ? `http://localhost:8080${item.imageUrls[0]}`: "../assets/images/placeholder.jpg",
       availableSizes: [...new Set(item.variants.map((v) => v.size))],
       availableColors: [...new Set(item.variants.map((v) => v.color))],
       totalStock: item.variants.reduce((sum, v) => sum + v.stockLevel, 0),
