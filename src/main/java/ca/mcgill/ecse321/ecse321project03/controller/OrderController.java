@@ -30,9 +30,6 @@ public class OrderController {
 
     @Autowired
     private OrderInfoService orderInfoService;
-    
-    @Autowired
-    private AccountService accountService;
 
 
 
