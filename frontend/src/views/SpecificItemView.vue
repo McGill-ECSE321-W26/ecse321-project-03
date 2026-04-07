@@ -94,6 +94,7 @@
 import { getSession } from '../session/storage'
 import { addToCart } from '../api/item.js'
 import RestockItemView from './RestockItemView.vue'  // <-- Import your actual RestockItemView
+import { restockItem } from '../api/inventory.js';
 
 export default {
   name: 'SpecificItemView',
@@ -101,10 +102,13 @@ export default {
 
   data() {
     const session = getSession()
+    const accountId = session?.accountId
+
     return {
       isManager: true,
       //session?.accountType === 'MANAGER',
       showRestockForm: false,
+      errorMessage: '',
       qty: 0,
       selectedColor: null, 
       selectedSize: null,  // Added size tracking
@@ -200,11 +204,18 @@ export default {
       setTimeout(() => this.added = false, 2000)
     },
 
-    handleRestockSubmit(restockData) {
-      restockData.forEach(r => {
-        const variant = this.product.variants.find(v => v.id === r.id)
-        if (variant) variant.stock += r.quantity
-      })
+    //commented off until backend is ready
+    //async handleRestockSubmit(restockData) {
+    //  errorMessage.value = ''
+    //  try{
+    //    await restockItem(restockData.id, restockData.quantity, restockData.accountId)
+    //  } catch (error) {
+    //    errorMessage.value = error.message || 'Failed to load cart items.'
+    //  }
+    //}
+
+    handleRestockSubmit(restockData){
+      //palecholder until the backend is connected properly
     }
   }
 }
@@ -403,7 +414,7 @@ export default {
 }
 
 .cart-btn {
-  background:#FFE5F9;
+  background:#f8bbd0;
   border: 0.5px solid #000000;
   border-radius: 28px;
 
