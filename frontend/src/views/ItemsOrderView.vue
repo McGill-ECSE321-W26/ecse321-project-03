@@ -4,7 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { getSession, isLoggedIn } from '../session/storage'
 import { useOrderInfo } from '../api/orderInfo.js'
 // IMPORT HEADER
-import Header from '../views/Header.vue' 
+import Header from '../views/Header.vue'
+import {API_BASE} from "../api/base.js";
 
 const route = useRoute()
 const router = useRouter()
@@ -47,7 +48,6 @@ function goBackToOrders() {
 
     <div class="checkout-page">
       <section class="checkout-main">
-        <div class="checkout-step">ORDER DETAILS</div>
 
         <section class="card-block checkout-card">
           <div class="section-header">
@@ -113,9 +113,11 @@ function goBackToOrders() {
             :key="item.itemType.id"
             class="mini-cart-row"
         >
+
           <div class="mini-product-image placeholder-image">
             {{ item.itemType.generalItem.name.charAt(0) }}
           </div>
+
           <div class="mini-product-text">
             <h3>{{ item.itemType.generalItem.name }}</h3>
             <p>SIZE: {{ item.itemType.size }}</p>
