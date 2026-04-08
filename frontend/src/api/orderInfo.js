@@ -20,7 +20,7 @@ export function useOrderInfo() {
 
         } catch (error) {
             console.error(error);
-            window.alert(error.message)
+            //window.alert(error.message)
 
         }  
     };
@@ -32,7 +32,7 @@ export function useOrderInfo() {
 
         } catch (error) {
             console.error(error);
-            window.alert(error.message)
+           // window.alert(error.message)
 
         }  
     };
