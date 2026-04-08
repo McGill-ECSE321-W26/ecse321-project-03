@@ -103,7 +103,7 @@ export function useOrderInfo() {
         loading.value = true; //set loading to true while fetching data
         await Promise.all([getAccount(accountId), getOrder(orderId)]); //wait for both account and order info to be fetched before proceeding
 
-        if (account.value?.accountType === 'MANAGER') {
+        if (account.value?.accountType === 'MANAGER' || account.value?.accountType === 'EMPLOYEE') {
             await getEmployees(accountId);
         }
 

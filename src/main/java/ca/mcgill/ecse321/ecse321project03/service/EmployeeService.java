@@ -33,7 +33,7 @@ public class EmployeeService {
      */
     @Transactional
     public List<Employee> viewEmployees(int userID) {
-        checkIfManager(userID);
+        checkIfManagerOrEmployee(userID);
 
         return (List<Employee>) employeeRepository.findAll();
     }
@@ -41,11 +41,11 @@ public class EmployeeService {
 
 
     /**
-     * Helper method to determine if a user is a Manager member from their user ID. Throws an error if it isn't the case.
+     * Helper method to determine if a user is a Manager/Employee member from their user ID. Throws an error if it isn't the case.
      * @param userID id of the account
      */
-    private void checkIfManager(int userID) {
-        if(managerRepository.findByAccount_Id(userID) == null) {
+    private void checkIfManagerOrEmployee(int userID) {
+        if(managerRepository.findByAccount_Id(userID) == null && (employeeRepository.findByAccount_Id(userID)==null)) {
             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Only manager may view all employees in the system");
 
         }
