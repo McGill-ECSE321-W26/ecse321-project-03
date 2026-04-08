@@ -2,6 +2,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { getCartItems, removeCartItem, updateCartItemQuantity } from '../api/cart.js'
 import { getSession } from '../session/storage'
+import { API_BASE } from '../api/base.js'
 
 const session = getSession()
 const accountId = session?.accountId
@@ -100,16 +101,13 @@ function goToCheckout() {
         class="cart-row"
     >
       <div class="products-col product-info">
-<!--        <img-->
-<!--            v-if="item.image && item.image.key"-->
-<!--            :src="`${API_BASE}/images/${item.image.key}`"-->
-<!--            class="product-image"-->
-<!--            :alt="item.itemType.generalItem.name"-->
-<!--        />-->
-<!--        <div v-else class="product-image placeholder-image">-->
-<!--          {{ item.itemType.generalItem.name.charAt(0) }}-->
-<!--        </div>-->
-        <div class="product-image placeholder-image">
+        <img
+            v-if="item.image && item.image.key"
+            :src="`${API_BASE}/images/${item.image.key}`"
+            class="product-image"
+            :alt="item.itemType.generalItem.name"
+        />
+        <div v-else class="product-image placeholder-image">
           {{ item.itemType.generalItem.name.charAt(0) }}
         </div>
         <div class="product-text">

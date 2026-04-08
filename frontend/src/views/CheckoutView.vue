@@ -7,6 +7,7 @@ import {
 } from '../api/checkout.js'
 import { getAccountById, updateAddress } from '../api/account.js'
 import { getCartItems } from '../api/cart.js'
+import { API_BASE } from '../api/base.js'
 
 
 const emit = defineEmits(['order-placed'])
@@ -191,7 +192,7 @@ async function placeOrder() {
               <h3>Standard</h3>
               <span class="method-fee">FREE</span>
             </div>
-            <p>4-10 business days</p>
+            <p>2-10 business days</p>
           </div>
         </div>
 
@@ -263,7 +264,13 @@ async function placeOrder() {
             :key="item.itemType.id"
             class="mini-cart-row"
         >
-          <div class="mini-product-image placeholder-image">
+          <img
+              v-if="item.image && item.image.key"
+              :src="`${API_BASE}/images/${item.image.key}`"
+              class="mini-product-image"
+              :alt="item.itemType.generalItem.name"
+          />
+          <div v-else class="mini-product-image placeholder-image">
             {{ item.itemType.generalItem.name.charAt(0) }}
           </div>
           <div class="mini-product-text">
