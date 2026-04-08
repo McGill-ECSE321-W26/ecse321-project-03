@@ -41,8 +41,6 @@ public class Order {
     private Employee assignee;
 
     private double totalPriceAfterDiscount;
-    private String address;
-
 
     //------------------------
     // CONSTRUCTOR
@@ -50,7 +48,7 @@ public class Order {
     protected Order() {
     }
 
-    public Order(Date aOrderDate, Date aDelivDate, OrderState aOrderState, Account aCustomer, Employee aAssignee, String aAddress) {
+    public Order(Date aOrderDate, Date aDelivDate, OrderState aOrderState, Account aCustomer, Employee aAssignee) {
         orderDate = aOrderDate;
         delivDate = aDelivDate;
         orderState = aOrderState;
@@ -59,7 +57,6 @@ public class Order {
         if (!setCustomer(aCustomer)) {
             throw new RuntimeException("Unable to create Order due to aCustomer. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
         }
-        address = aAddress;
     }
 
     //------------------------
@@ -118,13 +115,6 @@ public class Order {
         return wasSet;
     }
 
-    public boolean setAddress(String aAddress) {
-        boolean wasSet = false;
-        address = aAddress;
-        wasSet = true;
-        return wasSet;
-    }
-
     // Getter methods
     public int getId() {
         return id;
@@ -154,10 +144,6 @@ public class Order {
 
     public double getTotalPriceAfterDiscount() {
         return totalPriceAfterDiscount;
-    }
-
-    public String getAddress() {
-        return address;
     }
 
 

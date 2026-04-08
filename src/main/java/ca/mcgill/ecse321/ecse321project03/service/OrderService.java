@@ -75,7 +75,7 @@ public class OrderService {
                 orderDto.getDelivDate(),
                 Order.OrderState.Ordered,
                 customer,
-                null, orderDto.getAddress());
+                null);
         Order savedOrder = orderRepository.save(newOrder);
         return savedOrder;
     }

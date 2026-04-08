@@ -117,7 +117,6 @@ async function placeOrder() {
     await placeOrderRequest({
       customerId: accountId,
       delivDate: new Date(), // or your selected date if you add one
-      address: currentAddress
     })
     window.alert('Order placed successfully.')
     emit('order-placed')
