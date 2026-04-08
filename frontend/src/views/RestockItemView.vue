@@ -10,14 +10,17 @@ const emit = defineEmits(['close', 'restock'])
 
 const selectedColor = ref(null) 
 const selectedSize = ref(null)
-const quantity = ref(0)
+const quantity = ref('')
 
 // Reset selections when modal opens
 watch(() => props.visible, (val) => {
+  console.log('VISIBLE CHANGED:', val)
+
   if (val && props.product) {
-    selectedColor.value = null
-    selectedSize.value = null
-    quantity.value = 0
+    console.log('RESETTING FORM')
+    selectedColor.value = ''
+    selectedSize.value = ''
+    quantity.value = ''
   }
 })
 
@@ -39,22 +42,33 @@ const selectedVariant = computed(() => {
 })
 
 const submit = () => {
-  if (!selectedColor.value || !selectedSize.value) return alert('Please select both color and size!')
-  if (quantity.value <= 0) return alert('Enter a quantity greater than 0!')
+  console.log('RAW quantity:', quantity.value)
+  console.log('TYPE:', typeof quantity.value)
+
+  if (!selectedColor.value || !selectedSize.value) {
+    return alert('Please select both color and size!')
+  }
+
+  const qty = Number(quantity.value)
+
+  if (!qty || qty <= 0) {
+    return alert('Enter a quantity greater than 0!')
+  }
 
   emit('restock', [{
     id: selectedVariant.value.id,
     color: selectedVariant.value.color,
     size: selectedVariant.value.size,
-    quantity: quantity.value
+    quantity: qty
   }])
+
   emit('close')
 }
 </script>
 
 
 <template>
-  <div v-if="visible" class="modal-overlay">
+  <div v-show="visible" class="modal-overlay">
     <div class="modal-box">
 
       <div class="modal-header-bar">
@@ -67,19 +81,25 @@ const submit = () => {
         <input :value="product?.name || ''" disabled />
 
         <label>Color:</label>
-        <select v-model="selectedColor">
+        <select v-model="selectedColor" required>
           <option value="" disabled>Select a color</option>
           <option v-for="color in uniqueColors" :key="color" :value="color">{{ color }}</option>
         </select>
+        
 
         <label>Size:</label>
-        <select v-model="selectedSize" :disabled="!selectedColor">
+        <select v-model="selectedSize" :disabled="!selectedColor" required>
           <option value="" disabled>Select a size</option>
           <option v-for="size in sizesForColor" :key="size" :value="size">{{ size }}</option>
         </select>
 
         <label>Quantity:</label>
-        <input type="number" min="1" v-model.number="quantity" />
+              <input
+              type="number"
+              min="1"
+              v-model="quantity"
+              @input="e => console.log('Input event:', e.target.value)"
+/>
 
         <div class="button-container">
           <button class="restock-btn" @click="submit">Done</button>
@@ -114,7 +134,6 @@ const submit = () => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 12px;
 }
 
 .modal-header-bar {
@@ -158,6 +177,16 @@ const submit = () => {
 .form label {
   font-weight: bold;
   margin-top: 6px;
+}
+
+/* Gray placeholder text */
+select:invalid {
+  color: #727272; /* gray */
+}
+
+/* Black text when a valid option is selected */
+select {
+  color: #000; /* default for selected option */
 }
 
 .form input,

@@ -115,6 +115,7 @@ import { getSession } from '../session/storage'
 import { API_BASE } from '../api/base.js'
 import { addToCart, getProduct } from '../api/item.js'
 import RestockItemView from './RestockItemView.vue'
+import { restockItem } from "../api/inventory.js"; 
 
 export default {
   name: 'SpecificItemView',
@@ -238,16 +239,32 @@ export default {
         alert(error.message);
       }
     },
+    
+  async handleRestockSubmit(restockData) {
+  try {
+    const item = restockData[0]
 
-    handleRestockSubmit(restockData) {
-      restockData.forEach(r => {
-        const variant = this.product.variants.find(v => v.id === r.id)
-        if (variant) {
-          if (variant.stockLevel !== undefined) variant.stockLevel += r.quantity;
-          if (variant.stock !== undefined) variant.stock += r.quantity;
-        }
-      })
-    }
+    console.log('Sending to backend:', {
+      itemTypeId: item.id,
+      quantity: item.quantity,
+      accountId: this.session?.accountId
+    })
+
+    console.log("Restock request payload:", {
+     itemTypeId: item.id,
+      quantity: item.quantity,
+     accountId: this.session?.accountId
+    })  
+
+    await restockItem(item.id, item.quantity, this.session?.accountId)
+
+    alert('Restock successful!')
+    window.location.reload()
+
+  } catch (error) {
+    alert(error.message || 'Failed to restock item.')
+  }
+}
   }
 }
 </script>
