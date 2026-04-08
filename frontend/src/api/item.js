@@ -1,42 +1,91 @@
-export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ''
+import { API_BASE, readErrorMessage } from './base.js'
 
-// GET /api/products/{id}
-export async function getProduct(id) {
-  const res = await fetch(`${API_BASE}/products/${id}`)
-  if (!res.ok) throw new Error('Failed to fetch product')
-  return res.json()
+const base = API_BASE
+
+// GET all items
+export async function getAllItems(accountId) {
+  const url = `${base}/items?accountId=${accountId}`
+  const res = await fetch(url)
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to fetch items: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : []
 }
 
-// GET /api/products
-export async function getAllProducts() {
-  const res = await fetch(`${API_BASE}/products`)
-  if (!res.ok) throw new Error('Failed to fetch products')
-  return res.json()
+export async function getProduct(id, accountId) {
+  const res = await fetch(`${base}/items/${id}?accountId=${accountId}`)
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to fetch product: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : null
 }
 
-// POST /api/cart
-export async function addToCart(productId, quantity, colors) {
-  const res = await fetch(`${API_BASE}/cart`, {
+export async function createCart(accountId) {
+  const res = await fetch(`${base}/carts/${accountId}`, {
+    method: 'POST',
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to create cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : null
+}
+
+export async function addToCart(accountId, variantId, quantity) {
+  const tryAdd = async () => fetch(`${base}/carts/${accountId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, quantity, colors })
-  })
-  if (!res.ok) throw new Error('Failed to add to cart')
-  return res.json()
+    body: JSON.stringify({ itemType: { id: variantId }, quantity })
+  });
+
+  let res = await tryAdd();
+
+  
+  if (!res.ok) {
+    const text = await res.text();
+    if (text.includes("doesn't have a cart")) {
+      await createCart(accountId);
+      res = await tryAdd();
+    } else {
+      throw new Error(`Failed to add to cart: ${readErrorMessage(text)}`);
+    }
+  }
+
+  const text = await res.text()
+  if (!res.ok) throw new Error(`Failed to add to cart: ${readErrorMessage(text)}`)
+  return text ? JSON.parse(text) : true
 }
 
-// GET /api/cart
-export async function getCart() {
-  const res = await fetch(`${BASE_URL}/cart`)
-  if (!res.ok) throw new Error('Failed to fetch cart')
-  return res.json()
-}
 
-// DELETE /api/cart/:productId
-export async function removeFromCart(productId) {
-  const res = await fetch(`${BASE_URL}/cart/${productId}`, {
-    method: 'DELETE'
-  })
-  if (!res.ok) throw new Error('Failed to remove from cart')
-  return res.json()
+export async function createItem(accountId, itemData, files = null) {
+  const formData = new FormData();
+  
+  
+  const itemCreationDto = {
+    name: itemData.name,
+    price: itemData.price,
+    tag: itemData.tag,
+    variants: itemData.variants.map(variant => ({
+      size: variant.size,
+      color: variant.color,
+      initialStock: variant.initialStock
+    }))
+  };
+  
+  
+  formData.append('item', new Blob([JSON.stringify(itemCreationDto)], { type: 'application/json' }));
+  
+ 
+  if (files && files.length) {
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+  }
+  
+  const url = `${base}/items?accountId=${accountId}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    body: formData
+    
+  });
+  
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Failed to create item: ${readErrorMessage(text)}`);
+  return text ? JSON.parse(text) : null;
 }
