@@ -135,9 +135,9 @@ onMounted(() => {
                   class="box__ID" v-model="selectedEmployeeId">
                   <option :value="null">None</option>
                   <option v-for="employee in employees"
-                      :key="employee.id"
-                      :value="employee.id">
-                      {{ employee.id }}
+                      :key="employee.employeeId"
+                      :value="employee.employeeId">
+                      {{ employee.employeeId }}
                   </option>
                 </select>
               </div>
