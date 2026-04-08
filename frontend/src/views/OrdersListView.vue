@@ -142,6 +142,8 @@ function handlePopupClose(shouldRefresh) {
   }
 }
 
+defineExpose({ loadOrders })
+
 </script>
 
 <template>

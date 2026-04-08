@@ -11,6 +11,7 @@ const props = defineProps({
 });
 
 import { getAccountById } from "../api/account.js";
+import logoImg from "../assets/images/beautiful_big_logo.png";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -31,14 +32,13 @@ function pickTab(tab) {
 
 const points = ref(0);
 async function findNumberOfPoints() {
-  if (session.value.accountId) {
-    try {
-      const account = await getAccountById(session.value.accountId);
-      points.value = account?.loyaltyPts;
-    } catch (error) {
-      console.error(err);
-      window.alert(error.message)
-    }
+  if (!session.value?.accountId) return;
+  try {
+    const account = await getAccountById(session.value.accountId);
+    points.value = account?.loyaltyPts ?? 0;
+  } catch (error) {
+    console.error(error);
+    window.alert(error.message);
   }
 }
 
@@ -55,11 +55,20 @@ function refreshSession() {
 
 <template>
     <header class="top">
-      <div class="title-block">
-        <h1 class="brand">Papa's Fashionistaria</h1>
-        <span class="muted" v-if="session">
-          {{ session.username }} · {{ session.accountType?.toLowerCase() }}
-        </span>
+      <div class="header-left">
+        <div class="logo-block">
+          <img
+            :src="logoImg"
+            alt="Papa's Fashionistaria"
+            class="logo-img"
+          />
+        </div>
+        <div class="title-block">
+          <h1 class="brand">Papa's Fashionistaria</h1>
+          <span class="muted" v-if="session">
+            {{ session.username }} · {{ session.accountType?.toLowerCase() }}
+          </span>
+        </div>
       </div>
       <nav class="nav-tabs">
         <button
@@ -122,8 +131,35 @@ function refreshSession() {
   align-items: center;
   background: #FFE5F9;
   border-bottom: 4px solid #3D3C3C;
-  height: 11vh;
+  min-height: 11vh;
+  gap: 12px;
+}
 
+.header-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 12px;
+  margin-left: 12px;
+  max-width: min(42vw, 520px);
+}
+
+.title-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.title-block .brand {
+  margin: 0;
+  font-size: clamp(1rem, 2.2vh, 1.35rem);
+  line-height: 1.15;
+}
+
+.title-block .muted {
+  font-size: clamp(0.7rem, 1.6vh, 0.85rem);
+  opacity: 0.85;
 }
 .user-block {
   display: flex;
@@ -179,16 +215,19 @@ function refreshSession() {
 }
 
 .logo-block {
-  height: 100%;
+  height: 10vh;
+  max-height: 88px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .logo-img {
-  height: 90%;
+  height: 100%;
   width: auto;
+  max-width: 100%;
   object-fit: contain;
-  margin-left: 20px;
+  object-position: left center;
 }
 
 
