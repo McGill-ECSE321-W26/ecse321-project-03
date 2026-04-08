@@ -155,7 +155,7 @@ onMounted(() => {
                 <span class="underscores">______</span>
 
                 <template v-if="account?.accountType === 'CUSTOMER'">
-                  <select v-if="order?.orderState !== 'Delivered' && canCancelOrder()" v-model="selectedStatus" class="box__date__state">
+                  <select v-if="order?.orderState !== 'Delivered' && order?.orderState !== 'Cancelled' && canCancelOrder()" v-model="selectedStatus" class="box__date__state">
                     <option value="">{{ order?.orderState }} </option>
                     <option value="Cancelled">Cancelled</option>
                   </select>
@@ -163,7 +163,7 @@ onMounted(() => {
                 </template>
 
                 <template v-else-if="account?.accountType === 'EMPLOYEE'">
-                  <select v-if="order?.orderState !== 'Delivered'" v-model="selectedStatus" class="box__date__state">
+                  <select v-if="order?.orderState !== 'Delivered' && order?.orderState !== 'Cancelled'" v-model="selectedStatus" class="box__date__state">
                     <option value="">{{ order?.orderState }} </option>
                     <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
                     <option v-if="order?.orderState === 'InPreparation'" value="Prepared">Prepared</option>
@@ -173,7 +173,7 @@ onMounted(() => {
                 </template>
 
                 <template v-else-if="account?.accountType === 'MANAGER'">
-                  <select v-if="order?.orderState !== 'Delivered'" v-model="selectedStatus" class="box__date__state">
+                  <select v-if="order?.orderState !== 'Delivered' && order?.orderState !== 'Cancelled'" v-model="selectedStatus" class="box__date__state">
                     <option value="">{{ order?.orderState }} </option>
                     <option v-if="order?.orderState === 'Ordered'" value="InPreparation">InPreparation</option>
                     <option v-if="order?.orderState === 'Ordered'" value="Cancelled">Cancelled</option>
