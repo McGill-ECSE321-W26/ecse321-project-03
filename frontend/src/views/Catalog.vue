@@ -139,14 +139,15 @@ function mapDto(item) {
 
 const filteredProducts = computed(() => {
   return products.value.filter((product) => {
-    if (!filters.value.outOfStock && product.totalStock === 0) return false;
-    if (!filters.value.lowStock && product.hasLowStock) return false;
+    if (filters.value.outOfStock && product.totalStock !== 0) return false;
+    if (filters.value.lowStock && !product.hasLowStock) return false;
     const sizeMatch = filters.value.sizes.length === 0 || filters.value.sizes.some(s => product.availableSizes.includes(s));
     const colorMatch = filters.value.colors.length === 0 || filters.value.colors.some(c => product.availableColors.includes(c));
     const priceMatch = maxPrice.value === PRICE_LIMIT || product.price <= maxPrice.value;
     return sizeMatch && colorMatch && priceMatch;
   });
 });
+
 
 
 
