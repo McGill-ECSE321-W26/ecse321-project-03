@@ -84,6 +84,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { getAllItems } from "../api/item.js";
+import { API_BASE } from "../api/base.js";
 import { getSession } from "../session/storage";
 import { useRouter } from "vue-router";
 import AddItemView from "./AddItemView.vue";
@@ -128,7 +129,7 @@ function mapDto(item) {
     name: item.name ?? item.item?.name,
     price: item.price ?? item.item?.price,
     image: item.imageUrls?.length > 0
-      ? `http://localhost:8080${item.imageUrls[0]}`
+      ? `${API_BASE}${item.imageUrls[0]}`
       : "../assets/images/placeholder.jpg",
     availableSizes: [...new Set(item.variants.map(v => v.size))],
     availableColors: [...new Set(item.variants.map(v => v.color))],

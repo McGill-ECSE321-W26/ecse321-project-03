@@ -10,10 +10,32 @@
       <div class="window-body" v-if="!loading && product">
 
         <div class="left">
-          <div class="image">
-            <img :src="product.imageUrl" :alt="product.name" />
+          <div class="gallery">
+            <div class="image">
+              <img :src="activeImageSrc" :alt="product.name" />
+            </div>
+            <div v-if="product.imageUrls.length > 1" class="gallery-thumbs">
+              <button
+                v-for="(url, index) in product.imageUrls"
+                :key="index"
+                type="button"
+                class="gallery-thumb"
+                :class="{ 'gallery-thumb--active': index === activeImageIndex }"
+                :aria-label="`Show image ${index + 1} of ${product.imageUrls.length}`"
+                :aria-pressed="index === activeImageIndex"
+                @click="activeImageIndex = index"
+              >
+                <img :src="url" :alt="''" />
+              </button>
+            </div>
           </div>
-          <p class="stock">Stock left: {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : 'Select Color & Size' }}</p>
+          <p class="stock">
+            <span class="stock-line">
+              Stock left:
+              {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : '—' }}
+            </span>
+            <span v-if="!selectedVariant" class="stock-hint">Select color and size first</span>
+          </p>
         </div>
 
         <div class="right">
@@ -90,6 +112,7 @@
 
 <script>
 import { getSession } from '../session/storage'
+import { API_BASE } from '../api/base.js'
 import { addToCart, getProduct } from '../api/item.js'
 import RestockItemView from './RestockItemView.vue'
 
@@ -109,6 +132,7 @@ export default {
       added: false,
       loading: true,
       product: null,
+      activeImageIndex: 0,
     }
   },
 
@@ -118,15 +142,18 @@ export default {
     const responseDto = await getProduct(id, this.session?.accountId || 1);
     console.log('Response:', responseDto); // remove once working
 
+    const urls =
+      responseDto.imageUrls && responseDto.imageUrls.length > 0
+        ? responseDto.imageUrls.map((u) => `${API_BASE}${u}`)
+        : ['../assets/images/placeholder.jpg']
     this.product = {
       id: responseDto.id ?? responseDto.item?.id,
       name: responseDto.name ?? responseDto.item?.name,
       price: responseDto.price ?? responseDto.item?.price,
-      imageUrl: responseDto.imageUrls && responseDto.imageUrls.length > 0
-        ? `http://localhost:8080${responseDto.imageUrls[0]}`
-        : '../assets/images/placeholder.jpg',
+      imageUrls: urls,
       variants: responseDto.variants || []
-    };
+    }
+    this.activeImageIndex = 0
   } catch (error) {
     console.error("Failed to load specific item:", error);
     alert("Item not found!");
@@ -153,6 +180,18 @@ export default {
       return this.product.variants.find(
         v => v.color === this.selectedColor && v.size === this.selectedSize
       );
+    },
+
+    activeImageSrc() {
+      if (!this.product?.imageUrls?.length) return '../assets/images/placeholder.jpg'
+      const i = Math.min(this.activeImageIndex, this.product.imageUrls.length - 1)
+      return this.product.imageUrls[i]
+    }
+  },
+
+  watch: {
+    '$route.params.id'() {
+      this.activeImageIndex = 0
     }
   },
 
@@ -282,6 +321,7 @@ export default {
 
 .window-body {
   display: flex;
+  align-items: flex-start;
   gap: 32px;
   padding: 28px 28px 16px;
 }
@@ -292,6 +332,15 @@ export default {
   align-items: center;
   gap: 14px;
   flex-shrink: 0;
+  width: 200px;
+}
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .image {
@@ -303,6 +352,7 @@ export default {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  flex-shrink: 0;
 }
 .image img {
   width: 100%;
@@ -310,9 +360,69 @@ export default {
   object-fit: cover;
 }
 
+.gallery-thumbs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  width: 100%;
+  max-width: 200px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery-thumb {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #f2f2f2;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-thumb:hover {
+  border-color: #1209AB;
+}
+
+.gallery-thumb--active {
+  border-color: #1209AB;
+  box-shadow: 0 0 0 1px #1209AB;
+}
+
 .stock {
   font-size: 13px;
   color: #333;
+  line-height: 1.35;
+  width: 100%;
+  margin: 0;
+  min-height: calc(1.35em * 3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.stock-line {
+  font-weight: 700;
+}
+
+.stock-hint {
+  font-size: 12px;
+  color: #666;
+  font-weight: 400;
 }
 
 .right {
