@@ -1,5 +1,6 @@
-import { ref } from 'vue'
-import { API_BASE, readErrorMessage } from './base.js'
+import { ref, computed} from 'vue';
+import axios from 'axios'; //library for HTTP requests
+
 
 // export function to be accessible from other files
 // async function so that it can wait for the response from the backend before proceeding
@@ -14,10 +15,8 @@ export function useOrderInfo() {
 
     async function getAccount(id) {
         try {
-            const res = await fetch(`${API_BASE}/accounts/${id}`)
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) throw new Error(readErrorMessage(data))
-            account.value = data
+            const response = await axios.get(`http://localhost:8080/accounts/${id}`); //get account info from backend using account ID
+            account.value = response.data; //store account info in variable
 
         } catch (error) {
             console.error(error);
@@ -28,10 +27,8 @@ export function useOrderInfo() {
 
     async function getOrder(id) {
         try {
-            const res = await fetch(`${API_BASE}/order/order/${id}`)
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) throw new Error(readErrorMessage(data))
-            order.value = data
+            const response = await axios.get(`http://localhost:8080/order/order/${id}`); //get order info from backend using order ID
+            order.value = response.data; //store order info in variable
 
         } catch (error) {
             console.error(error);
@@ -42,11 +39,15 @@ export function useOrderInfo() {
 
     async function getEmployees(userId) {
         try {
-            const params = new URLSearchParams({ userID: String(userId) })
-            const res = await fetch(`${API_BASE}/employees?${params}`)
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) throw new Error(readErrorMessage(data))
-            employees.value = data
+            const response = await axios.get(
+                "http://localhost:8080/employees",
+                {
+                    params: { userID: userId },
+
+                }
+            );
+
+            employees.value = response.data; //store employees in variable
         } catch (error) {
             console.error(error);
            // window.alert(error.message)
@@ -65,16 +66,10 @@ export function useOrderInfo() {
 
     async function updateOrderStatus(orderId, newState, accountId) {
         try {
-            const params = new URLSearchParams({
-                orderState: String(newState),
-                accountId: String(accountId),
-            })
-            const res = await fetch(`${API_BASE}/order/order/${orderId}/status?${params}`, {
-                method: 'PUT',
-            })
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) throw new Error(readErrorMessage(data))
-            order.value = data
+            const response = await axios.put(`http://localhost:8080/order/order/${orderId}/status`, null, {
+                params: { orderState: newState, accountId: accountId }
+            });
+            order.value = response.data; // Update local state with new data
         } catch (error) {
             console.error(error);
             window.alert(error.message)
@@ -83,16 +78,10 @@ export function useOrderInfo() {
     
     async function assignEmployee(orderId, employeeId, accountId) {
         try {
-            const params = new URLSearchParams({
-                employeeId: String(employeeId),
-                accountId: String(accountId),
-            })
-            const res = await fetch(`${API_BASE}/order/order/${orderId}/assign-employee?${params}`, {
-                method: 'PUT',
-            })
-            const data = await res.json().catch(() => ({}))
-            if (!res.ok) throw new Error(readErrorMessage(data))
-            order.value = data
+            const response = await axios.put(`http://localhost:8080/order/order/${orderId}/assign-employee`, null, {
+                params: { employeeId: employeeId, accountId: accountId }
+            });
+            order.value = response.data;
         } catch (error) {
             console.error(error);
             window.alert(error.message)
@@ -122,3 +111,4 @@ export function useOrderInfo() {
         assignEmployee
     }
 };
+

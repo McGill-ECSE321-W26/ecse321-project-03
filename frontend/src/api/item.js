@@ -1,6 +1,6 @@
 import { API_BASE, readErrorMessage } from './base.js'
 
-const base = API_BASE
+const base = API_BASE || 'http://localhost:8080'
 
 // GET all items
 export async function getAllItems(accountId) {
