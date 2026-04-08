@@ -16,6 +16,7 @@ export default defineConfig({
       '/images': { target: backend, changeOrigin: true },
       '/carts': { target: backend, changeOrigin: true },
       '/orders': { target: backend, changeOrigin: true },
+      '/employees': { target: backend, changeOrigin: true },
       '/inventory': { target: backend, changeOrigin: true },
     },
   },

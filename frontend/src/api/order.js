@@ -1,4 +1,4 @@
-import {API_BASE, readErrorMessage} from './base.js'
+import { API_BASE } from './base.js'
 
 /**
  * Method to retrieve all the orders in the backend
@@ -7,7 +7,7 @@ import {API_BASE, readErrorMessage} from './base.js'
 export async function getAllOrders(userId) {
     const base = API_BASE
 
-    const url = `${base}/order/order?userID=${userId}`
+    const url = `${base}/orders/order?userID=${userId}`
     console.log("Fetching URL:", url)
 
     const res = await fetch(url)

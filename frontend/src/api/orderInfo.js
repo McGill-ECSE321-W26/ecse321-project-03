@@ -28,7 +28,7 @@ export function useOrderInfo() {
 
     async function getOrder(id) {
         try {
-            const res = await fetch(`${API_BASE}/order/order/${id}`)
+            const res = await fetch(`${API_BASE}/orders/order/${id}`)
             const data = await res.json().catch(() => ({}))
             if (!res.ok) throw new Error(readErrorMessage(data))
             order.value = data
@@ -69,7 +69,7 @@ export function useOrderInfo() {
                 orderState: String(newState),
                 accountId: String(accountId),
             })
-            const res = await fetch(`${API_BASE}/order/order/${orderId}/status?${params}`, {
+            const res = await fetch(`${API_BASE}/orders/order/${orderId}/status?${params}`, {
                 method: 'PUT',
             })
             const data = await res.json().catch(() => ({}))
@@ -87,7 +87,7 @@ export function useOrderInfo() {
                 employeeId: String(employeeId),
                 accountId: String(accountId),
             })
-            const res = await fetch(`${API_BASE}/order/order/${orderId}/assign-employee?${params}`, {
+            const res = await fetch(`${API_BASE}/orders/order/${orderId}/assign-employee?${params}`, {
                 method: 'PUT',
             })
             const data = await res.json().catch(() => ({}))
