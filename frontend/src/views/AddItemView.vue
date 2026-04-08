@@ -17,7 +17,8 @@ const item = ref({
   price: null,
   colors: [],
   sizes: [],
-  tag: ""
+  tag: "",
+  quantity: 1
 });
 
 const submitForm = () => {
