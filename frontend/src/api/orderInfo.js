@@ -50,7 +50,7 @@ export function useOrderInfo() {
             employees.value = response.data; //store employees in variable
         } catch (error) {
             console.error(error);
-            window.alert(error.message)
+           // window.alert(error.message)
         }
     };
 
