@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { clearSession, getSession } from '../session/storage'
 import Catalog from "./Catalog.vue";
 import { getAllOrders } from '../api/order.js'
+import OrderInfoView from '../views/OrderInfoView.vue';
 
 const router = useRouter()
 const session = ref(getSession())
@@ -24,11 +25,22 @@ const columns = [
   { key: 'employee', label: 'Employees' },
   { key: 'status', label: 'Status' },
   { key: 'orderDate', label: 'Order Date' },
+  { key: 'actions', label: 'View Order' },
 ]
 
 const orders = ref([])
 const loading = ref(false)
 const error = ref(null)
+
+const showOrderPopup = ref(false)
+const selectedOrderId = ref(null)
+
+// 3. Create a function to open the popup
+function openOrderDetails(id) {
+  selectedOrderId.value = id
+  showOrderPopup.value = true
+}
+
 
 async function loadOrders() {
   loading.value = true
@@ -70,7 +82,8 @@ async function loadOrders() {
  * Once the page loads, call your backend
  */
 onMounted(() => {
-  loadOrders()
+  loadOrders();
+
 })
 
 const sortKey = ref('orderId')
@@ -107,15 +120,7 @@ function logout() {
   router.replace({ name: 'login' })
 }
 
-function pickTab(tab) {
-  if (tab === 'inventory' && !isManager.value) {
-    return activeTab.value = tab
-  } else if (tab === 'orders') {
-    router.push({ name: 'orderList' })
-  } else {
-   router.push({ name: 'appShell' })
-  }
-}
+
 
 function sortBy(key) {
   if (sortKey.value === key) {
@@ -130,94 +135,19 @@ function searchOrders() {
   appliedFilters.value = { ...filters.value }
 }
 
+function handlePopupClose(shouldRefresh) {
+  showOrderPopup.value = false; // Close the popup
+  if (shouldRefresh === true) {
+    loadOrders(); // This re-runs the GET request to update your table!
+  }
+}
+
 </script>
 
 <template>
 
   <div class="page">
-    <header class="top">
-      <div class="logo-block">
-        <img src="../assets/images/beautiful_big_logo.png" class="logo-img" />
-      </div>
 
-      <nav class="nav-tabs">
-        <button
-            type="button"
-            :class="{ on: activeTab === 'shop' }"
-            @click="pickTab('shop')"
-        >
-          Shop
-        </button>
-
-        <button
-            type="button"
-            :class="{ on: activeTab === 'orders' }"
-            @click="pickTab('orders')"
-        >
-          Orders
-        </button>
-
-        <button
-            type="button"
-            :class="{ on: activeTab === 'cart' }"
-            @click="pickTab('cart')"
-        >
-          Cart
-        </button>
-
-        <button
-            v-if="isManager"
-            type="button"
-            :class="{ on: activeTab === 'inventory' }"
-            @click="pickTab('inventory')"
-        >
-          Inventory
-        </button>
-
-        <button
-            type="button"
-            class="logout-link"
-            @click="logout"
-        >
-          Log out
-        </button>
-      </nav>
-
-      <div class="user-block">
-        <button
-            type="button"
-            class="user-profile-btn"
-            aria-label="Open account details"
-        >
-          <img
-              src="../assets/images/user.png"
-              alt=""
-              class="user-icon-img"
-              width="28"
-              height="28"
-          />
-        </button>
-
-        <div class="user-text">
-          Hi {{ session?.username }}!
-          <div class="points">✨50 Points</div>
-        </div>
-      </div>
-    </header>
-
-    <main class="main">
-      <section v-show="activeTab === 'shop'">
-        <Catalog />
-      </section>
-
-      <section v-show="activeTab === 'cart'">
-        <Cart />
-      </section>
-
-      <section v-show="activeTab === 'inventory'">
-        <Inventory />
-      </section>
-    </main>
 
     <main class="content">
       <aside class="sidebar">
@@ -258,11 +188,23 @@ function searchOrders() {
             <div class="td">{{ order.employee }}</div>
             <div class="td">{{ order.status }}</div>
             <div class="td">{{ order.orderDate }}</div>
+            <div class="td">
+              <button class="view-btn" @click="openOrderDetails(order.orderId)">
+                View Info
+              </button>
+            </div>
+
           </div>
 
         </div>
       </section>
     </main>
+    <OrderInfoView
+        v-if="showOrderPopup"
+        :orderId="selectedOrderId"
+        @close="handlePopupClose"
+    />
+
   </div>
 </template>
 
@@ -516,6 +458,17 @@ function searchOrders() {
 }
 
 
+.view-btn {
+  background: linear-gradient(to top, #FFFFFF 0%, #FFEEFB 30%, #FDCEE9 80%);
+  border-radius: 20px;
+  width: 100px;
+  height: 20px;
+  border: 1px solid #000000;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: 'Inconsolata', monospace;
+}
+
 /* Table section */
 .table-section {
   display: flex;
@@ -526,7 +479,7 @@ function searchOrders() {
 .table-header,
 .tr {
   display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
+  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
 }
 
 .table-header {

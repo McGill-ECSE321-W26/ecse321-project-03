@@ -15,32 +15,42 @@ export function useOrderInfo() {
 
     async function getAccount(id) {
         try {
-            const response = await axios.get(`http://localhost:8080/account/${id}`); //get account info from backend using account ID
+            const response = await axios.get(`http://localhost:8080/accounts/${id}`); //get account info from backend using account ID
             account.value = response.data; //store account info in variable
 
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
 
         }  
     };
 
     async function getOrder(id) {
         try {
-            const response = await axios.get(`http://localhost:8080/order/${id}`); //get order info from backend using order ID
+            const response = await axios.get(`http://localhost:8080/order/order/${id}`); //get order info from backend using order ID
             order.value = response.data; //store order info in variable
 
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
 
         }  
     };
 
-    async function getEmployees() {
+    async function getEmployees(userId) {
         try {
-            const response = await axios.get(`http://localhost:8080/employee`); //get employees
+            const response = await axios.get(
+                "http://localhost:8080/employees",
+                {
+                    params: { userID: userId },
+
+                }
+            );
+
             employees.value = response.data; //store employees in variable
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     };
 
@@ -56,29 +66,37 @@ export function useOrderInfo() {
 
     async function updateOrderStatus(orderId, newState, accountId) {
         try {
-            const response = await axios.put(`http://localhost:8080/order/${orderId}/status`, null, {
+            const response = await axios.put(`http://localhost:8080/order/order/${orderId}/status`, null, {
                 params: { orderState: newState, accountId: accountId }
             });
             order.value = response.data; // Update local state with new data
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     }; 
     
     async function assignEmployee(orderId, employeeId, accountId) {
         try {
-            const response = await axios.put(`http://localhost:8080/order/${orderId}/assign-employee`, null, {
+            const response = await axios.put(`http://localhost:8080/order/order/${orderId}/assign-employee`, null, {
                 params: { employeeId: employeeId, accountId: accountId }
             });
             order.value = response.data;
         } catch (error) {
             console.error(error);
+            window.alert(error.message)
         }
     };
 
     async function init(accountId, orderId) {
         loading.value = true; //set loading to true while fetching data
-        await Promise.all([getAccount(accountId), getOrder(orderId), getEmployees()]); //wait for both account and order info to be fetched before proceeding
+        await Promise.all([getAccount(accountId), getOrder(orderId)]); //wait for both account and order info to be fetched before proceeding
+
+        if (account.value?.accountType === 'MANAGER') {
+            await getEmployees(accountId);
+        }
+
+
         loading.value = false; //set loading to false after data is fetched
     }
 

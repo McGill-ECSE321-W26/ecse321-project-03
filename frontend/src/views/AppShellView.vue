@@ -1,11 +1,13 @@
 <script setup>
-import { computed, ref } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { clearSession, getSession } from "../session/storage";
 import Catalog from "./Catalog.vue";
 import CartView from './CartView.vue'
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
+import OrdersListView from "./OrdersListView.vue";
+import { getAccountById } from "../api/account.js";
 
 const router = useRouter();
 const session = ref(getSession());
@@ -22,18 +24,37 @@ function logout() {
 
 // display inventory tab only for managers
 function pickTab(tab) {
-  if (tab === "inventory" && !isManager.value) return;
-
-  if (tab === "orders") {
-    router.push({name: "ordersList"})
-  } else {
     activeTab.value = tab;
+
+}
+
+const points = ref(0);
+async function findNumberOfPoints() {
+  if (session.value.accountId) {
+    try {
+      const account = await getAccountById(session.value.accountId);
+      points.value = account?.loyaltyPts;
+    } catch (error) {
+      console.error(err);
+      window.alert(error.message)
+    }
   }
 }
+onMounted(() => {
+  findNumberOfPoints();
+
+  const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+  const tab = urlParams.get('tab');
+  if (tab) {
+    activeTab.value = tab;
+  }
+});
 
 function refreshSession() {
   session.value = getSession();
+  findNumberOfPoints();
 }
+
 </script>
 
 <template>
@@ -70,14 +91,7 @@ function refreshSession() {
           Cart
         </button>
 
-        <button
-          v-if="isManager"
-          type="button"
-          :class="{ on: activeTab === 'inventory' }"
-          @click="pickTab('inventory')"
-        >
-          Inventory
-        </button>
+
 
         <button type="button" class="logout-link" @click="logout">Log out</button>
       </nav>
@@ -95,7 +109,7 @@ function refreshSession() {
         </button>
         <div class="user-text">
           Hi {{ session?.username }}!
-          <div class="points">✨50 Points</div>
+          <div class="points">✨{{ points }} Points</div>
         </div>
       </div>
     </header>
@@ -105,13 +119,15 @@ function refreshSession() {
         <Catalog />
       </section>
 
+
+      <section v-show="activeTab === 'orders'">
+        <OrdersListView />
+      </section>
+
       <section v-show="activeTab === 'cart'">
         <CartView @go-checkout="pickTab('checkout')" />
       </section>
 
-      <section v-show="activeTab === 'inventory'">
-         <Inventory />      
-      </section>
 
       <section v-show="activeTab === 'account'">
         <AccountDetailView @session-updated="refreshSession" />

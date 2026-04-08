@@ -3,6 +3,7 @@ import { isLoggedIn } from '../session/storage'
 import LoginView from '../views/LoginView.vue'
 import AppShellView from '../views/AppShellView.vue'
 import SpecificItemView from '../views/SpecificItemView.vue'
+import ItemsOrderView from '../views/ItemsOrderView.vue'
 import OrdersListView from "../views/OrdersListView.vue";
 
 const router = createRouter({
@@ -20,7 +21,15 @@ const router = createRouter({
       component: AppShellView,
       meta: { requiresAuth: true },
     },
+
     {
+      path: '/order-items/:id',
+      name: 'order-items',
+      component: ItemsOrderView,
+      meta: { requiresAuth: true },
+    },
+
+          {
       path: '/orders',
       name: 'ordersList',
       component: OrdersListView,

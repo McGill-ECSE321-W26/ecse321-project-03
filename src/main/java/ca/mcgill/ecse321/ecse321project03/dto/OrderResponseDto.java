@@ -24,6 +24,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
     private String assigneeName;
     private List<OrderItemDto> items;
     private double totalPriceAfterDiscount;
+    private String address;
 
     @SuppressWarnings("unused")
     public OrderResponseDto() {
@@ -51,6 +52,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
 
         this.assigneeId = (order.getAssignee() == null) ? 0 : order.getAssignee().getId();
         this.totalPriceAfterDiscount = order.getTotalPriceAfterDiscount();
+        this.address = order.getAddress();
         this.assigneeName = (order.getAssignee() == null || order.getAssignee().getAccount() == null)
                 ? "Not assigned"
                 : order.getAssignee().getAccount().getUsername();
@@ -88,6 +90,9 @@ public class OrderResponseDto { // This class is for the attributes that must be
 
     public int getAssigneeId() {
         return assigneeId;
+    }
+    public String getAddress(){
+        return address;
     }
 
     public double getTotalPrice() {

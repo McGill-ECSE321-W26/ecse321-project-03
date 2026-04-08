@@ -1,142 +1,150 @@
 <script setup>
-import Header from '../views/Header.vue'; // Ensure this path matches where you saved the Header component
-import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useOrderInfo } from '../api/orderInfo.js'; 
+import { ref, onMounted, defineProps, defineEmits } from 'vue';
+import {useRoute, useRouter } from 'vue-router';
+import { useOrderInfo } from '../api/orderInfo.js';
 import { getSession, isLoggedIn } from '../session/storage.js';
 
-const route = useRoute();
+
+const props = defineProps({
+  orderId: {
+    type: [Number, String],
+    required: true
+  }
+});
+const emit = defineEmits(['close']);
+
+
 const router = useRouter();
 const { order, account, employees, loading, canCancelOrder, init, updateOrderStatus, assignEmployee } = useOrderInfo();
 const selectedStatus = ref('');
 const selectedEmployeeId = ref(null);
 const isSelfAssignChecked = ref(false);
 
+
+function goToItemsView() {
+  const id = props.orderId;
+  if (id) {
+    emit('close'); // Close the popup first
+
+    router.push({
+      name: 'order-items',
+      params: { id: id }
+    });
+  }
+}
+
+function formatSimpleDate(dateStr) {
+  if (!dateStr) return 'N/A';
+  // Splits "2026-04-10T16:55:04.000+00:00" at 'T' and takes the first part
+  return dateStr.split('T')[0];
+}
+
+
 async function saveButtonAction() {
   const session = getSession();
-  const orderId = order.value.orderId;
+  const oId = props.orderId;
   const accountId = session.accountId;
 
 
   if (account.value.accountType === 'EMPLOYEE') {
     if (isSelfAssignChecked.value) {
       const employeeId = employees.value.find(e => e.account.id === accountId).employeeId;
-      await assignEmployee(orderId, employeeId, accountId);
+      await assignEmployee(oId, employeeId, accountId);
     }
     if (selectedStatus.value) {
-      await updateOrderStatus(orderId, selectedStatus.value, accountId);
+      await updateOrderStatus(oId, selectedStatus.value, accountId);
     }
   }
 
   if (account.value.accountType === 'CUSTOMER' && selectedStatus.value) {
-    
-    await updateOrderStatus(orderId, selectedStatus.value, accountId);
+
+    await updateOrderStatus(oId, selectedStatus.value, accountId);
   }
 
   if (account.value.accountType === 'MANAGER') {
     if (selectedEmployeeId.value) {
-      await assignEmployee(orderId, selectedEmployeeId.value, accountId);
+      await assignEmployee(oId, selectedEmployeeId.value, accountId);
     }
     if (selectedStatus.value) {
-      await updateOrderStatus(orderId, selectedStatus.value, accountId);
+      await updateOrderStatus(oId, selectedStatus.value, accountId);
     }
   }
+
+  emit('close', true)
 };
+
 
 onMounted(() => {
   if (!isLoggedIn()) {
     router.push('/login');
     return;
   }
-  const orderId = route.params.id;
   const session = getSession();
-  init(session.accountId, orderId);
+  init(session.accountId, props.orderId);
 });
 
 
-// FOR TESTING
-order.value = {
-  orderId: "ORD-12345",
-  items: [1, 2, 3],
-  assigneeId: 1,
-  customerId: "CUST-99",
-  orderState: "Delivered",
-  orderDate: "2026-05-01",
-  delivDate: "2026-05-05"
-};
-
-account.value = { accountType: 'EMPLOYEE' }; // Matches your localStorage fake
-
-employees.value = [
-  { id: 101 },
-  { id: 102 },
-  { id: 103 }
-];
-
-// FOR TESTING
 </script>
 
 <template>
-  <div class="page-layout">
-    <Header activeTab="orders" />
-
+  <div class="modal-overlay">
     <div class="container">
       <div class="box__wrapper">
         <div class="box__background"></div>
-        
+
         <div class="box">
           <div class="title__rectangle">
             Order Information
-            <button class="buttonReturn" @click="$router.back()"></button> 
-          </div> 
+            <button class="buttonReturn" @click="emit('close')"></button>
+          </div>
 
           <div class="main__content">
             <div class="order__summary__container">
               <div class="order__summary__text">
-                  <strong>Order ID:</strong> 
-                  <div>{{ order?.orderId ?? 0 }}</div>
+                  <strong>Order ID:</strong>
+                  <div>{{ props.orderId }}</div>
               </div>
               <div class="order__summary__text">
-                <strong>Total Items:</strong> 
+                <strong>Total Items:</strong>
                 <div>{{ order?.items?.length ?? 0 }}</div>
               </div>
-              <button class="buttonViewItems">View Items</button> 
+              <button class="buttonViewItems" @click="goToItemsView">View Items</button>
             </div>
 
             <div class="info__container">
               <div class="text__info__rectangle">
                 <span class="label">Employee ID:</span>
-                <span class="underscores">_______</span>    
+                <span class="underscores">_______</span>
                 <div v-if="order?.assigneeId !==0" class="box__ID">
                   {{ order?.assigneeId }}
                 </div>
 
-                
+
                 <div v-else-if="account?.accountType === 'CUSTOMER'" class="box__ID">
                   None
-                </div> 
+                </div>
 
-                <div v-else-if="account?.accountType === 'EMPLOYEE'">                  
-                  <label class="container">Self-assign 
+                <div v-else-if="account?.accountType === 'EMPLOYEE'">
+                  <label class="container">Self-assign
                       <input type="checkbox" v-model="isSelfAssignChecked">
                       <span class="checkmark"></span>
                   </label>
                 </div>
-                
+
                 <select v-else-if="account?.accountType === 'MANAGER'"
                   class="box__ID" v-model="selectedEmployeeId">
                   <option :value="null">None</option>
-                  <option v-for="employee in employees" 
-                      :key="employee.id" 
+                  <option v-for="employee in employees"
+                      :key="employee.id"
                       :value="employee.id">
                       {{ employee.id }}
                   </option>
-                </select> 
-              </div> 
+                </select>
+              </div>
 
               <div class="text__info__rectangle">
                 <span class="label">Customer ID:</span>
-                <span class="underscores">_______</span>  
+                <span class="underscores">_______</span>
                 <div class="box__ID">
                   {{ order?.customerId  }}
                 </div>
@@ -144,7 +152,7 @@ employees.value = [
 
               <div class="text__info__rectangle">
                 <span class="label">Status:</span>
-                <span class="underscores">______</span>  
+                <span class="underscores">______</span>
 
                 <template v-if="account?.accountType === 'CUSTOMER'">
                   <select v-if="order?.orderState !== 'Delivered' && canCancelOrder()" v-model="selectedStatus" class="box__date__state">
@@ -184,28 +192,28 @@ employees.value = [
                 <span class="label">Order Date:</span>
                 <span class="underscores">__</span>
                 <div class="box__date__state">
-                  {{ order?.orderDate }}
+                  {{ formatSimpleDate(order?.orderDate) }}
                 </div>
               </div>
-              
+
               <div class="text__info__rectangle">
                 <span class="label">Deliv. Date:</span>
                 <span class="underscores">_</span>
                 <div class="box__date__state">
-                  {{ order?.delivDate }}
+                  {{ formatSimpleDate(order?.delivDate) }}
                 </div>
-              </div>  
+              </div>
             </div>
           </div>
 
           <div class="footer">
-            <button 
-              v-if="!(order?.orderState === 'Delivered' && order?.assigneeId !== 0) && (account?.accountType !== 'CUSTOMER' || canCancelOrder())" 
-              class="buttonSave" 
+            <button
+              v-if="!(order?.orderState === 'Delivered' && order?.assigneeId !== 0) && (account?.accountType !== 'CUSTOMER' || canCancelOrder())"
+              class="buttonSave"
               @click="saveButtonAction"
             >
               Save changes
-            </button> 
+            </button>
           </div>
         </div>
       </div>
@@ -216,13 +224,17 @@ employees.value = [
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&display=swap');
 
-/* NEW: Wraps header and content */
-.page-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+.modal-overlay {
+  position: fixed;
+  top: 0;
   width: 100%;
-  background-color: #f7f4f1; /* Match AppShell background color */
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
 }
 
 .container {
@@ -244,7 +256,7 @@ employees.value = [
   width: 921px;
   height: 612px;
   border: 5px solid #3D3C3C;
-  background-color: #3D3C3C; 
+  background-color: #3D3C3C;
   position: absolute;
   top: 26px;
   left: 26px;
@@ -279,11 +291,11 @@ employees.value = [
   right: 5px;
   width: 61px;
   height: 61px;
-  background: #FFFFFF; 
-  border: 5px solid #3D3C3C;  
+  background: #FFFFFF;
+  border: 5px solid #3D3C3C;
   background-image: url('../assets/images/return-button.png');
-  background-size: 80%;      
-  background-repeat: no-repeat;  
+  background-size: 80%;
+  background-repeat: no-repeat;
   background-position: center;
   cursor: pointer;
 }
@@ -371,7 +383,7 @@ employees.value = [
   border-radius: 20px;
   width: 231px;
   height: 60px;
-  border: 1px solid #000000;  
+  border: 1px solid #000000;
   font-size: 29px;
   cursor: pointer;
   font-family: 'Inconsolata';
@@ -379,6 +391,7 @@ employees.value = [
 
 
 .underscores {
-  color: #FFFFFF; 
+  color: #FFFFFF;
 }
+
 </style>
