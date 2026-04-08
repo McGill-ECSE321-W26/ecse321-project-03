@@ -10,14 +10,17 @@ const emit = defineEmits(['close', 'restock'])
 
 const selectedColor = ref(null) 
 const selectedSize = ref(null)
-const quantity = ref(0)
+const quantity = ref('')
 
 // Reset selections when modal opens
 watch(() => props.visible, (val) => {
+  console.log('VISIBLE CHANGED:', val)
+
   if (val && props.product) {
+    console.log('RESETTING FORM')
     selectedColor.value = ''
     selectedSize.value = ''
-    quantity.value = 0
+    quantity.value = ''
   }
 })
 
@@ -39,22 +42,33 @@ const selectedVariant = computed(() => {
 })
 
 const submit = () => {
-  if (!selectedColor.value || !selectedSize.value) return alert('Please select both color and size!')
-  if (quantity.value <= 0) return alert('Enter a quantity greater than 0!')
+  console.log('RAW quantity:', quantity.value)
+  console.log('TYPE:', typeof quantity.value)
+
+  if (!selectedColor.value || !selectedSize.value) {
+    return alert('Please select both color and size!')
+  }
+
+  const qty = Number(quantity.value)
+
+  if (!qty || qty <= 0) {
+    return alert('Enter a quantity greater than 0!')
+  }
 
   emit('restock', [{
     id: selectedVariant.value.id,
     color: selectedVariant.value.color,
     size: selectedVariant.value.size,
-    quantity: quantity.value
+    quantity: qty
   }])
+
   emit('close')
 }
 </script>
 
 
 <template>
-  <div v-if="visible" class="modal-overlay">
+  <div v-show="visible" class="modal-overlay">
     <div class="modal-box">
 
       <div class="modal-header-bar">
@@ -80,7 +94,12 @@ const submit = () => {
         </select>
 
         <label>Quantity:</label>
-              <input type="number" min="1" placeholder="1" />
+              <input
+              type="number"
+              min="1"
+              v-model="quantity"
+              @input="e => console.log('Input event:', e.target.value)"
+/>
 
         <div class="button-container">
           <button class="restock-btn" @click="submit">Done</button>
