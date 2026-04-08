@@ -24,9 +24,6 @@ public class OrderCreationDto {
     @NotNull(message = "Delivery date must not be null")
     private Date delivDate; // The delivery date is chosen by the customer
 
-    @NotNull(message = "Address must not be null")
-    private String address; // The delivery date is chosen by the customer
-
 
     //------------------------
     // CONSTRUCTOR
@@ -39,10 +36,9 @@ public class OrderCreationDto {
      * @param customerId the customer who made the order
      * @param delivDate the chosen delivery date by the customer
      */
-    public OrderCreationDto(int customerId, Date delivDate, String address) {
+    public OrderCreationDto(int customerId, Date delivDate) {
         this.customerId = customerId;
         this.delivDate = delivDate;
-        this.address = address;
     }
 
     @SuppressWarnings("unused")
@@ -60,10 +56,6 @@ public class OrderCreationDto {
 
     public Date getDelivDate() {
         return delivDate;
-    }
-
-    public String getAddress(){
-        return address;
     }
 
 
