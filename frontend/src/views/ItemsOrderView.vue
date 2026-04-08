@@ -22,7 +22,10 @@ onMounted(() => {
 })
 
 const orderItems = computed(() => order.value?.items || [])
-const total = computed(() => order.value?.totalPriceAfterDiscount)
+const total = computed(() => {
+  console.log('Full order object:', JSON.stringify(order.value))
+  return order.value?.totalPrice
+})
 const orderAddress = computed(() => order.value?.address)
 
 const subtotal = computed(() => 
