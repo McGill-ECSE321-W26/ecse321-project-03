@@ -5,7 +5,7 @@ import {API_BASE, readErrorMessage} from './base.js'
  * @author Sonia Ly
  */
 export async function getAllOrders(userId) {
-    const base = API_BASE
+    const base = API_BASE || 'http://localhost:8080' // In case API_BASE isn't found
 
     const url = `${base}/order/order?userID=${userId}`
     console.log("Fetching URL:", url)
