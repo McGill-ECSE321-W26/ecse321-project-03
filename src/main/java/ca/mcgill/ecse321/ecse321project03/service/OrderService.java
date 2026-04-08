@@ -520,8 +520,8 @@ public class OrderService {
             // 20-34 pts -> 10% off
             return 0.1;
         } else {
-            // 35+ pts -> 20% off
-            return 0.2;
+            // 35+ pts -> 15% off
+            return 0.15;
         }
     }
 

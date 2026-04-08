@@ -19,6 +19,25 @@ const subtotal = computed(() =>
 const availablePoints = ref(0)
 const billingSameAsShipping = ref(true)
 
+const selectedDeliveryDate = ref('')
+
+function formatDateForInput(date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getMinimumDeliveryDate() {
+  const minDate = new Date()
+  minDate.setDate(minDate.getDate() + 2)
+  return formatDateForInput(minDate)
+}
+
+const minimumDeliveryDate = getMinimumDeliveryDate()
+selectedDeliveryDate.value = minimumDeliveryDate
+
+
 const currentAddress = ref('')
 const isEditingAddress = ref(false)
 const editedAddress = ref('')
@@ -36,7 +55,7 @@ const discountRate = computed(() => {
   if (pts < 15) return 0.02
   if (pts < 20) return 0.05
   if (pts < 35) return 0.1
-  return 0.2
+  return 0.15
 })
 const discount = computed(() => subtotal.value * discountRate.value)
 const total = computed(() => Math.max(subtotal.value - discount.value, 0))
@@ -116,7 +135,7 @@ async function placeOrder() {
 
     await placeOrderRequest({
       customerId: accountId,
-      delivDate: new Date(), // or your selected date if you add one
+      delivDate: new Date(`${selectedDeliveryDate.value}T12:00:00`).toISOString(),
     })
     window.alert('Order placed successfully.')
     emit('order-placed')
@@ -174,6 +193,18 @@ async function placeOrder() {
             </div>
             <p>4-10 business days</p>
           </div>
+        </div>
+
+        <div class="delivery-date-section">
+          <label for="delivery-date" class="delivery-date-label">Delivery Date</label>
+          <input
+              id="delivery-date"
+              v-model="selectedDeliveryDate"
+              class="delivery-date-input"
+              type="date"
+              :min="minimumDeliveryDate"
+          />
+          <p class="delivery-date-note">Please choose a date at least 2 days after today.</p>
         </div>
 
       </section>
@@ -408,6 +439,36 @@ async function placeOrder() {
 
 .method-row {
   margin-top: 1.2rem;
+}
+
+.delivery-date-section {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #bfa3db;
+}
+
+.delivery-date-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.delivery-date-input {
+  width: 100%;
+  max-width: 260px;
+  padding: 0.75rem;
+  border: 1px solid #d9d0c9;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.delivery-date-note {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #5f5551;
 }
 
 .single-option {
