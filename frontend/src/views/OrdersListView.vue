@@ -19,14 +19,19 @@ const filters = ref({
   customerName: '',
 })
 
-const columns = [
-  { key: 'orderId', label: 'Order ID' },
-  { key: 'customer', label: 'Customer' },
-  { key: 'employee', label: 'Employees' },
-  { key: 'status', label: 'Status' },
-  { key: 'orderDate', label: 'Order Date' },
-  { key: 'actions', label: 'View Order' },
-]
+const columns = computed(() => {
+  const cols = [
+    { key: 'orderId', label: 'Order ID' },
+    { key: 'employee', label: 'Employees' },
+    { key: 'status', label: 'Status' },
+    { key: 'orderDate', label: 'Order Date' },
+    { key: 'actions', label: 'View Order' },
+  ]
+  if (isStaff.value) {
+    cols.splice(1, 0, { key: 'customer', label: 'Customer' });
+  }
+  return cols
+})
 
 const orders = ref([])
 const loading = ref(false)
@@ -142,6 +147,30 @@ function handlePopupClose(shouldRefresh) {
   }
 }
 
+function getStatusColor(status) {
+  if (!status) return ''
+
+  if (status === 'Ordered') return '#1E40AF'
+  if (status === 'InPreparation') return '#92400E'
+  if (status === 'Prepared') return '#3730A3'
+  if (status === 'Delivered') return '#166534'
+  if (status === 'Cancelled') return '#991B1B'
+
+  return ''
+}
+
+const gridStyle = computed(() => {
+  return {
+    display: 'grid',
+    // 6 columns for staff, 5 for customers
+    gridTemplateColumns: isStaff.value
+        ? '1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr'
+        : '1.1fr 1.1fr 1.1fr 1.1fr 1.1fr'
+
+  }
+})
+
+
 defineExpose({ loadOrders })
 
 </script>
@@ -153,7 +182,8 @@ defineExpose({ loadOrders })
 
     <main class="content">
       <aside class="sidebar">
-        <h3 class="filter-title">Filter By:</h3>
+        <h3 class="filter-title" v-if="isStaff">Filter By:</h3>
+        <h3 class="filter-title" v-else="isStaff">List of all the orders made by the account:</h3>
 
         <div v-if="isStaff" class="filter-group">
           <h4>Customer</h4>
@@ -171,7 +201,7 @@ defineExpose({ loadOrders })
       </aside>
 
       <section class="table-section">
-        <div class="table-header">
+        <div class="table-header" :style="gridStyle">
           <div
               v-for="column in columns"
               :key="column.key"
@@ -179,7 +209,9 @@ defineExpose({ loadOrders })
               @click="sortBy(column.key)"
           >
             <span>{{ column.label }}</span>
-            <span class="sort-arrow">▼</span>
+            <span v-if="column.key !== 'actions'" class="sort-arrow">
+              {{ sortKey === column.key ? (sortAsc ? '▲' : '▼') : '▼' }}
+            </span>
           </div>
         </div>
 
@@ -190,31 +222,32 @@ defineExpose({ loadOrders })
             </div>
             <h2 class="empty-orders-title">No orders yet!</h2>
             <p class="empty-orders-subtitle">
-              You haven't placed any orders.<br />
+              You haven't placed any order.<br />
               Start browsing the shop and find something you love.
             </p>
-            <button class="view-btn" @click="router.push('/app?tab=shop')">
-              Go to shop
-            </button>
           </div>
 
 
-        <div v-else>
-          <div v-for="order in displayedOrders" :key="order.orderId" class="tr">
-            <div class="td">{{ order.orderId }}</div>
-            <div class="td">{{ order.customer }}</div>
-            <div class="td">{{ order.employee }}</div>
-            <div class="td">{{ order.status }}</div>
-            <div class="td">{{ order.orderDate }}</div>
-            <div class="td">
-              <button class="view-btn" @click="openOrderDetails(order.orderId)">
-                View Info
-              </button>
+          <div v-else>
+            <div v-for="order in displayedOrders" :key="order.orderId" class="tr" :style="gridStyle">
+              <div v-for="col in columns" :key="col.key" class="td">
+
+                <template v-if="col.key === 'status'"> <span :style="{ color: getStatusColor(order.status) }"> {{ order.status }}</span>
+                </template>
+
+                <template v-else-if="col.key === 'actions'">
+                  <button class="view-btn" @click="openOrderDetails(order.orderId)">
+                    View Info
+                  </button>
+                </template>
+
+                <template v-else>
+                  {{ order[col.key] }}
+                </template>
+
+              </div>
             </div>
-
           </div>
-        </div>
-
         </div>
       </section>
     </main>
@@ -390,10 +423,6 @@ defineExpose({ loadOrders })
 }
 
 .table-header,
-.tr {
-  display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
-}
 
 .table-header {
   background: #cbb8e5;
