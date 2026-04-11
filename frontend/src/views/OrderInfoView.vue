@@ -113,8 +113,16 @@ onMounted(() => {
 
             <div class="info__container">
               <div class="text__info__rectangle">
-                <span class="label">Employee ID:</span>
-                <span class="underscores">_______</span>
+                <span class="label">
+                {{ (account?.accountType === 'MANAGER' && order?.assigneeId === 0) ? 'Employee:' : 'Employee ID:' }}
+                </span>
+
+                <span class="underscores">
+                {{ (account?.accountType === 'MANAGER' && order?.assigneeId === 0) ? '__________' : '_______' }}
+                </span>
+
+
+
                 <div v-if="order?.assigneeId !==0 || order?.orderState === 'Cancelled'" class="box__ID">
                   {{ order?.assigneeId }}
                 </div>
@@ -137,7 +145,7 @@ onMounted(() => {
                   <option v-for="employee in employees"
                       :key="employee.employeeId"
                       :value="employee.employeeId">
-                      {{ employee.employeeId }}
+                      {{ employee.account.username }}
                   </option>
                 </select>
               </div>
