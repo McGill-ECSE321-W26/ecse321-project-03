@@ -184,6 +184,22 @@ defineExpose({ loadOrders })
         </div>
 
         <div class="table-body">
+          <div v-if="displayedOrders.length === 0" class="empty-state">
+            <div class="image-logo">
+              <img src="../assets/images/shop_bag_icon.png" class="empty-img"/>
+            </div>
+            <h2 class="empty-orders-title">No orders yet!</h2>
+            <p class="empty-orders-subtitle">
+              You haven't placed any orders.<br />
+              Start browsing the shop and find something you love.
+            </p>
+            <button class="view-btn" @click="router.push('/app?tab=shop')">
+              Go to shop
+            </button>
+          </div>
+
+
+        <div v-else>
           <div v-for="order in displayedOrders" :key="order.orderId" class="tr">
             <div class="td">{{ order.orderId }}</div>
             <div class="td">{{ order.customer }}</div>
@@ -197,6 +213,7 @@ defineExpose({ loadOrders })
             </div>
 
           </div>
+        </div>
 
         </div>
       </section>
@@ -229,36 +246,27 @@ defineExpose({ loadOrders })
   font-family: 'Inconsolata', monospace;
 }
 
-/* ===== HEADER ===== */
-.top {
+.empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  background: #FFE5F9;
-  border-bottom: 4px solid #3D3C3C;
-  height: 11vh;
-}
-
-.logo-block {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.logo-img {
-  height: 90%;
-  width: auto;
-  object-fit: contain;
-  margin-left: 20px;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 100px;
-  flex: 1;
   justify-content: center;
-  align-items: center;
-  height: 100%;
+  padding: 80px 100px;
+  text-align: center;
 }
+
+.image-logo {
+  background-color: #ede9fe;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 24px;
+  width: 20%;
+}
+
+.empty-img {
+  width: 100%;
+}
+
 
 .nav-tabs button {
   font-family: 'Jersey 10', monospace;
@@ -276,86 +284,6 @@ defineExpose({ loadOrders })
   border-bottom: 3px solid #1209AB;
 }
 
-.logout-link {
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 2vh;
-  cursor: pointer;
-  background: #FFFFFF;
-  border: 2px solid #1209AB;
-  outline: none;
-  padding: 4px 8px;
-}
-
-.user-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 11vh;
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 4vh;
-  margin-right: 20px;
-  margin-top: 20px;
-  line-height: 1;
-}
-
-.user-profile-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.user-profile-btn:hover {
-  background: rgba(18, 9, 171, 0.08);
-}
-
-.user-profile-btn:focus-visible {
-  outline: 2px solid #1209ab;
-  outline-offset: 2px;
-}
-
-.user-icon-img {
-  display: block;
-  width: clamp(26px, 3.5vh, 36px);
-  height: clamp(26px, 3.5vh, 36px);
-  object-fit: contain;
-}
-
-.user-text {
-  text-align: right;
-}
-
-.points {
-  margin-top: 4px;
-}
-
-.logo-block {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.logo-img {
-  height: 90%;
-  width: auto;
-  object-fit: contain;
-  margin-left: 20px;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 100px;
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
 
 .nav-tabs button {
   font-family: 'Jersey 10', monospace;
@@ -373,23 +301,6 @@ defineExpose({ loadOrders })
   border-bottom: 3px solid #1209AB;
 }
 
-.logout-link {
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 2vh;
-  cursor: pointer;
-  background: #FFFFFF;
-  border: 2px solid #1209AB;
-  outline: none;
-  padding: 4px 8px;
-}
-
-/* ===== ORDERS PAGE ===== */
-.main {
-  max-width: 100%;
-  max-height: 100%;
-  margin: 0 auto;
-}
 
 .content {
   display: grid;
