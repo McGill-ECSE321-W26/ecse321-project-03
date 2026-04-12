@@ -2,6 +2,9 @@ package ca.mcgill.ecse321.ecse321project03.controller;
 
 import ca.mcgill.ecse321.ecse321project03.dto.OrderCreationDto;
 import ca.mcgill.ecse321.ecse321project03.dto.OrderResponseDto;
+import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
+import ca.mcgill.ecse321.ecse321project03.dto.OrderItemDto;
+import ca.mcgill.ecse321.ecse321project03.model.ItemImage;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
 import ca.mcgill.ecse321.ecse321project03.service.OrderService;
@@ -14,6 +17,7 @@ import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * REST controller responsible for handling all order-related API endpoints.
@@ -31,6 +35,17 @@ public class OrderController {
     @Autowired
     private OrderInfoService orderInfoService;
 
+    private List<OrderItemDto> toOrderItemDtos(List<OrderItem> orderItems, int orderId) {
+        List<OrderItemDto> orderItemDtos = new ArrayList<>();
+        for (OrderItem orderItem : orderItems) {
+            int generalItemId = orderItem.getOrderItemId().getItemType().getGeneralItem().getId();
+            ItemImage firstImage = orderService.getFirstImageForOrderItem(generalItemId);
+            ItemImageDto imageDto = firstImage == null ? null : new ItemImageDto(firstImage);
+            orderItemDtos.add(new OrderItemDto(orderItem, orderId, imageDto));
+        }
+
+        return orderItemDtos;
+    }
 
 
     /**
@@ -50,8 +65,8 @@ public class OrderController {
             // Retrieve the created order from the first OrderItem
             Order order = orderItems.get(0).getOrderItemId().getOrder();
 
-            return new OrderResponseDto(order, orderItems);
-
+            List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+            return new OrderResponseDto(order, orderItemDtos);
     }
 
     /**
@@ -65,8 +80,8 @@ public class OrderController {
     public OrderResponseDto findOrderById(@PathVariable int id) {
             Order order = orderService.findOrderByIdResponseDto(id);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return (new OrderResponseDto(order, orderItems));
-
+            List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+            return (new OrderResponseDto(order, orderItemDtos));
     }
 
     /**
@@ -84,8 +99,8 @@ public class OrderController {
 
             Order order = orderService.assignEmployee(orderId, employeeId, accountId);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return new OrderResponseDto(order, orderItems);
-
+            List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+            return new OrderResponseDto(order, orderItemDtos);
     }
 
     /**
@@ -102,7 +117,8 @@ public class OrderController {
             @RequestParam String orderState, @RequestParam int accountId) {
             Order order = orderService.updateStatus(orderId, orderState, accountId);
             List<OrderItem> orderItems = orderService.findOrderItems(order);
-            return (new OrderResponseDto(order, orderItems));
+            List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+            return (new OrderResponseDto(order, orderItemDtos));
     }
 
 
@@ -118,7 +134,11 @@ public class OrderController {
 
             List<Order> orders = orderInfoService.viewOrders(userID);
             List<OrderResponseDto> orderDtos = orders.stream()
-                    .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
+                    .map(order -> {
+                        List<OrderItem> orderItems = orderService.findOrderItems(order);
+                        List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+                        return new OrderResponseDto(order, orderItemDtos);
+                    })
                     .toList();
             return orderDtos;
     }
@@ -136,7 +156,11 @@ public class OrderController {
 
             List<Order> orders = orderInfoService.viewOrdersByOrderDate(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
-                    .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
+                    .map(order -> {
+                        List<OrderItem> orderItems = orderService.findOrderItems(order);
+                        List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+                        return new OrderResponseDto(order, orderItemDtos);
+                    })
                     .toList();
             return orderDtos;
 
@@ -155,7 +179,11 @@ public class OrderController {
 
             List<Order> orders = orderInfoService.viewOrdersByCustomer(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
-                    .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
+                    .map(order -> {
+                        List<OrderItem> orderItems = orderService.findOrderItems(order);
+                        List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+                        return new OrderResponseDto(order, orderItemDtos);
+                    })
                     .toList();
             return orderDtos;
 
@@ -173,7 +201,11 @@ public class OrderController {
     public List<OrderResponseDto> sortOrdersByStatus(@RequestParam int userID, @RequestParam String filterDirection) {
             List<Order> orders = orderInfoService.sortOrdersByStatus(userID, filterDirection);
             List<OrderResponseDto> orderDtos = orders.stream()
-                    .map(order -> new OrderResponseDto(order, orderService.findOrderItems(order)))
+                    .map(order -> {
+                        List<OrderItem> orderItems = orderService.findOrderItems(order);
+                        List<OrderItemDto> orderItemDtos = toOrderItemDtos(orderItems, order.getId());
+                        return new OrderResponseDto(order, orderItemDtos);
+                    })
                     .toList();
             return orderDtos;
     }

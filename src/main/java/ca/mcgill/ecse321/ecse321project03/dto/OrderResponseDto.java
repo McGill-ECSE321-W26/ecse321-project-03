@@ -40,7 +40,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
      * @param order order to retrieve its important data
      * @author Wissam Abchiche
      */
-    public OrderResponseDto(Order order, List<OrderItem> orderItems) {
+    public OrderResponseDto(Order order, List<OrderItemDto> orderItemsDto) {
         this.id = order.getId();
         this.orderDate = order.getOrderDate();
         this.delivDate = order.getDelivDate();
@@ -57,11 +57,7 @@ public class OrderResponseDto { // This class is for the attributes that must be
                 ? "Not assigned"
                 : order.getAssignee().getAccount().getUsername();
 
-        this.items = new ArrayList<>();
-
-        for (OrderItem oi : orderItems) {
-            items.add(new OrderItemDto(oi, this.id));
-        }
+        this.items = new ArrayList<>(orderItemsDto);
     }
 
 
