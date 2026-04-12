@@ -163,7 +163,7 @@ public class OrderServiceTests {
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), new Date(System.currentTimeMillis()), null);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate, null);
         Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null, orderDto.getAddress());
         when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
 

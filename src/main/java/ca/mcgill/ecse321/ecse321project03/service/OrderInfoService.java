@@ -107,8 +107,8 @@ public class OrderInfoService {
      */
     private boolean checkIfStaffMember(int userID) {
         if(roleRepository.findByAccount_Id(userID) == null){
-            return false;
-            // throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
+            //return false;
+             throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
         }
 
         return true;

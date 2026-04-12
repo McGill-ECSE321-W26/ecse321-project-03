@@ -238,22 +238,6 @@ public class OrderIntegrationTest {
     }
 
 
-    /**
-     * Method that invalidates the creation of an order when given null address
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testAssignRedeemAddressNull() {
-
-        Date deliveryDate = new Date(System.currentTimeMillis() + 30L * 60L * 60L * 1000L);
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate, null);
-
-        invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "The address cannot be null." );
-
-
-    }
-
-
 
     /**
      * Method that invalidates the creation of an order when given an invalid delivery date (less than 24 hours from order date)

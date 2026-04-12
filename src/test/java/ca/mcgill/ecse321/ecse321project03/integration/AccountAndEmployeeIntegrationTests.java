@@ -1,4 +1,10 @@
 package ca.mcgill.ecse321.ecse321project03.integration;
+import ca.mcgill.ecse321.ecse321project03.dto.*;
+import ca.mcgill.ecse321.ecse321project03.model.Employee;
+import ca.mcgill.ecse321.ecse321project03.model.Manager;
+import ca.mcgill.ecse321.ecse321project03.repository.EmployeeRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,9 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
-import ca.mcgill.ecse321.ecse321project03.dto.AccountResponseDto;
-import ca.mcgill.ecse321.ecse321project03.dto.ErrorDto;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 
@@ -29,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // instance will be shared across all methods
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 
-public class AccountIntegrationTests {
+public class AccountAndEmployeeIntegrationTests {
 
     @Autowired
     private TestRestTemplate client;
@@ -37,21 +40,36 @@ public class AccountIntegrationTests {
     private int createdAccountId;
     private Account testCustomer;
     private Account testAccountEmployee;
+    private Account testAccountEmployee2;
     private Account testAccountManager;
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private ManagerRepository managerRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
     @BeforeAll
     @AfterAll
     public void cleanDatabase() {
+
+        employeeRepository.deleteAll();
+        managerRepository.deleteAll();
+        roleRepository.deleteAll();
         accountRepository.deleteAll();
     }
 
     @BeforeEach
     public void setup() {
+
+        employeeRepository.deleteAll();
+        managerRepository.deleteAll();
+        roleRepository.deleteAll();
         accountRepository.deleteAll();
-        
+
         // Customer
         testCustomer = new Account("Jeane", "jeane@gmail.com", "$fjdgbfdju1234", "1000 McGill", 0);
         accountRepository.save(testCustomer);
@@ -59,6 +77,10 @@ public class AccountIntegrationTests {
         // Employee
         testAccountEmployee = new Account("Gabriel", "gabriel@gmail.com", "$fjdgb23525", "2000 McGill", 0);
         accountRepository.save(testAccountEmployee);
+
+        // Employee 2
+        testAccountEmployee2 = new Account("Dora", "dora@gmail.com", "$fjdgb23525", "2000 McGill", 0);
+        accountRepository.save(testAccountEmployee2);
 
         // Manager
         testAccountManager = new Account("Joseph", "joseph@gmail.com", "$fjdgb222/115", "3000 McGill", 0);
@@ -104,7 +126,7 @@ public class AccountIntegrationTests {
 
         // Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/accounts", body, ErrorDto.class);
-        
+
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -112,7 +134,7 @@ public class AccountIntegrationTests {
     }
 
 
-   
+
     /*
       Valid test for endpoint GET find account by id
       @author: Maria Klinski
@@ -196,8 +218,8 @@ public class AccountIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
         assertIterableEquals(List.of("No account found with username " + invalidUsername), response.getBody().getErrors());
-    
-    }      
+
+    }
     /*
         Valid test for endpoint GET find account by email
         @author: Maria Klinski
@@ -321,4 +343,53 @@ public class AccountIntegrationTests {
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 }
+
+
+    /**
+     * Method which validates the view of employees
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testValidViewEmployees() {
+        Employee employee = new Employee(testAccountEmployee);
+        Employee employee2 = new Employee(testAccountEmployee2);
+        Manager manager = new Manager(testAccountManager);
+        employeeRepository.save(employee);
+        employeeRepository.save(employee2);
+        managerRepository.save(manager);
+
+
+        ResponseEntity<EmployeeDto[]> response = client.getForEntity(
+                "/employees?userID=" + manager.getAccount().getId(), EmployeeDto[].class);
+
+
+        // Verify status is HTTP.OK
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        EmployeeDto[] responseBody = response.getBody();
+        assertNotNull(responseBody);
+
+        // Verify the correct data is returned
+        assertEquals(2, responseBody.length);
+        assertEquals(employee.getId(), responseBody[0].getEmployeeId());
+        assertEquals(employee2.getId(), responseBody[1].getEmployeeId());
+    }
+
+
+    /**
+     * Method which invalidates the view of employees if done by customer
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testInvalidViewEmployees() {
+
+        ResponseEntity<ErrorDto> response = client.getForEntity(
+                "/employees?userID=" + testCustomer.getId(), ErrorDto.class);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        ErrorDto responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals("Only manager and employees may view all employees in the system", responseBody.getErrors().get(0));
+    }
+
 }
