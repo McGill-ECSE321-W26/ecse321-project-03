@@ -210,14 +210,6 @@ async function placeOrder() {
         </div>
 
       </section>
-
-      <section class="card-block checkout-card">
-        <h2>BILLING ADDRESS</h2>
-        <label class="radio-row single-option">
-          <input v-model="billingSameAsShipping" type="radio" :value="true" />
-          <span>My billing address and shipping address are the same</span>
-        </label>
-      </section>
     </section>
 
     <aside class="checkout-sidebar">
