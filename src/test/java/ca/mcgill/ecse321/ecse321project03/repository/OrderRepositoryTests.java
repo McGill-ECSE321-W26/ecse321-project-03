@@ -64,7 +64,8 @@ public class OrderRepositoryTests {
         Date orderDate = Date.valueOf("2026-02-19");
         Date delivDate = Date.valueOf("2026-02-20");
         Order.OrderState state = Order.OrderState.Ordered;
-        Order order = new Order(orderDate, delivDate, state, customer, assignee);
+        String address  = customer.getAddress();;
+        Order order = new Order(orderDate, delivDate, state, customer, assignee, address);
         order = orderRepository.save(order);
         int orderId = order.getId();
 

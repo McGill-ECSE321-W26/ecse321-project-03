@@ -79,11 +79,11 @@ public class OrderInfoServiceTests {
         //orders:
         //order1 and order3 -> same state
         //order2 and order3 -> same customer
-        order1 = new Order(orderDate, delivDate, Order.OrderState.InPreparation, employeeAccount, employee);
+        order1 = new Order(orderDate, delivDate, Order.OrderState.InPreparation, employeeAccount, employee, "addre");
         order1.setId(ORDER_ID1);
-        order2 = new Order(delivDate, delivDate, Order.OrderState.Delivered, customer, employee);
+        order2 = new Order(delivDate, delivDate, Order.OrderState.Delivered, customer, employee, "addrc");
         order2.setId(ORDER_ID2);
-        order3 = new Order(new Date(System.currentTimeMillis()), delivDate, Order.OrderState.Ordered, managerAccount, employee);
+        order3 = new Order(new Date(System.currentTimeMillis()), delivDate, Order.OrderState.Ordered, managerAccount, employee, "addrm");
         order3.setId(ORDER_ID3);
         orderList = new ArrayList<>();
         orderList.add(order1);

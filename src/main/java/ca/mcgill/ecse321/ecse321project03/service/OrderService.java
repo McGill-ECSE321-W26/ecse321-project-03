@@ -44,7 +44,7 @@ public class OrderService {
 
     @Autowired
     private CartItemRepository cartItemRepository;
-    
+
 
 
 
@@ -69,6 +69,11 @@ public class OrderService {
         // Verify that the delivery date has been chosen at least 24 hours after the order date
          if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60L * 60L * 1000L)) < 24) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
+        }
+
+         // Verify that the delivery date has been chosen at least 24 hours after the order date
+         if (orderDto.getAddress() == null) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The address cannot be null.");
         }
 
         // Create the Order object. For now, the employee assigned is null and the state is Ordered.
