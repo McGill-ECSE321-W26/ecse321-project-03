@@ -44,6 +44,8 @@ public class OrderService {
 
     @Autowired
     private CartItemRepository cartItemRepository;
+    
+
 
 
     /**
@@ -149,7 +151,6 @@ public class OrderService {
 
             OrderItem.OrderItemId orderItemId = new OrderItem.OrderItemId(itemType, order);
             OrderItem orderItem = new OrderItem(orderItemId, qty);
-
             OrderItem savedOrderItem = orderItemRepository.save(orderItem);
             createdOrderItems.add(savedOrderItem);
 
@@ -184,6 +185,7 @@ public class OrderService {
         }
         return orderFromDB;
     }
+
 
 
     /**
@@ -411,7 +413,7 @@ public class OrderService {
         for (Order order : allOrders) {
 
             // if the current time is equal or exceeds the delivery date, change its state to Delivered
-            if (order.getDelivDate().getTime() <= currentTime.getTime()) {
+            if (order.getDelivDate().before(currentTime)) {
                 prepareOrderToDeliveryAutomatically(order);
             }
         }
@@ -589,4 +591,6 @@ public class OrderService {
     public List<OrderItem> findOrderItems(Order order) {
         return orderItemRepository.findByOrderItemId_Order(order);
     }
+
+
 }
