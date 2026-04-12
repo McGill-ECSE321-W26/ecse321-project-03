@@ -46,6 +46,8 @@ public class OrderService {
     private CartItemRepository cartItemRepository;
 
 
+
+
     /**
      * Create an order based on the OrderCreationDTO transfer object (where only the customer id and the chosen delivery date are provided in the UI)
      *
@@ -67,6 +69,11 @@ public class OrderService {
         // Verify that the delivery date has been chosen at least 24 hours after the order date
          if (((orderDto.getDelivDate().getTime() - orderDate.getTime()) / (60L * 60L * 1000L)) < 24) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
+        }
+
+         // Verify that the delivery date has been chosen at least 24 hours after the order date
+         if (orderDto.getAddress() == null) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "The address cannot be null.");
         }
 
         // Create the Order object. For now, the employee assigned is null and the state is Ordered.
@@ -149,7 +156,6 @@ public class OrderService {
 
             OrderItem.OrderItemId orderItemId = new OrderItem.OrderItemId(itemType, order);
             OrderItem orderItem = new OrderItem(orderItemId, qty);
-
             OrderItem savedOrderItem = orderItemRepository.save(orderItem);
             createdOrderItems.add(savedOrderItem);
 
@@ -184,6 +190,7 @@ public class OrderService {
         }
         return orderFromDB;
     }
+
 
 
     /**
@@ -411,7 +418,7 @@ public class OrderService {
         for (Order order : allOrders) {
 
             // if the current time is equal or exceeds the delivery date, change its state to Delivered
-            if (order.getDelivDate().getTime() <= currentTime.getTime()) {
+            if (order.getDelivDate().before(currentTime)) {
                 prepareOrderToDeliveryAutomatically(order);
             }
         }
@@ -589,4 +596,6 @@ public class OrderService {
     public List<OrderItem> findOrderItems(Order order) {
         return orderItemRepository.findByOrderItemId_Order(order);
     }
+
+
 }

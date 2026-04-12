@@ -145,7 +145,7 @@ public class OrderIntegrationTest {
         Date delivDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
 
         // Create the order
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), delivDate);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), delivDate, "123 McGill");
 
         // Act
         ResponseEntity<OrderResponseDto> response = client.postForEntity("/orders/checkout", request, OrderResponseDto.class);
@@ -219,7 +219,7 @@ public class OrderIntegrationTest {
     public void testCreateOrderAndCheckoutInvalidCustomerId() {
         // Create order with invalid customer id
         Date deliveryDate = new Date(System.currentTimeMillis() + 30L * 60L * 60L * 1000L);
-        OrderCreationDto request = new OrderCreationDto(-1, deliveryDate);
+        OrderCreationDto request = new OrderCreationDto(-1, deliveryDate, "123 McGill");
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.NOT_FOUND, "No cart found for customer with id -1" );
     }
@@ -231,11 +231,12 @@ public class OrderIntegrationTest {
     @Test
     public void testCreateOrderAndCheckoutNullDelivDate() {
         // Create order with null delivery date
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), null);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), null, "123 McGill");
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Delivery date must not be null" );
 
     }
+
 
 
     /**
@@ -246,7 +247,7 @@ public class OrderIntegrationTest {
     public void testCreateOrderAndCheckoutInvalidDelivDate() {
         // Create order with a delivery date representing the current date, which is also the current order date
         Date currentDate = new Date(System.currentTimeMillis());
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), currentDate);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), currentDate, "123 McGill");
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "The delivery date can not be placed less than 24 hours after the order date");
     }
@@ -259,7 +260,7 @@ public class OrderIntegrationTest {
     public void testCreateOrderAndCheckoutInvalidCart() {
         // Create a valid order
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L* 60L * 1000L);
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate, "123 McGill");
 
 
         // Delete all the cart items of cart
@@ -282,7 +283,7 @@ public class OrderIntegrationTest {
 
         // Create a valid order
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L* 60L * 1000L);
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate, "123 McGill");
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Cart contains an invalid quantity: 0");
 
@@ -300,7 +301,7 @@ public class OrderIntegrationTest {
 
         // Create a valid order
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate);
+        OrderCreationDto request = new OrderCreationDto(testCustomer.getId(), deliveryDate, "123 McGill");
 
         invalidTestForCreateOrderAndCheckout(request, HttpStatus.BAD_REQUEST, "Not enough stock for itemType id " + testItemType1.getId() +
                  ". Requested " + (testItemType1.getStock() + 5) + ", available " + (testItemType1.getStock()));
@@ -318,7 +319,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         // Verify that the status code is OK
@@ -382,7 +383,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
 
@@ -440,7 +441,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), testEmployee.getId(), -1),
@@ -457,7 +458,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
 
@@ -475,7 +476,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestForAssignEmployee(assignEmployeeUrl(order.getId(), -1, testManager.getAccount().getId()),
@@ -491,7 +492,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         // Create an employee attached to the customer
@@ -513,7 +514,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         // Create a new employee for test
@@ -573,7 +574,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, orderState, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, orderState, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         ResponseEntity<OrderResponseDto> response = client.exchange(
@@ -627,7 +628,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         ResponseEntity<OrderResponseDto> response = client.exchange(
@@ -671,7 +672,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", -1),
@@ -687,7 +688,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 12L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         // Verify that customer cancels less than 24 hours before delivery, which should throiw an error
@@ -705,7 +706,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Cancelled", testEmployee.getAccount().getId()),
@@ -723,7 +724,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "InPreparation", testCustomer.getId()),
@@ -740,7 +741,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Prepared", testManager.getAccount().getId()),
@@ -757,7 +758,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Delivered", testManager.getAccount().getId()),
@@ -774,7 +775,7 @@ public class OrderIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.InPreparation, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.InPreparation, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestUpdateStatus(updateStatusUrl(order.getId(), "Delivered", testManager.getAccount().getId()),

@@ -5,6 +5,7 @@ import AppShellView from '../views/AppShellView.vue'
 import SpecificItemView from '../views/SpecificItemView.vue'
 import ItemsOrderView from '../views/ItemsOrderView.vue'
 import OrdersListView from "../views/OrdersListView.vue";
+import Catalog from "../views/Catalog.vue";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -29,12 +30,14 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
-          {
-      path: '/orders',
-      name: 'ordersList',
-      component: OrdersListView,
+
+    {
+      path: '/Shop',
+      name: 'shop',
+      component: Catalog,
       meta: { requiresAuth: true },
     },
+
     { path: '/app/account', redirect: '/app' },
     { path: '/', redirect: '/app' },
     { path: '/:pathMatch(.*)*', redirect: '/app' },

@@ -19,14 +19,19 @@ const filters = ref({
   customerName: '',
 })
 
-const columns = [
-  { key: 'orderId', label: 'Order ID' },
-  { key: 'customer', label: 'Customer' },
-  { key: 'employee', label: 'Employees' },
-  { key: 'status', label: 'Status' },
-  { key: 'orderDate', label: 'Order Date' },
-  { key: 'actions', label: 'View Order' },
-]
+const columns = computed(() => {
+  const cols = [
+    { key: 'orderId', label: 'Order ID' },
+    { key: 'employee', label: 'Employees' },
+    { key: 'status', label: 'Status' },
+    { key: 'orderDate', label: 'Order Date' },
+    { key: 'actions', label: 'View Order' },
+  ]
+  if (isStaff.value) {
+    cols.splice(1, 0, { key: 'customer', label: 'Customer' });
+  }
+  return cols
+})
 
 const orders = ref([])
 const loading = ref(false)
@@ -142,6 +147,30 @@ function handlePopupClose(shouldRefresh) {
   }
 }
 
+function getStatusColor(status) {
+  if (!status) return ''
+
+  if (status === 'Ordered') return '#1E40AF'
+  if (status === 'InPreparation') return '#92400E'
+  if (status === 'Prepared') return '#3730A3'
+  if (status === 'Delivered') return '#166534'
+  if (status === 'Cancelled') return '#991B1B'
+
+  return ''
+}
+
+const gridStyle = computed(() => {
+  return {
+    display: 'grid',
+    // 6 columns for staff, 5 for customers
+    gridTemplateColumns: isStaff.value
+        ? '1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr'
+        : '1.1fr 1.1fr 1.1fr 1.1fr 1.1fr'
+
+  }
+})
+
+
 defineExpose({ loadOrders })
 
 </script>
@@ -153,7 +182,8 @@ defineExpose({ loadOrders })
 
     <main class="content">
       <aside class="sidebar">
-        <h3 class="filter-title">Filter By:</h3>
+        <h3 class="filter-title" v-if="isStaff">Filter By:</h3>
+        <h3 class="filter-title" v-else="isStaff">List of all the orders made by the account:</h3>
 
         <div v-if="isStaff" class="filter-group">
           <h4>Customer</h4>
@@ -171,7 +201,7 @@ defineExpose({ loadOrders })
       </aside>
 
       <section class="table-section">
-        <div class="table-header">
+        <div class="table-header" :style="gridStyle">
           <div
               v-for="column in columns"
               :key="column.key"
@@ -179,25 +209,45 @@ defineExpose({ loadOrders })
               @click="sortBy(column.key)"
           >
             <span>{{ column.label }}</span>
-            <span class="sort-arrow">▼</span>
+            <span v-if="column.key !== 'actions'" class="sort-arrow">
+              {{ sortKey === column.key ? (sortAsc ? '▲' : '▼') : '▼' }}
+            </span>
           </div>
         </div>
 
         <div class="table-body">
-          <div v-for="order in displayedOrders" :key="order.orderId" class="tr">
-            <div class="td">{{ order.orderId }}</div>
-            <div class="td">{{ order.customer }}</div>
-            <div class="td">{{ order.employee }}</div>
-            <div class="td">{{ order.status }}</div>
-            <div class="td">{{ order.orderDate }}</div>
-            <div class="td">
-              <button class="view-btn" @click="openOrderDetails(order.orderId)">
-                View Info
-              </button>
+          <div v-if="displayedOrders.length === 0" class="empty-state">
+            <div class="image-logo">
+              <img src="../assets/images/shop_bag_icon.png" class="empty-img"/>
             </div>
-
+            <h2 class="empty-orders-title">No orders yet!</h2>
+            <p class="empty-orders-subtitle">
+              You haven't placed any order.<br />
+              Start browsing the shop and find something you love.
+            </p>
           </div>
 
+
+          <div v-else>
+            <div v-for="order in displayedOrders" :key="order.orderId" class="tr" :style="gridStyle">
+              <div v-for="col in columns" :key="col.key" class="td">
+
+                <template v-if="col.key === 'status'"> <span :style="{ color: getStatusColor(order.status) }"> {{ order.status }}</span>
+                </template>
+
+                <template v-else-if="col.key === 'actions'">
+                  <button class="view-btn" @click="openOrderDetails(order.orderId)">
+                    View Info
+                  </button>
+                </template>
+
+                <template v-else>
+                  {{ order[col.key] }}
+                </template>
+
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -229,36 +279,27 @@ defineExpose({ loadOrders })
   font-family: 'Inconsolata', monospace;
 }
 
-/* ===== HEADER ===== */
-.top {
+.empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  background: #FFE5F9;
-  border-bottom: 4px solid #3D3C3C;
-  height: 11vh;
-}
-
-.logo-block {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.logo-img {
-  height: 90%;
-  width: auto;
-  object-fit: contain;
-  margin-left: 20px;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 100px;
-  flex: 1;
   justify-content: center;
-  align-items: center;
-  height: 100%;
+  padding: 80px 100px;
+  text-align: center;
 }
+
+.image-logo {
+  background-color: #ede9fe;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 24px;
+  width: 20%;
+}
+
+.empty-img {
+  width: 100%;
+}
+
 
 .nav-tabs button {
   font-family: 'Jersey 10', monospace;
@@ -276,86 +317,6 @@ defineExpose({ loadOrders })
   border-bottom: 3px solid #1209AB;
 }
 
-.logout-link {
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 2vh;
-  cursor: pointer;
-  background: #FFFFFF;
-  border: 2px solid #1209AB;
-  outline: none;
-  padding: 4px 8px;
-}
-
-.user-block {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 11vh;
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 4vh;
-  margin-right: 20px;
-  margin-top: 20px;
-  line-height: 1;
-}
-
-.user-profile-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.user-profile-btn:hover {
-  background: rgba(18, 9, 171, 0.08);
-}
-
-.user-profile-btn:focus-visible {
-  outline: 2px solid #1209ab;
-  outline-offset: 2px;
-}
-
-.user-icon-img {
-  display: block;
-  width: clamp(26px, 3.5vh, 36px);
-  height: clamp(26px, 3.5vh, 36px);
-  object-fit: contain;
-}
-
-.user-text {
-  text-align: right;
-}
-
-.points {
-  margin-top: 4px;
-}
-
-.logo-block {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.logo-img {
-  height: 90%;
-  width: auto;
-  object-fit: contain;
-  margin-left: 20px;
-}
-
-.nav-tabs {
-  display: flex;
-  gap: 100px;
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-}
 
 .nav-tabs button {
   font-family: 'Jersey 10', monospace;
@@ -373,23 +334,6 @@ defineExpose({ loadOrders })
   border-bottom: 3px solid #1209AB;
 }
 
-.logout-link {
-  font-family: 'Jersey 10', monospace;
-  color: #1209AB;
-  font-size: 2vh;
-  cursor: pointer;
-  background: #FFFFFF;
-  border: 2px solid #1209AB;
-  outline: none;
-  padding: 4px 8px;
-}
-
-/* ===== ORDERS PAGE ===== */
-.main {
-  max-width: 100%;
-  max-height: 100%;
-  margin: 0 auto;
-}
 
 .content {
   display: grid;
@@ -479,10 +423,6 @@ defineExpose({ loadOrders })
 }
 
 .table-header,
-.tr {
-  display: grid;
-  grid-template-columns: 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr;
-}
 
 .table-header {
   background: #cbb8e5;

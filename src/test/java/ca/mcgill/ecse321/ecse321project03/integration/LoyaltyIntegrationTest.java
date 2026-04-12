@@ -146,7 +146,7 @@ public class LoyaltyIntegrationTest {
         // Create valid order
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null, "123 McGill");
         orderRepository.save(order);
 
         ResponseEntity<String> response = client.postForEntity(
@@ -175,7 +175,7 @@ public class LoyaltyIntegrationTest {
         // Create valid order
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null, "123 McGill");
         orderRepository.save(order);
 
         ResponseEntity<String> response = client.postForEntity(
@@ -202,7 +202,7 @@ public class LoyaltyIntegrationTest {
         // Create valid order
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer, null, "123 McGill");
         orderRepository.save(order);
 
         // Set the number of points of test customer to 0
@@ -254,12 +254,13 @@ public class LoyaltyIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestForRedeemLoyaltyPoints(url(order.getId(), -1, true), HttpStatus.NOT_FOUND, "No person with id -1 found.");
 
     }
+
 
 
     /**
@@ -282,7 +283,7 @@ public class LoyaltyIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48L * 60L * 60L * 1000L);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testAccountEmployee,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testAccountEmployee,null, "123 McGill");
         orderRepository.save(order);
 
         invalidTestForRedeemLoyaltyPoints(url(order.getId(), testCustomer.getId(), true), HttpStatus.FORBIDDEN,

@@ -81,7 +81,10 @@ public class OrderItemRepositoryTests {
         Date orderDate = Date.valueOf("2026-02-19");
         Date delivDate = Date.valueOf("2026-02-20");
 
-        Order order = new Order(orderDate, delivDate, Order.OrderState.Ordered, customer, assignee);
+        // ---------- 5) Create Address Order ----------
+        String address = customer.getAddress();
+
+        Order order = new Order(orderDate, delivDate, Order.OrderState.Ordered, customer, assignee, address);
         order = orderRepository.save(order);
 
         // ---------- 5) Create OrderItem (composite key) ----------

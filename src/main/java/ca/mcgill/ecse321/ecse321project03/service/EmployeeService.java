@@ -46,7 +46,7 @@ public class EmployeeService {
      */
     private void checkIfManagerOrEmployee(int userID) {
         if(managerRepository.findByAccount_Id(userID) == null && (employeeRepository.findByAccount_Id(userID)==null)) {
-            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Only manager may view all employees in the system");
+            throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Only manager and employees may view all employees in the system");
 
         }
     }

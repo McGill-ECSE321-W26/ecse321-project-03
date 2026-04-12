@@ -102,9 +102,9 @@ public class OrderServiceTests {
         employeeRole2 = new Employee(employeeAccount2);
         customer = new Account("customerUser", "customer@mail.com", "passc", "addrc", 0);
         customer.setId(CUSTOMER_ACCOUNT_ID);
-        order = new Order(orderDate, delivDate, Order.OrderState.Ordered, customer, employee);
+        order = new Order(orderDate, delivDate, Order.OrderState.Ordered, customer, employee, "addrc");
         order.setId(ORDER_ID);
-        orderDummy = new Order(orderDate, delivDate, Order.OrderState.Ordered, employeeAccount, employee);
+        orderDummy = new Order(orderDate, delivDate, Order.OrderState.Ordered, employeeAccount, employee, "addre");
         orderDummy.setId(ORDER_ID_DUMMY);
         cart = new Cart(customer);
         item = new Item("Shirt", Item.Tag.Top, 15);
@@ -126,8 +126,8 @@ public class OrderServiceTests {
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate);
-        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate, fakePerson.getAddress());
+        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null, orderDto.getAddress());
         when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
 
         //act
@@ -144,8 +144,8 @@ public class OrderServiceTests {
         //arrange
         when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), new Date(System.currentTimeMillis()));
-        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), new Date(System.currentTimeMillis()), fakePerson.getAddress());
+        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null, orderDto.getAddress());
         when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
 
         //act - deliv date < 24 hours after order date
@@ -155,6 +155,25 @@ public class OrderServiceTests {
         //assert
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals( "The delivery date can not be placed less than 24 hours after the order date", e.getMessage());
+    }
+
+    //failure
+    @Test
+    public void createOrderWrongAddress(){
+        //arrange
+        when(accountRepository.findById(CUSTOMER_ACCOUNT_ID)).thenReturn(Optional.of(customer));
+        Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate, null);
+        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null, orderDto.getAddress());
+        when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
+
+        //act - deliv date < 24 hours after order date
+        Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
+                () -> orderService.createOrder(orderDto));
+
+        //assert
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals( "The address cannot be null.", e.getMessage());
     }
 
 
@@ -175,7 +194,7 @@ public class OrderServiceTests {
         List<CartItem> ci = cartItemRepository.findByCartItemId_Cart(cart);
         when(orderItemRepository.save(any(OrderItem.class))).thenReturn(orderItem);
         when(itemTypeRepository.save(any(ItemType.class))).thenReturn(itemType);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         List <OrderItem> oi = orderService.checkout(orderDto);
@@ -196,8 +215,8 @@ public class OrderServiceTests {
         //arrange
         Account fakePerson = new Account("customerUserFake", "customerFake@mail.com", "passc", "addrc", 0);
         fakePerson.setId(10);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate);
-        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), delivDate, fakePerson.getAddress());
+        Order newOrder = new Order(new Date(System.currentTimeMillis()), orderDto.getDelivDate(), Order.OrderState.Ordered, fakePerson, null, orderDto.getAddress());
         when(orderRepository.save(any(Order.class))).thenReturn(newOrder);
 
         //act
@@ -217,7 +236,7 @@ public class OrderServiceTests {
         Account fakePerson = accountRepository.findById(CUSTOMER_ACCOUNT_ID).orElse(null);
         when(cartRepository.findByAccount_Id(CUSTOMER_ACCOUNT_ID)).thenReturn(null);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
@@ -236,7 +255,7 @@ public class OrderServiceTests {
         Cart fakeCart = new Cart(customer);
         when(cartRepository.findByAccount_Id(CUSTOMER_ACCOUNT_ID)).thenReturn(fakeCart);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
@@ -259,7 +278,7 @@ public class OrderServiceTests {
         CartItem cartItem1 = cartItem;
         cartItem1.setQuantity(0);
         when(cartItemRepository.findByCartItemId_Cart(cart)).thenReturn(List.of(cartItem1));
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
@@ -282,7 +301,7 @@ public class OrderServiceTests {
         CartItem.CartItemId ciid = new CartItem.CartItemId(null, cart);
         CartItem cartItem1 = new CartItem(ciid, 2);
         when(cartItemRepository.findByCartItemId_Cart(cart)).thenReturn(List.of(cartItem1));
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
@@ -305,7 +324,7 @@ public class OrderServiceTests {
         CartItem cartItem1 = cartItem;
         cartItem1.getCartItemId().getItemType().setStock(0);
         when(cartItemRepository.findByCartItemId_Cart(cart)).thenReturn(List.of(cartItem1));
-        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate);
+        OrderCreationDto orderDto = new OrderCreationDto(fakePerson.getId(), orderDate, fakePerson.getAddress());
 
         //act
         Ecse321Project03Exception e = assertThrows(Ecse321Project03Exception.class,
@@ -625,7 +644,7 @@ public class OrderServiceTests {
         // ordered 2 days ago, delivery scheduled to one day ago
         Date orderDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 48));
         Date delivDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 24));
-        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Prepared, customer, employee);
+        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Prepared, customer, employee, customer.getAddress());
         when(orderRepository.findAll()).thenReturn(List.of(preparedOrder));
 
         assertDoesNotThrow(() -> orderService.automaticDeliveryUpdate());
@@ -639,7 +658,7 @@ public class OrderServiceTests {
         // ordered 2 days ago, delivery scheduled to one day ago
         Date orderDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 48));
         Date delivDate1 = new Date(System.currentTimeMillis() - (1000L * 60 * 60 * 24));
-        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Ordered, customer, employee);
+        Order preparedOrder = new Order(orderDate1, delivDate1, Order.OrderState.Ordered, customer, employee, customer.getAddress());
         when(orderRepository.findAll()).thenReturn(List.of(preparedOrder));
 
         assertDoesNotThrow(() -> orderService.automaticDeliveryUpdate());

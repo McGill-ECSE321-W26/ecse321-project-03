@@ -139,7 +139,7 @@ public class OrderInfoIntegrationTest {
         // Create a valid order and save it in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
 
@@ -210,12 +210,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
@@ -246,12 +246,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, testCustomer, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
@@ -294,12 +294,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
@@ -334,12 +334,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Ordered, customer2, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
@@ -380,12 +380,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
@@ -415,12 +415,12 @@ public class OrderInfoIntegrationTest {
         // Create valid orders and save them in the repo
         Date orderDate = new Date(System.currentTimeMillis());
         Date deliveryDate = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
-        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null);
+        Order order = new Order(orderDate, deliveryDate, Order.OrderState.Ordered, testCustomer,null, "123 McGill");
         orderRepository.save(order);
 
         Date dateOrder = new Date(System.currentTimeMillis() + 48 * 60 * 60 * 1000);
         Date dateDeliver = new Date(System.currentTimeMillis() + 72 * 60 * 60 * 1000);
-        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null);
+        Order order2 = new Order(dateOrder, dateDeliver, Order.OrderState.Delivered, testCustomer, null, "123 McGill");
         orderRepository.save(order2);
 
         // Act
