@@ -20,6 +20,7 @@ public class Account {
     private String password;
     private String address;
     private int loyaltyPts;
+    private boolean active;
 
 
     //------------------------
@@ -32,6 +33,7 @@ public class Account {
         password = aPassword;
         address = aAddress;
         loyaltyPts = aLoyaltyPts;
+        active = true;
     }
 
     public Account() {
@@ -86,6 +88,13 @@ public class Account {
         return wasSet;
     }
 
+    public boolean setActive(boolean aActive) {
+        boolean wasSet = false;
+        active = false;
+        wasSet = true;
+        return wasSet;
+    }
+
 
     // Getter methods
     public int getId() {
@@ -112,6 +121,9 @@ public class Account {
         return loyaltyPts;
     }
 
+    public boolean getActive() {
+        return active;
+    }
 
     // Delete method
     public void delete() {

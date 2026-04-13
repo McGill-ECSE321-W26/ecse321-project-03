@@ -161,4 +161,14 @@ public class AccountController {
     public int getLoyaltyPoints(@PathVariable int id) {
         return accountService.getLoyaltyPoints(id);
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllAccounts() {
+        try {
+            return new ResponseEntity<>(accountService.getAllAccounts(), HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
