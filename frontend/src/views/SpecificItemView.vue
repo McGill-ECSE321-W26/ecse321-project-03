@@ -1,3 +1,7 @@
+/* Vue file (JavaScript + HTML + CSS) for the specific item view. 
+This is a child of the catalog
+Author: Maria Klinski */
+
 <template>
   <div class="desktop">
     <div class="window">
@@ -7,6 +11,7 @@
         <span class="title-name">{{ product?.name || 'Loading...' }}</span>
       </div>
 
+      <!-- wait for the product to load -->
       <div class="window-body" v-if="!loading && product">
 
         <div class="left">
@@ -16,19 +21,20 @@
             </div>
             <div v-if="product.imageUrls.length > 1" class="gallery-thumbs">
               <button
-                  v-for="(url, index) in product.imageUrls"
-                  :key="index"
-                  type="button"
-                  class="gallery-thumb"
-                  :class="{ 'gallery-thumb--active': index === activeImageIndex }"
-                  :aria-label="`Show image ${index + 1} of ${product.imageUrls.length}`"
-                  :aria-pressed="index === activeImageIndex"
-                  @click="activeImageIndex = index"
+                v-for="(url, index) in product.imageUrls"
+                :key="index"
+                class="gallery-thumb"
+                :class="{ 'gallery-thumb--active': index === activeImageIndex }"
+                :aria-label="`Show image ${index + 1} of ${product.imageUrls.length}`"
+                :aria-pressed="index === activeImageIndex"
+                @click="activeImageIndex = index"
               >
-                <img :src="url" :alt="''" />
+                <img :src="url" alt="" />
               </button>
             </div>
           </div>
+
+          <!-- Stock count -->
           <p class="stock">
             <span class="stock-line">
               Stock left:
@@ -52,48 +58,51 @@
           <div class="row">
             <span class="lbl">Quantity:</span>
             <div class="qty-ctrl">
+              <!-- Don't go below 0 -->
               <button @click="qty > 0 && qty--">-</button>
               <span>{{ qty }}</span>
+              <!-- Don't go above available stock -->
               <button @click="selectedVariant && qty < (selectedVariant.stockLevel || selectedVariant.stock) && qty++">+</button>
             </div>
           </div>
 
+          <!-- Color picker -->
           <div class="colors-block">
             <span class="lbl">Colors:</span>
             <div class="color-grid">
               <button
-                  v-for="color in uniqueColors"
-                  :key="color"
-                  class="color-btn"
-                  :class="{ active: selectedColor === color }"
-                  @click="handleSelectColor(color)"
+                v-for="color in uniqueColors"
+                :key="color"
+                class="color-btn"
+                :class="{ active: selectedColor === color }"
+                @click="handleSelectColor(color)"
               >{{ color }}</button>
             </div>
           </div>
 
+          <!-- Size picker — only appears after a color is selected -->
           <div class="colors-block" v-if="selectedColor">
             <span class="lbl">Sizes:</span>
             <div class="color-grid">
               <button
-                  v-for="size in availableSizesForColor"
-                  :key="size"
-                  class="color-btn"
-                  :class="{ active: selectedSize === size }"
-                  @click="handleSelectSize(size)"
+                v-for="size in availableSizesForColor"
+                :key="size"
+                class="color-btn"
+                :class="{ active: selectedSize === size }"
+                @click="handleSelectSize(size)"
               >{{ size }}</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Customer: Add to Cart -->
       <div class="button">
         <button class="cart-btn" @click="handleAddToCart">
           {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
         </button>
       </div>
 
-      <!-- Manager buttons -->
+      <!-- Manager can only see these buttons -->
       <div v-if="isManager" class="manager-buttons">
         <button class="mgr-btn restock-btn" @click="showRestockForm = true">Restock</button>
         <button class="mgr-btn edit-btn"    @click="showEditForm = true">Edit Item</button>
@@ -102,18 +111,19 @@
 
     </div>
 
+    <!-- restock form for manager -->
     <RestockItemView
-        :visible="showRestockForm"
-        :product="product"
-        @close="showRestockForm = false"
-        @restock="handleRestockSubmit"
+      :visible="showRestockForm"
+      :product="product"
+      @close="showRestockForm = false"
+      @restock="handleRestockSubmit"
     />
-
+    <!-- edit form for manager -->
     <EditItemView
-        :visible="showEditForm"
-        :product="product"
-        @close="showEditForm = false"
-        @update="handleEditSubmit"
+      :visible="showEditForm"
+      :product="product"
+      @close="showEditForm = false"
+      @update="handleEditSubmit"
     />
   </div>
 </template>
@@ -134,13 +144,13 @@ export default {
     const session = getSession()
     return {
       session,
-      isManager: session?.accountType === 'MANAGER',
+      isManager: session?.accountType === 'MANAGER', // gates manager UI
       showRestockForm: false,
       showEditForm: false,
       qty: 0,
       selectedColor: null,
       selectedSize: null,
-      added: false,
+      added: false,  
       loading: true,
       product: null,
       activeImageIndex: 0,
@@ -151,22 +161,21 @@ export default {
     const id = this.$route.params.id
     try {
       const responseDto = await getProduct(id, this.session?.accountId || 1)
-      console.log('Response:', responseDto)
 
+      
       const urls =
-          responseDto.imageUrls && responseDto.imageUrls.length > 0
-              ? responseDto.imageUrls.map((u) => `${API_BASE}${u}`)
-              : ['../assets/images/placeholder.jpg']
+        responseDto.imageUrls?.length
+          ? responseDto.imageUrls.map((u) => `${API_BASE}${u}`)
+          : ['../assets/images/placeholder.jpg']
 
       this.product = {
-        id: responseDto.id ?? responseDto.item?.id,
-        name: responseDto.name ?? responseDto.item?.name,
-        price: responseDto.price ?? responseDto.item?.price,
-        tag: responseDto.tag ?? responseDto.item?.tag ?? '',
+        id:        responseDto.id       ?? responseDto.item?.id,
+        name:      responseDto.name     ?? responseDto.item?.name,
+        price:     responseDto.price    ?? responseDto.item?.price,
+        tag:       responseDto.tag      ?? responseDto.item?.tag ?? '',
         imageUrls: urls,
-        variants: responseDto.variants || [],
+        variants:  responseDto.variants || [],
       }
-      this.activeImageIndex = 0
     } catch (error) {
       console.error('Failed to load specific item:', error)
       alert('Item not found!')
@@ -181,17 +190,19 @@ export default {
       return [...new Set(this.product.variants.map((v) => v.color))]
     },
 
+    // Sizes available for whichever color is currently selected
     availableSizesForColor() {
       if (!this.product?.variants || !this.selectedColor) return []
       return this.product.variants
-          .filter((v) => v.color === this.selectedColor)
-          .map((v) => v.size)
+        .filter((v) => v.color === this.selectedColor)
+        .map((v) => v.size)
     },
 
+    // matching the current color + size selection
     selectedVariant() {
       if (!this.product || !this.selectedColor || !this.selectedSize) return null
       return this.product.variants.find(
-          (v) => v.color === this.selectedColor && v.size === this.selectedSize
+        (v) => v.color === this.selectedColor && v.size === this.selectedSize
       )
     },
 
@@ -203,48 +214,43 @@ export default {
   },
 
   watch: {
+    // Reset to first image when navigating to a different product
     '$route.params.id'() {
       this.activeImageIndex = 0
     },
   },
 
   methods: {
+    // Switching color clears size and quantity
     handleSelectColor(color) {
       this.selectedColor = color
-      this.selectedSize = null
-      this.qty = 0
+      this.selectedSize  = null
+      this.qty           = 0
     },
 
     handleSelectSize(size) {
       this.selectedSize = size
+      // Wait for update
       this.$nextTick(() => {
         const stock = this.selectedVariant?.stockLevel || this.selectedVariant?.stock || 0
-        if (this.selectedVariant && this.qty > stock) {
-          this.qty = stock
-        } else if (this.qty === 0 && this.selectedVariant && stock > 0) {
-          this.qty = 1
-        }
+        if (this.qty > stock)                          this.qty = stock  // clamp down
+        else if (this.qty === 0 && stock > 0)          this.qty = 1      // auto-set to 1
       })
     },
 
     async handleAddToCart() {
-      if (!this.selectedColor || !this.selectedSize) {
-        alert('Please select both a color and a size!')
-        return
-      }
-      if (this.qty === 0) {
-        alert('Please select a valid quantity!')
-        return
-      }
+      if (!this.selectedColor || !this.selectedSize)
+        return alert('Please select both a color and a size!')
+      if (this.qty === 0)
+        return alert('Please select a valid quantity!')
       const stock = this.selectedVariant.stockLevel || this.selectedVariant.stock
-      if (this.qty > stock) {
-        alert('Not enough stock for this variant!')
-        return
-      }
+      if (this.qty > stock)
+        return alert('Not enough stock for this variant!')
+
       try {
         await addToCart(this.session?.accountId || 1, this.selectedVariant.id, this.qty)
         this.added = true
-        setTimeout(() => (this.added = false), 2000)
+        setTimeout(() => (this.added = false), 2000) // reset button text after 2s
       } catch (error) {
         alert(error.message)
       }
@@ -255,7 +261,7 @@ export default {
         const item = restockData[0]
         await restockItem(item.id, item.quantity, this.session?.accountId)
         alert('Restock successful!')
-        window.location.reload()
+        window.location.reload() // reload to reflect new stock quantity
       } catch (error) {
         alert(error.message || 'Failed to restock item.')
       }
@@ -268,18 +274,18 @@ export default {
           variants: this.product.variants,
         })
 
+  
         this.product.name  = saved.name  ?? dto.name
         this.product.price = saved.price ?? dto.price
         this.product.tag   = saved.tag   ?? dto.tag
 
         if (saved.imageUrls?.length) {
           this.product.imageUrls = saved.imageUrls.map((u) => `${API_BASE}${u}`)
-          this.activeImageIndex = 0
+          this.activeImageIndex  = 0
         }
 
         alert('Item updated successfully!')
       } catch (error) {
-        console.error('Failed to update item:', error)
         alert(error.message || 'Failed to update item.')
       }
     },
@@ -290,7 +296,6 @@ export default {
         await deleteItem(this.session?.accountId || 1, this.product.id)
         this.$router.back()
       } catch (error) {
-        console.error('Failed to delete item:', error)
         alert(error.message || 'Failed to delete item.')
       }
     },

@@ -1,49 +1,57 @@
+/* Vue file (JavaScript + HTML + CSS) for the edit item modal. 
+This is a child of the SpecificItemView.vue for a Manager
+Author: Maria Klinski */
+
 <script setup>
 import { ref, watch } from 'vue'
 
+// What the parent passes in
 const props = defineProps({
-  visible: Boolean,
-  product: Object
+  visible: Boolean,  // show or hide the modal depending on role
+  product: Object    // the item being edited
 })
 
+// make the update or close
 const emit = defineEmits(['close', 'update'])
 
-const name = ref('')
-const price = ref('')
-const tag = ref('')
+//editable fields
+const name      = ref('')
+const price     = ref('')
+const tag       = ref('')
 const imageFile = ref(null)
-const preview = ref(null)
+const preview   = ref(null)
 
-// Reset form whenever modal opens with a product
+// Pre-fill when the modal opens
 watch(() => props.visible, (val) => {
   if (val && props.product) {
-    name.value = props.product.name || ''
-    price.value = props.product.price != null ? props.product.price : ''
-    tag.value = props.product.tag || ''
+    name.value      = props.product.name  || ''
+    price.value     = props.product.price ?? ''
+    tag.value       = props.product.tag   || ''
     imageFile.value = null
-    preview.value = null
+    preview.value   = null
   }
 })
 
+// Show a preview of the image
 function onFileChange(e) {
   const file = e.target.files[0]
   if (!file) return
   imageFile.value = file
-  preview.value = URL.createObjectURL(file)
+  preview.value   = URL.createObjectURL(file)
 }
 
+// update
 function submit() {
   if (!name.value.trim()) return alert('Name is required!')
   const parsedPrice = parseFloat(price.value)
   if (isNaN(parsedPrice) || parsedPrice <= 0) return alert('Enter a valid price greater than 0!')
 
   emit('update', {
-    name: name.value.trim(),
-    price: parsedPrice,
-    tag: tag.value.trim(),
-    imageFile: imageFile.value
+    name:      name.value.trim(),
+    price:     parsedPrice,
+    tag:       tag.value.trim(),
+    imageFile: imageFile.value  // null if unchanged
   })
-
   emit('close')
 }
 </script>
@@ -69,6 +77,7 @@ function submit() {
 
         <label>Replace image:</label>
         <input type="file" accept="image/*" class="file-input" @change="onFileChange" />
+
         <img
           v-if="preview || product?.imageUrls?.[0]"
           :src="preview || product.imageUrls[0]"
@@ -78,7 +87,7 @@ function submit() {
 
         <div class="button-container">
           <button class="action-btn cancel-btn" @click="$emit('close')">Cancel</button>
-          <button class="action-btn save-btn" @click="submit">Save changes</button>
+          <button class="action-btn save-btn"   @click="submit">Save changes</button>
         </div>
       </div>
 

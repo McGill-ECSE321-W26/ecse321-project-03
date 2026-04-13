@@ -176,21 +176,19 @@ public class AccountService {
      * @author Maria Klinski
      */
     @Transactional
-    public void deleteAccount (int id) {
-        Account accountFromDB = accountRepository.findById(id).orElse(null);
-        
-        // check if account exists
-        if (accountFromDB == null) {
-             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
-        }
+    public void deleteAccount(int id) {
+    Account accountFromDB = accountRepository.findById(id).orElse(null);
 
-        Role role = roleRepository.findByAccount_Id(id);
-        // check if account is a manager account
-        if (role instanceof Manager) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
-        }
-        accountRepository.delete(accountFromDB);
+    if (accountFromDB == null) {
+        throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
     }
+
+    Role role = roleRepository.findByAccount_Id(id);
+    if (role instanceof Manager) {
+        throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
+    }
+    accountRepository.delete(accountFromDB);
+}
 
     /**
      * Update account
