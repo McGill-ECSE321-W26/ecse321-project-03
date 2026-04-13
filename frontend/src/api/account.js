@@ -69,3 +69,13 @@ export async function updateAccount(id, payload) {
   if (!res.ok) throw new Error(readErrorMessage(data))
   return data
 }
+
+export async function deleteAccount(id) {
+  const res = await fetch(`${API_BASE}/accounts/${id}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(readErrorMessage(data))
+  }
+}

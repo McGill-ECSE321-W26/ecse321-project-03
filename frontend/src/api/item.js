@@ -1,3 +1,8 @@
+/*
+  * API functions related to items/products and cart management.
+  * @author Maria Klinski
+  */
+
 import { API_BASE, readErrorMessage } from './base.js'
 
 const base = API_BASE
@@ -11,6 +16,7 @@ export async function getAllItems(accountId) {
   return text ? JSON.parse(text) : []
 }
 
+// get item by id and accountId (for editing)
 export async function getProduct(id, accountId) {
   const res = await fetch(`${base}/items/${id}?accountId=${accountId}`)
   const text = await res.text()
@@ -18,6 +24,7 @@ export async function getProduct(id, accountId) {
   return text ? JSON.parse(text) : null
 }
 
+// create cart with a given id
 export async function createCart(accountId) {
   const res = await fetch(`${base}/carts/${accountId}`, {
     method: 'POST',
@@ -27,6 +34,7 @@ export async function createCart(accountId) {
   return text ? JSON.parse(text) : null
 }
 
+// add to cart the items
 export async function addToCart(accountId, variantId, quantity) {
   const tryAdd = async () => fetch(`${base}/carts/${accountId}/items`, {
     method: 'POST',
@@ -51,6 +59,7 @@ export async function addToCart(accountId, variantId, quantity) {
   return text ? JSON.parse(text) : true
 }
 
+// create an item (manager)
 export async function createItem(accountId, itemData, files = null) {
   const formData = new FormData();
 
@@ -84,6 +93,7 @@ export async function createItem(accountId, itemData, files = null) {
   return text ? JSON.parse(text) : null;
 }
 
+// update an item (manager)
 export async function updateItem(accountId, itemId, dto) {
   const formData = new FormData();
 
@@ -116,6 +126,7 @@ export async function updateItem(accountId, itemId, dto) {
   return text ? JSON.parse(text) : null;
 }
 
+// delete an item (manager)
 export async function deleteItem(accountId, itemId) {
   const url = `${base}/items/${itemId}?accountId=${accountId}`;
   const res = await fetch(url, {
