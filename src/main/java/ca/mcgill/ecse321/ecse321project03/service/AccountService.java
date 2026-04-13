@@ -19,6 +19,9 @@ import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
 import jakarta.transaction.Transactional;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
 
+import java.util.ArrayList;
+import java.util.List;
+
 // Tutorial 7
 @Service
 @Validated
@@ -163,6 +166,12 @@ public class AccountService {
         if (accountFromDB == null) {
              throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with email " + email);
         }
+
+        if (!accountFromDB.getActive()) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "This account has been deactivated: " + email);
+        }
+
+
         if (!accountFromDB.getPassword().equals(password)) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Incorrect password for email " + email);
         }
@@ -187,7 +196,9 @@ public class AccountService {
     if (role instanceof Manager) {
         throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
     }
-    accountRepository.delete(accountFromDB);
+
+    accountFromDB.setActive(false);
+    accountRepository.save(accountFromDB);
 }
 
     /**
@@ -243,5 +254,22 @@ public class AccountService {
         Account account = findAccountById(id);
         account.setAddress(address);
         return accountRepository.save(account);
+    }
+
+    /**
+     * Author: Sonia Ly
+     * @return a list of all accounts
+     */
+    public List<AccountResponseDto> getAllAccounts() {
+        List<Account> accounts = (List<Account>) accountRepository.findAll();
+        List<AccountResponseDto> allAccountsDTO = new ArrayList<>();
+
+        for (Account account : accounts) {
+            if (account.getActive()) {
+                allAccountsDTO.add(toAccountResponseDto(account));
+            }
+        }
+
+        return allAccountsDTO;
     }
 }

@@ -7,6 +7,7 @@ import CartView from './CartView.vue'
 import CheckoutView from './CheckoutView.vue'
 import AccountDetailView from "./AccountDetailView.vue";
 import OrdersListView from "./OrdersListView.vue";
+import AccountsListView from "./AccountListView.vue";
 import { getAccountById } from "../api/account.js";
 import logoImg from "../assets/images/beautiful_big_logo.png";
 
@@ -119,6 +120,14 @@ function refreshSession() {
           Cart
         </button>
 
+        <button
+            v-if="isManager"
+            type="button"
+            :class="{ on: activeTab === 'accounts' }"
+            @click="pickTab('accounts')"
+        >
+          Accounts
+        </button>
 
 
         <button type="button" class="logout-link" @click="logout">Log out</button>
@@ -156,12 +165,16 @@ function refreshSession() {
         <CartView @go-checkout="pickTab('checkout')" />
       </section>
 
-
       <section v-show="activeTab === 'account'">
         <AccountDetailView @session-updated="refreshSession" />
       </section>
+
       <section v-if="activeTab === 'checkout'">
         <CheckoutView @order-placed="onOrderPlaced" />
+      </section>
+
+      <section v-if="activeTab === 'accounts' && isManager">
+        <AccountsListView />
       </section>
     </main>
   </div>

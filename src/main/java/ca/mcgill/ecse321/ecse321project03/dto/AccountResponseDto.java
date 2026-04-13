@@ -23,7 +23,7 @@ public class AccountResponseDto {
     private int loyaltyPts;
     /** CUSTOMER, MANAGER, or EMPLOYEE */
     private String accountType;
-
+    private boolean active;
 
     //------------------------
     // CONSTRUCTOR
@@ -40,6 +40,7 @@ public class AccountResponseDto {
         address = account.getAddress();
         loyaltyPts = account.getLoyaltyPts();
         accountType = resolveAccountType(role);
+        active = account.getActive();
     }
 
     @SuppressWarnings("unused")
