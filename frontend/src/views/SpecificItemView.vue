@@ -3,14 +3,16 @@ This is a child of the catalog
 Author: Maria Klinski */
 
 <template>
-  <div class="desktop">
-    <div class="window">
+  <div class="page">
 
-      <div class="title-bar">
-        <button class="back-btn" @click="$router.back()">← Back</button>
-        <span class="title-name">{{ product?.name || 'Loading...' }}</span>
-      </div>
+    <Header activeTab="shop" />
 
+    <div class="page-inner">
+
+      <div class="window">
+
+        <div class="title-bar">
+          <span class="title-name">{{ product?.name || 'Loading...' }}</span>
       <!-- wait for the product to load -->
       <div class="window-body" v-if="!loading && product">
 
@@ -44,17 +46,43 @@ Author: Maria Klinski */
           </p>
         </div>
 
-        <div class="right">
-          <div class="row">
-            <span class="lbl">Name:</span>
-            <span class="val">{{ product.name }}</span>
+        <div class="window-body" v-if="!loading && product">
+
+          <div class="left">
+            <div class="gallery">
+              <div class="image">
+                <img :src="activeImageSrc" :alt="product.name" />
+              </div>
+
+              <div v-if="product.imageUrls.length > 1" class="gallery-thumbs">
+                <button
+                  v-for="(url, index) in product.imageUrls"
+                  :key="index"
+                  type="button"
+                  class="gallery-thumb"
+                  :class="{ 'gallery-thumb--active': index === activeImageIndex }"
+                  @click="activeImageIndex = index"
+                >
+                  <img :src="url" :alt="''" />
+                </button>
+              </div>
+            </div>
+
+            <p class="stock">
+              <span class="stock-line">
+                Stock left:
+                {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : '—' }}
+              </span>
+              <span v-if="!selectedVariant" class="stock-hint">
+                Select color and size first
+              </span>
+            </p>
           </div>
 
-          <div class="row">
-            <span class="lbl">Price:</span>
-            <span class="val">${{ product.price?.toFixed(2) }}</span>
-          </div>
-
+          <div class="right">
+            <div class="row">
+              <span class="lbl">Name:</span>
+              <span class="val">{{ product.name }}</span>
           <div class="row">
             <span class="lbl">Quantity:</span>
             <div class="qty-ctrl">
@@ -64,51 +92,52 @@ Author: Maria Klinski */
               <!-- Don't go above available stock -->
               <button @click="selectedVariant && qty < (selectedVariant.stockLevel || selectedVariant.stock) && qty++">+</button>
             </div>
-          </div>
 
-          <!-- Color picker -->
-          <div class="colors-block">
-            <span class="lbl">Colors:</span>
-            <div class="color-grid">
-              <button
-                v-for="color in uniqueColors"
-                :key="color"
-                class="color-btn"
-                :class="{ active: selectedColor === color }"
-                @click="handleSelectColor(color)"
-              >{{ color }}</button>
+            <div class="colors-block">
+              <span class="lbl">Colors:</span>
+              <div class="color-grid">
+                <button
+                  v-for="color in uniqueColors"
+                  :key="color"
+                  class="color-btn"
+                  :class="{ active: selectedColor === color }"
+                  @click="handleSelectColor(color)"
+                >
+                  {{ color }}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <!-- Size picker — only appears after a color is selected -->
-          <div class="colors-block" v-if="selectedColor">
-            <span class="lbl">Sizes:</span>
-            <div class="color-grid">
-              <button
-                v-for="size in availableSizesForColor"
-                :key="size"
-                class="color-btn"
-                :class="{ active: selectedSize === size }"
-                @click="handleSelectSize(size)"
-              >{{ size }}</button>
+            <div class="colors-block" v-if="selectedColor">
+              <span class="lbl">Sizes:</span>
+              <div class="color-grid">
+                <button
+                  v-for="size in availableSizesForColor"
+                  :key="size"
+                  class="color-btn"
+                  :class="{ active: selectedSize === size }"
+                  @click="handleSelectSize(size)"
+                >
+                  {{ size }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="button">
-        <button class="cart-btn" @click="handleAddToCart">
-          {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
-        </button>
-      </div>
+        <div class="button">
+          <button class="cart-btn" @click="handleAddToCart">
+            {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
+          </button>
+        </div>
 
-      <!-- Manager can only see these buttons -->
-      <div v-if="isManager" class="manager-buttons">
-        <button class="mgr-btn restock-btn" @click="showRestockForm = true">Restock</button>
-        <button class="mgr-btn edit-btn"    @click="showEditForm = true">Edit Item</button>
-        <button class="mgr-btn delete-btn"  @click="handleDeleteItem">Delete Item</button>
-      </div>
+        <div v-if="isManager" class="button">
+          <button class="cart-btn" @click="showRestockForm = true">
+            Restock
+          </button>
+        </div>
 
+      </div>
     </div>
 
     <!-- restock form for manager -->
@@ -133,6 +162,12 @@ import { getSession } from '../session/storage'
 import { API_BASE } from '../api/base.js'
 import { addToCart, getProduct, updateItem, deleteItem } from '../api/item.js'
 import RestockItemView from './RestockItemView.vue'
+import { restockItem } from "../api/inventory.js"
+import Header from '../views/Header.vue'
+
+export default {
+  name: 'SpecificItemView',
+  components: { RestockItemView, Header },
 import EditItemView from './EditItemView.vue'
 import { restockItem } from '../api/inventory.js'
 
@@ -304,18 +339,20 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Jersey+10&display=swap');
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-.desktop {
+.page {
   min-height: 100vh;
-  background: #c0c0c0;
+  background: #fff;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+}
+
+/* IMPORTANT: only centers content, NOT header */
+.page-inner {
+  flex: 1;
+  display: flex;
   justify-content: center;
+  align-items: center;
   padding: 40px 20px;
-  font-family: 'Inconsolata', monospace;
 }
 
 .window {
@@ -324,7 +361,6 @@ export default {
   border: 3px solid #1209AB;
   box-shadow: 12px 12px 0 #3D3C3C;
 }
-
 .title-bar {
   background: #D8BFF1;
   height: 44px;
@@ -332,7 +368,7 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; 
 }
 
 .back-btn {

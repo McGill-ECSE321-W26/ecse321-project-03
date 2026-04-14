@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onBeforeUnmount } from "vue";
+import { ref, onBeforeUnmount, computed } from "vue";
 
 const emit = defineEmits(["create", "close"]);
 
@@ -102,6 +102,16 @@ function removeImage(index) {
   uploadError.value = "";
 }
 
+function toggleAll(type) {
+  if (type === "colors") {
+    item.value.colors =
+      item.value.colors.length === colors.length ? [] : [...colors];
+  } else if (type === "sizes") {
+    item.value.sizes =
+      item.value.sizes.length === sizes.length ? [] : [...sizes];
+  }
+}
+
 const submitForm = () => {
   const files = imageEntries.value.map((e) => e.file);
   emit("create", { ...item.value }, files.length ? files : null);
@@ -178,8 +188,12 @@ const submitForm = () => {
               <label>Quantity:</label>
               <input type="number" min="1" placeholder="1" v-model.number="item.quantity" />
 
-              <label>Colors:</label>
+            <label>Colors:</label>
               <div class="color-grid">
+                <span class="toggle-all" @click="toggleAll('colors')">
+                  {{ item.colors.length === colors.length ? "Deselect all" : "Select all" }}
+                </span>
+
                 <label v-for="color in colors" :key="color" class="container">
                   {{ color }}
                   <input type="checkbox" :value="color" v-model="item.colors" />
@@ -187,8 +201,13 @@ const submitForm = () => {
                 </label>
               </div>
 
+
               <label>Sizes:</label>
               <div class="color-grid">
+                <span class="toggle-all" @click="toggleAll('sizes')">
+                  {{ item.sizes.length === sizes.length ? "Deselect all" : "Select all" }}
+                </span>
+
                 <label v-for="size in sizes" :key="size" class="container">
                   {{ size }}
                   <input type="checkbox" :value="size" v-model="item.sizes" />
@@ -436,6 +455,19 @@ select {
 .color-grid .container {
   font-size: 16px;
   line-height: 1.2;
+}
+
+.toggle-all {
+  grid-column: 1 / -1; /* span entire grid row */
+  font-size: 0.9rem;
+  text-decoration: underline;
+  cursor: pointer;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.toggle-all:hover {
+  color: #000;
 }
 
 .submit-btn {
