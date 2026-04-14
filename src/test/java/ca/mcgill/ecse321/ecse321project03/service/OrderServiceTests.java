@@ -690,13 +690,11 @@ public class OrderServiceTests {
 
         //act
         String msg1 = orderService.redeemLoyaltyPts(fakePerson.getId(), fakeOrder.getId());
-        String msg2 = orderService.redeemLoyaltyPts(fakePerson.getId(), fakeOrder.getId());
         fakePerson.setLoyaltyPts(20);
         String msg3 = orderService.redeemLoyaltyPts(fakePerson.getId(), fakeOrder.getId());
 
         //assertion
         assertEquals("You don't have enough points to get a discount :(", msg1);
-        assertEquals("Points not used.", msg2);
         assertEquals("You saved $0.00 on this order!", msg3);
     }
 

@@ -1,104 +1,115 @@
 <template>
-  <div class="desktop">
-    <div class="window">
+  <div class="page">
 
-      <div class="title-bar">
-        <button class="back-btn" @click="$router.back()">← Back</button>
-        <span class="title-name">{{ product?.name || 'Loading...' }}</span>
-      </div>
+    <Header activeTab="shop" />
 
-      <div class="window-body" v-if="!loading && product">
+    <div class="page-inner">
 
-        <div class="left">
-          <div class="gallery">
-            <div class="image">
-              <img :src="activeImageSrc" :alt="product.name" />
-            </div>
-            <div v-if="product.imageUrls.length > 1" class="gallery-thumbs">
-              <button
-                v-for="(url, index) in product.imageUrls"
-                :key="index"
-                type="button"
-                class="gallery-thumb"
-                :class="{ 'gallery-thumb--active': index === activeImageIndex }"
-                :aria-label="`Show image ${index + 1} of ${product.imageUrls.length}`"
-                :aria-pressed="index === activeImageIndex"
-                @click="activeImageIndex = index"
-              >
-                <img :src="url" :alt="''" />
-              </button>
-            </div>
-          </div>
-          <p class="stock">
-            <span class="stock-line">
-              Stock left:
-              {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : '—' }}
-            </span>
-            <span v-if="!selectedVariant" class="stock-hint">Select color and size first</span>
-          </p>
+      <div class="window">
+
+        <div class="title-bar">
+          <span class="title-name">{{ product?.name || 'Loading...' }}</span>
         </div>
 
-        <div class="right">
-          <div class="row">
-            <span class="lbl">Name:</span>
-            <span class="val">{{ product.name }}</span>
-          </div>
+        <div class="window-body" v-if="!loading && product">
 
-          <div class="row">
-            <span class="lbl">Price:</span>
-            <span class="val">${{ product.price?.toFixed(2) }}</span>
-          </div>
+          <div class="left">
+            <div class="gallery">
+              <div class="image">
+                <img :src="activeImageSrc" :alt="product.name" />
+              </div>
 
-          <div class="row">
-            <span class="lbl">Quantity:</span>
-            <div class="qty-ctrl">
-              <button @click="qty > 0 && qty--">-</button>
-              <span>{{ qty }}</span>
-              <button @click="selectedVariant && qty < (selectedVariant.stockLevel || selectedVariant.stock) && qty++">+</button>
+              <div v-if="product.imageUrls.length > 1" class="gallery-thumbs">
+                <button
+                  v-for="(url, index) in product.imageUrls"
+                  :key="index"
+                  type="button"
+                  class="gallery-thumb"
+                  :class="{ 'gallery-thumb--active': index === activeImageIndex }"
+                  @click="activeImageIndex = index"
+                >
+                  <img :src="url" :alt="''" />
+                </button>
+              </div>
             </div>
+
+            <p class="stock">
+              <span class="stock-line">
+                Stock left:
+                {{ selectedVariant ? (selectedVariant.stockLevel || selectedVariant.stock) : '—' }}
+              </span>
+              <span v-if="!selectedVariant" class="stock-hint">
+                Select color and size first
+              </span>
+            </p>
           </div>
 
-          <div class="colors-block">
-            <span class="lbl">Colors:</span>
-            <div class="color-grid">
-              <button
-                v-for="color in uniqueColors"
-                :key="color"
-                class="color-btn"
-                :class="{ active: selectedColor === color }"
-                @click="handleSelectColor(color)"
-              >{{ color }}</button>
+          <div class="right">
+            <div class="row">
+              <span class="lbl">Name:</span>
+              <span class="val">{{ product.name }}</span>
             </div>
-          </div>
 
-          <div class="colors-block" v-if="selectedColor">
-            <span class="lbl">Sizes:</span>
-            <div class="color-grid">
-              <button
-                v-for="size in availableSizesForColor"
-                :key="size"
-                class="color-btn"
-                :class="{ active: selectedSize === size }"
-                @click="handleSelectSize(size)"
-              >{{ size }}</button>
+            <div class="row">
+              <span class="lbl">Price:</span>
+              <span class="val">${{ product.price?.toFixed(2) }}</span>
+            </div>
+
+            <div class="row">
+              <span class="lbl">Quantity:</span>
+              <div class="qty-ctrl">
+                <button @click="qty > 0 && qty--">-</button>
+                <span>{{ qty }}</span>
+                <button @click="selectedVariant && qty < (selectedVariant.stockLevel || selectedVariant.stock) && qty++">+</button>
+              </div>
+            </div>
+
+            <div class="colors-block">
+              <span class="lbl">Colors:</span>
+              <div class="color-grid">
+                <button
+                  v-for="color in uniqueColors"
+                  :key="color"
+                  class="color-btn"
+                  :class="{ active: selectedColor === color }"
+                  @click="handleSelectColor(color)"
+                >
+                  {{ color }}
+                </button>
+              </div>
+            </div>
+
+            <div class="colors-block" v-if="selectedColor">
+              <span class="lbl">Sizes:</span>
+              <div class="color-grid">
+                <button
+                  v-for="size in availableSizesForColor"
+                  :key="size"
+                  class="color-btn"
+                  :class="{ active: selectedSize === size }"
+                  @click="handleSelectSize(size)"
+                >
+                  {{ size }}
+                </button>
+              </div>
             </div>
           </div>
 
         </div>
-      </div>
 
-      <div class="button">
-        <button class="cart-btn" @click="handleAddToCart">
-          {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
-        </button>
-      </div>
-      
-      <div v-if="isManager" class="button">
-        <button class="cart-btn" @click="showRestockForm = true">
-          Restock
-        </button>
-      </div>
+        <div class="button">
+          <button class="cart-btn" @click="handleAddToCart">
+            {{ added ? '✓ Added to Cart!' : 'Add to Cart' }}
+          </button>
+        </div>
 
+        <div v-if="isManager" class="button">
+          <button class="cart-btn" @click="showRestockForm = true">
+            Restock
+          </button>
+        </div>
+
+      </div>
     </div>
 
     <RestockItemView
@@ -107,6 +118,7 @@
       @close="showRestockForm = false"
       @restock="handleRestockSubmit"
     />
+
   </div>
 </template>
 
@@ -115,16 +127,17 @@ import { getSession } from '../session/storage'
 import { API_BASE } from '../api/base.js'
 import { addToCart, getProduct } from '../api/item.js'
 import RestockItemView from './RestockItemView.vue'
-import { restockItem } from "../api/inventory.js"; 
+import { restockItem } from "../api/inventory.js"
+import Header from '../views/Header.vue'
 
 export default {
   name: 'SpecificItemView',
-  components: { RestockItemView },
+  components: { RestockItemView, Header },
 
   data() {
     const session = getSession()
     return {
-      session: session,
+      session,
       isManager: session?.accountType === 'MANAGER',
       showRestockForm: false,
       qty: 0,
@@ -138,150 +151,105 @@ export default {
   },
 
   async mounted() {
-  const id = this.$route.params.id;
-  try {
-    const responseDto = await getProduct(id, this.session?.accountId || 1);
-    console.log('Response:', responseDto); // remove once working
+    const id = this.$route.params.id
+    try {
+      const responseDto = await getProduct(id, this.session?.accountId || 1)
 
-    const urls =
-      responseDto.imageUrls && responseDto.imageUrls.length > 0
-        ? responseDto.imageUrls.map((u) => `${API_BASE}${u}`)
-        : ['../assets/images/placeholder.jpg']
-    this.product = {
-      id: responseDto.id ?? responseDto.item?.id,
-      name: responseDto.name ?? responseDto.item?.name,
-      price: responseDto.price ?? responseDto.item?.price,
-      imageUrls: urls,
-      variants: responseDto.variants || []
-    }
-    this.activeImageIndex = 0
-  } catch (error) {
-    console.error("Failed to load specific item:", error);
-    alert("Item not found!");
-  } finally {
-    this.loading = false;
-  }
-},
+      const urls =
+        responseDto.imageUrls && responseDto.imageUrls.length > 0
+          ? responseDto.imageUrls.map((u) => `${API_BASE}${u}`)
+          : []
 
-  computed: {
-    uniqueColors() {
-      if (!this.product || !this.product.variants) return [];
-      return [...new Set(this.product.variants.map(v => v.color))];
-    },
+      this.product = {
+        id: responseDto.id,
+        name: responseDto.name,
+        price: responseDto.price,
+        imageUrls: urls,
+        variants: responseDto.variants || []
+      }
 
-    availableSizesForColor() {
-      if (!this.product || !this.product.variants || !this.selectedColor) return [];
-      return this.product.variants
-        .filter(v => v.color === this.selectedColor)
-        .map(v => v.size);
-    },
-
-    selectedVariant() {
-      if (!this.product || !this.selectedColor || !this.selectedSize) return null;
-      return this.product.variants.find(
-        v => v.color === this.selectedColor && v.size === this.selectedSize
-      );
-    },
-
-    activeImageSrc() {
-      if (!this.product?.imageUrls?.length) return '../assets/images/placeholder.jpg'
-      const i = Math.min(this.activeImageIndex, this.product.imageUrls.length - 1)
-      return this.product.imageUrls[i]
+      this.activeImageIndex = 0
+    } catch (e) {
+      alert("Item not found!")
+    } finally {
+      this.loading = false
     }
   },
 
-  watch: {
-    '$route.params.id'() {
-      this.activeImageIndex = 0
+  computed: {
+    uniqueColors() {
+      return this.product?.variants
+        ? [...new Set(this.product.variants.map(v => v.color))]
+        : []
+    },
+
+    availableSizesForColor() {
+      if (!this.selectedColor) return []
+      return this.product.variants
+        .filter(v => v.color === this.selectedColor)
+        .map(v => v.size)
+    },
+
+    selectedVariant() {
+      return this.product?.variants?.find(
+        v => v.color === this.selectedColor && v.size === this.selectedSize
+      )
+    },
+
+    activeImageSrc() {
+      if (!this.product?.imageUrls?.length) return ''
+      return this.product.imageUrls[this.activeImageIndex]
     }
   },
 
   methods: {
     handleSelectColor(color) {
-      this.selectedColor = color;
-      this.selectedSize = null;
-      this.qty = 0;
+      this.selectedColor = color
+      this.selectedSize = null
+      this.qty = 0
     },
 
     handleSelectSize(size) {
-      this.selectedSize = size;
-      this.$nextTick(() => {
-        const stock = this.selectedVariant?.stockLevel || this.selectedVariant?.stock || 0;
-        if (this.selectedVariant && this.qty > stock) {
-          this.qty = stock;
-        } else if (this.qty === 0 && this.selectedVariant && stock > 0) {
-          this.qty = 1;
-        }
-      });
+      this.selectedSize = size
     },
 
     async handleAddToCart() {
-      if (!this.selectedColor || !this.selectedSize) {
-        alert("Please select both a color and a size!");
-        return;
-      }
-      if (this.qty === 0) {
-        alert("Please select a valid quantity!");
-        return;
-      }
+      if (!this.selectedVariant) return alert("Select variant first")
 
-      const stock = this.selectedVariant.stockLevel || this.selectedVariant.stock;
-      if (this.qty > stock) {
-        alert("Not enough stock for this variant!");
-        return;
-      }
+      await addToCart(
+        this.session.accountId,
+        this.selectedVariant.id,
+        this.qty
+      )
 
-      try {
-        await addToCart(this.session?.accountId || 1, this.selectedVariant.id, this.qty)
-        this.added = true
-        setTimeout(() => this.added = false, 2000)
-      } catch (error) {
-        alert(error.message);
-      }
+      this.added = true
+      setTimeout(() => (this.added = false), 2000)
     },
-    
-  async handleRestockSubmit(restockData) {
-  try {
-    const item = restockData[0]
 
-    console.log('Sending to backend:', {
-      itemTypeId: item.id,
-      quantity: item.quantity,
-      accountId: this.session?.accountId
-    })
-
-    console.log("Restock request payload:", {
-     itemTypeId: item.id,
-      quantity: item.quantity,
-     accountId: this.session?.accountId
-    })  
-
-    await restockItem(item.id, item.quantity, this.session?.accountId)
-
-    alert('Restock successful!')
-    window.location.reload()
-
-  } catch (error) {
-    alert(error.message || 'Failed to restock item.')
-  }
-}
+    async handleRestockSubmit(data) {
+      const item = data[0]
+      await restockItem(item.id, item.quantity, this.session.accountId)
+      window.location.reload()
+    }
   }
 }
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Jersey+10&display=swap');
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-.desktop {
+.page {
   min-height: 100vh;
-  background: #c0c0c0;
+  background: #fff;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+}
+
+/* IMPORTANT: only centers content, NOT header */
+.page-inner {
+  flex: 1;
+  display: flex;
   justify-content: center;
+  align-items: center;
   padding: 40px 20px;
-  font-family: 'Inconsolata', monospace;
 }
 
 .window {
@@ -290,7 +258,6 @@ export default {
   border: 3px solid #1209AB;
   box-shadow: 12px 12px 0 #3D3C3C;
 }
-
 .title-bar {
   background: #D8BFF1;
   height: 44px;
@@ -298,7 +265,7 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center; /* keeps title centered */
+  justify-content: center; 
 }
 
 .back-btn {
