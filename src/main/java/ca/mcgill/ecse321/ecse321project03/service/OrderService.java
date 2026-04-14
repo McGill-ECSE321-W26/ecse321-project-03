@@ -426,10 +426,7 @@ public class OrderService {
         
     }
 
-    public ItemImage getFirstImageForOrderItem(int itemId) {
-        List<ItemImage> images = itemImageRepository.findByItem_Id(itemId);
-        return images.isEmpty() ? null : images.get(0);
-    }
+
 
     //------------------------
     // Related to Loyalty Points

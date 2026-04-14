@@ -78,7 +78,7 @@ public class CartController {
                 .map(cartItem -> {
                     int generalItemId = cartItem.getCartItemId().getItemType().getGeneralItem().getId();
 
-                    ItemImage firstImage = cartService.getFirstImageForCartItem(generalItemId);
+                    ItemImage firstImage = cartService.getFirstImageForCartOrOrderItem(generalItemId);
                     ItemImageDto imageDto = firstImage == null ? null : new ItemImageDto(firstImage);
 
                     return new CartItemResponseDto(

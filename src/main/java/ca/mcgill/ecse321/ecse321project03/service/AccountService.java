@@ -22,6 +22,8 @@ import ca.mcgill.ecse321.ecse321project03.model.Account;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 // Tutorial 7
 @Service
 @Validated
@@ -241,35 +243,39 @@ public class AccountService {
         return accountRepository.save(accountFromDB);
     }
 
+    /**
+     * Retrieve the loyalty points of an account
+     * @param accountId the account for which to retrieve the loyalty points
+     * @return the loyalty points
+     * @author Yani Zhang
+     */
     public int getLoyaltyPoints(int accountId) {
-        Account account = accountRepository.findById(accountId).orElse(null);
-        if (account == null) {
-            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND,
-                    "No account found with id " + accountId);
-        }
+        Account account = findAccountById(accountId);
+
         return account.getLoyaltyPts();
     }
 
+    /**
+     * Update the address of an account
+     * @param id the account for which to to update the address
+     * @param address the new address
+     * @return the updated account
+     * @author Yani Zhang
+     */
     public Account updateAddress(int id, String address) {
         Account account = findAccountById(id);
         account.setAddress(address);
         return accountRepository.save(account);
     }
 
+
     /**
-     * Author: Sonia Ly
-     * @return a list of all accounts
+     * A list of all accounts
+     * @return the accounts
+     * @author Sonia Ly
      */
-    public List<AccountResponseDto> getAllAccounts() {
+    public List<Account> getAllAccounts() {
         List<Account> accounts = (List<Account>) accountRepository.findAll();
-        List<AccountResponseDto> allAccountsDTO = new ArrayList<>();
-
-        for (Account account : accounts) {
-            if (account.getActive()) {
-                allAccountsDTO.add(toAccountResponseDto(account));
-            }
-        }
-
-        return allAccountsDTO;
+        return accounts;
     }
 }

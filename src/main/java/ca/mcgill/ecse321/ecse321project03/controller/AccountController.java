@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * REST controller responsible for handling all account-related API endpoints.
  * It connects HTTP requests from the client to the AccountService layer.
@@ -151,20 +154,59 @@ public class AccountController {
         }
     }
 
+
+    /**
+     * Update the address of an account.
+     *
+     * @param id the ID of the account to update
+     * @return an account response dto
+     * @author Yani Zhang
+     */
     @PutMapping("/{id}/address")
-    public AccountResponseDto updateAddress(@PathVariable int id, @RequestBody AddressUpdateDto updateDto) {
-        Account account = accountService.updateAddress(id, updateDto.getAddress());
-        return accountService.toAccountResponseDto(account);
+    public ResponseEntity<?>  updateAddress(@PathVariable int id, @RequestBody AddressUpdateDto updateDto) {
+        try {
+            Account account = accountService.updateAddress(id, updateDto.getAddress());
+            return new ResponseEntity<>(accountService.toAccountResponseDto(account),  HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
+        }
     }
 
+    /**
+     * Get the loyalty points of an account.
+     *
+     * @param id the ID of the account to look for the points
+     * @return the loyalty points
+     * @author Yani Zhang
+     */
     @GetMapping("/{id}/loyalty-points")
-    public int getLoyaltyPoints(@PathVariable int id) {
-        return accountService.getLoyaltyPoints(id);
+    public ResponseEntity<?> getLoyaltyPoints(@PathVariable int id) {
+        try {
+            return new ResponseEntity<>(accountService.getLoyaltyPoints(id),  HttpStatus.OK);
+        } catch (Ecse321Project03Exception e) {
+            return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.NOT_FOUND);
+        }
     }
 
+
+
+    /**
+     * Retrieves all accounts in the system.
+     * @return a ResponseEntity containing a list of EmployeeDto objects if successful,
+     *         or an ErrorDto if the request fails
+     * @author : Wissam Abchiche
+     */
     @GetMapping
     public ResponseEntity<?> getAllAccounts() {
         try {
+            List<Account> accounts = accountService.getAllAccounts();
+            List<AccountResponseDto> allAccountsDTO = new ArrayList<>();
+
+            for (Account account : accounts) {
+                if (account.getActive()) {
+                    allAccountsDTO.add(accountService.toAccountResponseDto(account));
+                }
+            }
             return new ResponseEntity<>(accountService.getAllAccounts(), HttpStatus.OK);
         } catch (Ecse321Project03Exception e) {
             return new ResponseEntity<>(new ErrorDto(e.getMessage()), HttpStatus.BAD_REQUEST);

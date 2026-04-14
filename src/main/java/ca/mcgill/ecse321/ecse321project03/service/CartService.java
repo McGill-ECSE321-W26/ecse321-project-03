@@ -1,9 +1,6 @@
 package ca.mcgill.ecse321.ecse321project03.service;
 
-import ca.mcgill.ecse321.ecse321project03.dto.CartDto;
 import ca.mcgill.ecse321.ecse321project03.dto.CartItemDto;
-import ca.mcgill.ecse321.ecse321project03.dto.CartItemResponseDto;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
 import ca.mcgill.ecse321.ecse321project03.dto.ItemTypeDto;
 import ca.mcgill.ecse321.ecse321project03.exception.Ecse321Project03Exception;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
@@ -313,7 +310,7 @@ public class CartService {
      * @param itemId the id of the general item
      * @return the first ItemImage associated with the item, or null if none exist
      */
-    public ItemImage getFirstImageForCartItem(int itemId) {
+    public ItemImage getFirstImageForCartOrOrderItem(int itemId) {
         List<ItemImage> images = itemImageRepository.findByItem_Id(itemId);
         return images.isEmpty() ? null : images.get(0);
     }

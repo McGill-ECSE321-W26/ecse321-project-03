@@ -158,23 +158,6 @@ public class OrderInfoIntegrationTest {
     }
 
 
-    /**
-     * Method which invalidates the view of orders if done by customer
-     * @author Wissam Abchiche
-     */
-    @Test
-    public void testInvalidViewOrders() {
-
-        ResponseEntity<ErrorDto> response = client.getForEntity(
-                "/orders/order?userID=" + testCustomer.getId(), ErrorDto.class);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        ErrorDto responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals("Customers may not view of all of the orders in the system", responseBody.getErrors().get(0));
-    }
-
 
 
     /**

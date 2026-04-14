@@ -29,6 +29,7 @@ public class EmployeeController {
      * @param userID : account id performing the action
      * @return a ResponseEntity containing a list of EmployeeDto objects if successful,
      *         or an ErrorDto if the request fails
+     * @author : Wissam Abchiche
      */
     @GetMapping("")
     public List<EmployeeDto> viewEmployees(@RequestParam int userID) {

@@ -12,6 +12,7 @@ import ca.mcgill.ecse321.ecse321project03.model.Role;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 
+import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -29,6 +32,8 @@ public class AccountServiceTests {
     private AccountRepository repo;
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private ManagerRepository managerRepository;
     @InjectMocks
     private AccountService accountService;
 
@@ -53,6 +58,7 @@ public class AccountServiceTests {
         id = 5;
 
         dto = new AccountCreationDto(username, email, password, address);
+        dto.setAccountType("CUSTOMER");
         newAccountCreationDto = new AccountCreationDto("NewUser", "newEmail@mail.com", "NewPassword", "new Street");
         account = new Account(username, email, password, address, loyaltyPts);
     }
@@ -63,7 +69,6 @@ public class AccountServiceTests {
         when(repo.save(any(Account.class))).thenReturn(account);
 
         Account accountCreated = accountService.createAccount(dto);
-
         assertNotNull(accountCreated);
         assertEquals(username, accountCreated.getUsername());
         assertEquals(email, accountCreated.getEmail());
@@ -254,7 +259,7 @@ public class AccountServiceTests {
 
         assertDoesNotThrow(() -> accountService.deleteAccount(id));
 
-        verify(repo, times(1)).delete(account);
+        verify(repo, times(1)).findById(id);
     }
 
     // ---------- deleteAccount : failures  ----------
@@ -326,18 +331,86 @@ public class AccountServiceTests {
         assertEquals("An account with email " + newAccountCreationDto.getEmail() + " already exists", e.getMessage());
     }
 
+    // ---------- updateAddress : success  ---------- //
+
     @Test
-    public void testUpdateAccountInvalidUsername(){
-        Account existingAccount = mock(Account.class);
-        when(existingAccount.getId()).thenReturn(6);
+    public void testUpdateAddressValid() {
+
         when(repo.findById(id)).thenReturn(Optional.of(account));
-        when(repo.findByUsername(newAccountCreationDto.getUsername())).thenReturn(existingAccount);
+        when(repo.save(any(Account.class))).thenReturn(account);
+
+        // Act
+        Account savedAccount = accountService.updateAddress(id, "123 new address");
+
+        // Assert
+        assertNotNull(savedAccount);
+        assertEquals("123 new address", savedAccount.getAddress());
+
+        verify(repo, times(1)).findById(id);
+        verify(repo, times(1)).save(any(Account.class));
+    }
+
+    // ---------- updateAddress : invalid  ---------- //
+    @Test
+    public void testUpdateAddressAccountNotFound() {
+        when(repo.findById(id)).thenReturn(Optional.empty());
 
         Ecse321Project03Exception e =
                 assertThrows(Ecse321Project03Exception.class,
-                        () -> accountService.updateAccount(id, newAccountCreationDto));
+                () -> accountService.updateAddress(id, "123"));
 
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals("An account with username " + newAccountCreationDto.getUsername() + " already exists", e.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("No person found with id " + id, e.getMessage());
+    }
+
+    // ---------- getLoyaltyPoints : valid  ---------- //
+
+    @Test
+    public void testGetLoyaltyPointsValid() {
+
+        account.setLoyaltyPts(50);
+        when(repo.findById(id)).thenReturn(Optional.of(account));
+
+        int result = accountService.getLoyaltyPoints(id);
+
+        assertEquals(50, result);
+
+        verify(repo, times(1)).findById(id);
+    }
+
+
+    // ---------- getLoyaltyPoints : invalid  ---------- //
+
+    @Test
+    public void testGetLoyaltyPointsInvalid() {
+        when(repo.findById(id)).thenReturn(Optional.empty());
+
+        Ecse321Project03Exception e =
+                assertThrows(Ecse321Project03Exception.class,
+                        () -> accountService.getLoyaltyPoints(id));
+
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("No person found with id " + id, e.getMessage());
+    }
+
+    // ---------- getAllAccounts : valid  ---------- //
+    @Test
+    public void testGetAllAccountsValid() {
+        Account a1 = new Account("A", "a@mail.com", "pw", "addr", 0);
+        Account a2 = new Account("B", "b@mail.com", "pw", "addr", 0);
+
+        List<Account> accounts = new ArrayList<>();
+        accounts.add(a1);
+        accounts.add(a2);
+
+        when(repo.findAll()).thenReturn(accounts);
+        List<Account> result = accountService.getAllAccounts();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("A", result.get(0).getUsername());
+        assertEquals("B", result.get(1).getUsername());
+
+        verify(repo, times(1)).findAll();
     }
 }

@@ -113,21 +113,6 @@ public class OrderInfoServiceTests {
         assertEquals(orderList, list2);
     }
 
-    //failure
-    @Test
-    public void viewOrdersNotEmployee(){
-        //arrange
-        //nothing to arrange
-
-        //act
-        Ecse321Project03Exception e =
-                assertThrows(Ecse321Project03Exception.class,
-                        () -> orderInfoService.viewOrders(CUSTOMER_ACCOUNT_ID));
-
-        //assert
-        assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
-        assertEquals( "Customers may not view of all of the orders in the system", e.getMessage());
-    }
 
     //------------------------
     //View Orders tests

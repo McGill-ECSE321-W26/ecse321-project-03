@@ -98,7 +98,7 @@ public class AccountAndEmployeeIntegrationTests {
     public void testCreateValidAccount() {
         // Arrange
         AccountCreationDto body = new AccountCreationDto("Bob", "bob@gmail.com", "Bob123#456", "123 Peel St, Montreal, QC");
-
+        body.setAccountType("CUSTOMER");
         // Act
          ResponseEntity<AccountResponseDto> response = client.postForEntity("/accounts", body, AccountResponseDto.class);
 
@@ -342,8 +342,119 @@ public class AccountAndEmployeeIntegrationTests {
 
         // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-}
+   }
 
+    /*
+        Valid test for endpoint PUT update address
+        @author:Wissam Abchiche
+     */
+    @Test
+    public void testUpdateAddressValid() {
+        // Arrange
+        String url = String.format("/accounts/%d/address", this.createdAccountId);
+
+        String newAddress = "123 new address";
+
+        AddressUpdateDto updateDto = new AddressUpdateDto();
+        updateDto.setAddress(newAddress);
+
+        HttpEntity<AddressUpdateDto> request = new HttpEntity<>(updateDto);
+
+        // Act
+        ResponseEntity<AccountResponseDto> response =
+                client.exchange(url, HttpMethod.PUT, request, AccountResponseDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("123 new address", response.getBody().getAddress());
+    }
+
+    /*
+      Invalid test for endpoint PUT update address
+      @author:Wissam Abchiche
+    */
+    @Test
+    public void testUpdateAddressInvalid() {
+        // Arrange
+        String url = "/accounts/999999/address";
+
+        AddressUpdateDto updateDto = new AddressUpdateDto();
+        updateDto.setAddress("123 new address");
+
+        HttpEntity<AddressUpdateDto> request = new HttpEntity<>(updateDto);
+
+        // Act
+        ResponseEntity<ErrorDto> response =
+                client.exchange(url, HttpMethod.PUT, request, ErrorDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("No person found with id " + 999999), response.getBody().getErrors());
+
+    }
+
+    /*
+        Valid test for endpoint GET get loyalty points
+        @author:Wissam Abchiche
+     */
+    @Test
+    public void testGetLoyaltyPointsValid() {
+        // Arrange
+        String url = String.format("/accounts/%d/loyalty-points", this.createdAccountId);
+
+        // Act
+        ResponseEntity<Integer> response =
+                client.exchange(url, HttpMethod.GET, null, Integer.class);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+
+    }
+
+    /*
+        Invalid test for endpoint GET get loyaltyPoints
+        @author: Wissam Abchiche
+  */
+    @Test
+    public void testUGetLoyaltyPointsInvalid() {
+        // Arrange
+        String url = "/accounts/99999/loyalty-points";
+
+        ResponseEntity<ErrorDto> response =
+                client.exchange(url, HttpMethod.GET, null, ErrorDto.class);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertIterableEquals(List.of("No person found with id " + 99999), response.getBody().getErrors());
+
+    }
+
+    /**
+     * Method which validates the get of accounts
+     * @author Wissam Abchiche
+     */
+    @Test
+    public void testValidGetAccounts() {
+
+
+        ResponseEntity<AccountResponseDto[]> response = client.getForEntity(
+                "/accounts", AccountResponseDto[].class);
+
+
+        // Verify status is HTTP.OK
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        AccountResponseDto[] responseBody = response.getBody();
+        assertNotNull(responseBody);
+
+        // Verify the correct data is returned
+        assertEquals(4, responseBody.length);
+        assertEquals(testCustomer.getId(), responseBody[0].getId());
+        assertEquals(testAccountEmployee.getId(), responseBody[1].getId());
+    }
 
     /**
      * Method which validates the view of employees

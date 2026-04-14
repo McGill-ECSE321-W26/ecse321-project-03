@@ -7,6 +7,7 @@ import ca.mcgill.ecse321.ecse321project03.dto.OrderItemDto;
 import ca.mcgill.ecse321.ecse321project03.model.ItemImage;
 import ca.mcgill.ecse321.ecse321project03.model.Order;
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
+import ca.mcgill.ecse321.ecse321project03.service.CartService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderService;
 import ca.mcgill.ecse321.ecse321project03.service.OrderInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,30 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+
     @Autowired
     private OrderInfoService orderInfoService;
 
+    @Autowired
+    private CartService cartService;
+
+    /**
+     * Creates a list of OrderItemDtos giving a list of OrderItems.
+     * Each DTO includes the associated order ID and the first image (if available)
+     * @param orderItems list of items to transform into dtos
+     * @param orderId the ID of the order associated with the items
+     * @return a list of OrderItemDto objects representing the given order items
+     */
     private List<OrderItemDto> toOrderItemDtos(List<OrderItem> orderItems, int orderId) {
         List<OrderItemDto> orderItemDtos = new ArrayList<>();
         for (OrderItem orderItem : orderItems) {
+            // Find general item associated with that order item
             int generalItemId = orderItem.getOrderItemId().getItemType().getGeneralItem().getId();
-            ItemImage firstImage = orderService.getFirstImageForOrderItem(generalItemId);
+            // Find first image associated with that generalItem and create dto
+            ItemImage firstImage = cartService.getFirstImageForCartOrOrderItem(generalItemId);
             ItemImageDto imageDto = firstImage == null ? null : new ItemImageDto(firstImage);
+
+            // create order item dto
             orderItemDtos.add(new OrderItemDto(orderItem, orderId, imageDto));
         }
 
