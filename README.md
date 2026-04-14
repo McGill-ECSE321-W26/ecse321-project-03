@@ -49,12 +49,12 @@ questions or regrading
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Architecture Modelling         |                   |           |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |                   |           |    1     |            |                 |      8        |            |
+| Web Frontend                   |         7         |           |    1     |            |                 |      8        |            |
 | Backend Services               |                   |           |          |            |                 |      13       |            |
-| Project Management             |                   |           |    4     |            |                 |               |            |
+| Project Management             |          5        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
-| Meetings                       |         1         |     4     |     4    |     4      |        4        |      1        |     4      |
-| Total                          |         15        |    20.5   |    14    |    23.5    |       24        |               |     20     |
+| Meetings                       |         4         |     4     |     4    |     4      |        4        |      1        |     4      |
+| Total                          |         16        |    20.5   |    14    |    23.5    |       24        |               |     20     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
