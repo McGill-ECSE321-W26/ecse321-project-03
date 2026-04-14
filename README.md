@@ -41,7 +41,7 @@ questions or regrading
 | Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
 | Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |                       |
 | Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             23        |                       |
-| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |                       |
+| Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |           24          |
 
 ## Task breakdown 
 
@@ -49,12 +49,12 @@ questions or regrading
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Architecture Modelling         |                   |           |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         8         |           |    1     |            |                 |      8        |            |
-| Backend Services               |                   |           |          |            |                 |      13       |            |
+| Web Frontend                   |         8         |           |    1     |            |                 |      8        |     8      |
+| Backend Services               |                   |           |          |            |                 |      13       |     12     |
 | Project Management             |          5        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |        4        |      1        |     4      |
-| Total                          |         16        |    20.5   |    14    |    23.5    |       24        |               |     20     |
+| Total                          |         16        |    20.5   |    14    |    23.5    |       24        |               |     24     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
