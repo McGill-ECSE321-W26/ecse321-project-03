@@ -116,12 +116,17 @@ const colors = [
   "Red",
 ];
 
+// Holds initial state of filters
 const filters = ref({
   outOfStock: false,
   sizes: [...sizes],
   colors: [...colors],
 });
 
+/**
+ * Toggles the state of all the filters under the category "type" to either checked or unchecked
+ * @param {string} type - Which category of filter to toggle, either ("sizes" or "colors")
+ */
 function toggleAll(type) {
   if (type === "sizes") {
     filters.value.sizes = filters.value.sizes.length > 0 ? [] : [...sizes];
@@ -130,12 +135,21 @@ function toggleAll(type) {
   }
 }
 
+/**
+ * Navigates to the specific item page for the given item
+ * @param {number} id - The id of the clicked object
+ */
 function goToItem(id) {
   router.push(`/product/${id}`);
 }
 
 const products = ref([]);
 
+/**
+ * Extracts useful information from the item DTO
+ * @param {Object} item : item DTO
+ * @returns {Object} A normalized product object for use within the view
+ */
 function mapDto(item) {
   return {
     id: item.id ?? item.item?.id,
@@ -157,6 +171,7 @@ function mapDto(item) {
   };
 }
 
+//Computed list of products after applying all active filters.
 const filteredProducts = computed(() => {
   const filtered = products.value.filter((product) => {
     const sizeMatch =
@@ -181,6 +196,11 @@ const filteredProducts = computed(() => {
   return filtered;
 });
 
+/**
+ * Handles the creation of a new product item, then refreshes the product list on sucess / alerts the user on failure
+ * @param {Object} createdDto - Form data containing name, price, tag, sizes, colors, and quantity
+ * @param {File[]|null} imageFiles - Optional image files to upload with the item
+ */
 async function addItem(createdDto, imageFiles = null) {
   try {
     const variants = [];
@@ -219,6 +239,7 @@ async function addItem(createdDto, imageFiles = null) {
   }
 }
 
+// Fetches and loads all products from API when component is mounted
 onMounted(async () => {
   try {
     const data = await getAllItems(session?.accountId || 1);
