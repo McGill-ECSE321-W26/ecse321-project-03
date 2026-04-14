@@ -238,4 +238,20 @@ public class OrderController {
         return orderService.calculateFinalPriceAfterDiscount(accountId, orderId);
     }
 
+    /**
+     * Redeems loyalty points for a specific order belonging to an account.
+     *
+     *
+     * @param orderId the ID of the order where points are redeemed
+     * @param accountId the ID of the account using loyalty points
+     * @return a ResponseEntity containing the updated AccountResponseDto if successful,
+     *         or an ErrorDto if redemption fails
+     */
+    @PostMapping("/redeem-loyalty/{orderId}")
+    public String redeemLoyaltyPtsInOrder( @PathVariable int orderId,
+                                           @RequestParam int accountId) {
+        String message = orderService.redeemLoyaltyPts(accountId, orderId);
+        return message;
+    }
+
 }
