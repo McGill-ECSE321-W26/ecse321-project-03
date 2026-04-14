@@ -49,7 +49,7 @@ questions or regrading
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Architecture Modelling         |                   |           |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         7         |           |    1     |            |                 |      8        |            |
+| Web Frontend                   |         8         |           |    1     |            |                 |      8        |            |
 | Backend Services               |                   |           |          |            |                 |      13       |            |
 | Project Management             |          5        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
