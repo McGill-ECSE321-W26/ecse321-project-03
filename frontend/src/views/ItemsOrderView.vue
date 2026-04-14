@@ -114,7 +114,13 @@ function goBackToOrders() {
             class="mini-cart-row"
         >
 
-          <div class="mini-product-image placeholder-image">
+          <img
+              v-if="item.image && item.image.key"
+              :src="`${API_BASE}/images/${item.image.key}`"
+              class="mini-product-image"
+              :alt="item.itemType.generalItem.name"
+          />
+          <div v-else class="mini-product-image placeholder-image">
             {{ item.itemType.generalItem.name.charAt(0) }}
           </div>
 

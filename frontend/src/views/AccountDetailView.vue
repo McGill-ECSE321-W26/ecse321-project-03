@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAccountById, loginWithEmailPassword, updateAccount } from '../api/account'
-import { getSession, saveSession } from '../session/storage'
+import { getAccountById, loginWithEmailPassword, updateAccount, deleteAccount } from '../api/account'
+import { getSession, saveSession, clearSession } from '../session/storage'
 
 const emit = defineEmits(['session-updated'])
 
@@ -33,6 +33,10 @@ const saveSuccess = ref('')
 const loyaltyPts = ref(50)
 const accountType = ref('CUSTOMER')
 
+// ── Delete account state ──────────────────────────────────────────
+const deleteStep = ref('idle')   // 'idle' | 'confirm' | 'deleting'
+const deleteError = ref('')
+
 async function loadAccount() {
   const s = session.value
   if (!s) {
@@ -56,9 +60,7 @@ async function loadAccount() {
   }
 }
 
-/**
- * API responses omit the password; we confirm the typed password with the same check as login.
- */
+
 async function submitVerify() {
   const s = session.value
   if (!s) return
@@ -98,6 +100,32 @@ async function submitSave() {
     saveError.value = e.message ?? 'Could not update account'
   } finally {
     saveLoading.value = false
+  }
+}
+
+// ── Delete account handlers ───────────────────────────────────────
+function requestDelete() {
+  deleteError.value = ''
+  deleteStep.value = 'confirm'
+}
+
+function cancelDelete() {
+  deleteError.value = ''
+  deleteStep.value = 'idle'
+}
+
+async function confirmDelete() {
+  const s = session.value
+  if (!s) return
+  deleteError.value = ''
+  deleteStep.value = 'deleting'
+  try {
+    await deleteAccount(s.accountId)
+    clearSession()
+    await router.replace({ name: 'login' })
+  } catch (e) {
+    deleteError.value = e.message ?? 'Could not delete account. Please try again.'
+    deleteStep.value = 'confirm'
   }
 }
 
@@ -199,6 +227,51 @@ onMounted(loadAccount)
             </button>
           </div>
         </section>
+
+        <!-- ── Delete Account Section ─────────────────────────────── -->
+        <section class="delete-panel" aria-label="Delete account">
+          <h2 class="delete-title">DELETE ACCOUNT:</h2>
+
+          <template v-if="deleteStep === 'idle'">
+            <p class="delete-help">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <button
+              type="button"
+              class="btn-pill btn-danger"
+              :disabled="!unlocked"
+              @click="requestDelete"
+            >
+              Delete my account
+            </button>
+            <p v-if="!unlocked" class="delete-locked-hint">
+              Unlock your account above to enable this option.
+            </p>
+          </template>
+
+          <template v-else-if="deleteStep === 'confirm'">
+            <p class="delete-confirm-msg">
+              ⚠️ Are you sure? This will permanently delete your account
+              <template v-if="accountType === 'EMPLOYEE'">
+                and remove all associated roles (employee &amp; customer if applicable)
+              </template>. There is no way to recover it.
+            </p>
+            <p v-if="deleteError" class="field-error" role="alert">{{ deleteError }}</p>
+            <div class="delete-actions">
+              <button type="button" class="btn-pill btn-ghost" @click="cancelDelete">
+                Cancel
+              </button>
+              <button type="button" class="btn-pill btn-danger" @click="confirmDelete">
+                Yes, delete my account
+              </button>
+            </div>
+          </template>
+
+          <template v-else-if="deleteStep === 'deleting'">
+            <p class="loading-msg">Deleting your account…</p>
+          </template>
+        </section>
+
       </template>
     </main>
   </div>
@@ -316,6 +389,23 @@ onMounted(loadAccount)
   font-weight: 600;
 }
 
+.btn-ghost {
+  background: #fff;
+  color: #3d3c3c;
+  font-weight: 600;
+}
+
+.btn-danger {
+  background: linear-gradient(180deg, #ffe5e5 0%, #f5cccc 100%);
+  border-color: #a42020;
+  color: #7f1d1d;
+  font-weight: 600;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffd5d5 0%, #f0b8b8 100%);
+}
+
 .field-error {
   color: #a42020;
   font-family: Inconsolata, monospace;
@@ -365,6 +455,59 @@ onMounted(loadAccount)
   margin-top: 1.25rem;
 }
 
+/* ── Delete panel ───────────────────────────────────────────────── */
+.delete-panel {
+  margin-top: 2.5rem;
+  background: #fff5f5;
+  border: 2px solid #e8b4b8;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.delete-title {
+  font-family: Inconsolata, monospace;
+  font-size: 1.05rem;
+  text-decoration: underline;
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  color: #7f1d1d;
+}
+
+.delete-help {
+  font-family: Inconsolata, monospace;
+  font-size: 0.95rem;
+  color: #5a2020;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.delete-locked-hint {
+  font-family: Inconsolata, monospace;
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0.5rem 0 0;
+}
+
+.delete-confirm-msg {
+  font-family: Inconsolata, monospace;
+  font-size: 0.95rem;
+  color: #5a2020;
+  margin: 0 0 1rem;
+  line-height: 1.6;
+  background: #fde8e8;
+  border: 1px solid #f5cccc;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
 .banner {
   padding: 0.75rem 1rem;
   border-radius: 8px;
@@ -395,6 +538,10 @@ onMounted(loadAccount)
 
   .detail-label {
     text-align: left;
+  }
+
+  .delete-actions {
+    flex-direction: column-reverse;
   }
 }
 </style>

@@ -45,19 +45,16 @@ questions or regrading
 
 ## Task breakdown 
 
-**Deliverable 2 - hours spent on each task per teammate** 
+**Deliverable 3 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Unit testing of service layer  |         9         |    13.5   |    2     |      7.5   |                 |               |            |
-| Project management             |         3         |           |    1     |            |                 |               |            |
-| DTOs Creation                  |                   |           |          |            |                 |      3        |            |
-| QA plan and report             |         2         |           |    4     |            |                 |               |            |
-| Integration testing of backend |                   |           |          |            |       13        |      12       |            |
-| Build system                   |                   |           |          |            |                 |      1        |            |
-| Business methods               |                   |     3     |    4     |     12     |        6        |      3        |      6     |
-| Controller layer               |                   |           |          |            |                 |               |     10     |
-| Meetings                       |         1         |     4     |     4    |     4      |        4        |      4        |     4     |
-| Total                          |         15        |    20.5   |    14    |    23.5    |       24        |      23       |     20     |
+| Architecture Modelling         |                   |           |    2     |      7.5   |                 |               |            |
+| Web Frontend                   |                   |           |    1     |            |                 |      8        |            |
+| Backend Services               |                   |           |          |            |                 |      13       |            |
+| Project Management             |                   |           |    4     |            |                 |               |            |
+| Build system                   |                   |           |          |            |                 |               |            |
+| Meetings                       |         1         |     4     |     4    |     4      |        4        |      1        |     4      |
+| Total                          |         15        |    20.5   |    14    |    23.5    |       24        |               |     20     |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    

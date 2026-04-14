@@ -10,6 +10,7 @@ const emit = defineEmits(['go-checkout'])
 const cartItems = ref([])
 const loading = ref(false)
 const errorMessage = ref('')
+const cartActionMessage = ref('')
 
 const subtotal = computed(() =>
     cartItems.value.reduce((sum, item) => sum + item.itemType.generalItem.price * item.quantity, 0),
@@ -27,6 +28,7 @@ async function loadCartItems() {
   try {
     if (!accountId) throw new Error('No logged-in account')
     cartItems.value = await getCartItems(accountId)
+    cartActionMessage.value = ''
   } catch (error) {
     errorMessage.value = error.message || 'Failed to load cart items.'
   } finally {
@@ -53,17 +55,25 @@ async function removeItem(itemId) {
     await removeCartItem(accountId, itemId)
     await loadCartItems()
   } catch (error) {
-    errorMessage.value = error.message || 'Failed to remove item.'
+    cartActionMessage.value = error.message || 'Failed to remove item.'
   }
 }
 
 async function changeQuantity(item, quantity) {
   try {
     if (!accountId) throw new Error('No logged-in account')
+
+    const availableStock = item.itemType.stock ?? 0
+    if (quantity > availableStock) {
+      cartActionMessage.value = `Only ${availableStock} item(s) are currently available in stock.`
+      return
+    }
+
+    cartActionMessage.value = ''
     await updateCartItemQuantity(accountId, item.itemType.id, quantity)
     await loadCartItems()
   } catch (error) {
-    errorMessage.value = error.message || 'Failed to update quantity.'
+    cartActionMessage.value = error.message || 'Failed to update quantity.'
   }
 }
 
@@ -130,7 +140,13 @@ function goToCheckout() {
             class="quantity-select"
             @change="changeQuantity(item, Number($event.target.value))"
         >
-          <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+          <option
+              v-for="n in Math.max(1, item.itemType.stock ?? 1)"
+              :key="n"
+              :value="n"
+          >
+            {{ n }}
+          </option>
         </select>
       </div>
 
@@ -147,6 +163,9 @@ function goToCheckout() {
     </button>
     <p v-if="!loading && cartItems.length === 0" class="checkout-disabled-note">
       Add items to your cart before proceeding to checkout.
+    </p>
+    <p v-if="cartActionMessage" class="cart-action-message">
+      {{ cartActionMessage }}
     </p>
 
     <div class="summary-section">
@@ -274,12 +293,22 @@ function goToCheckout() {
 }
 
 .quantity-select {
-  padding: 0.45rem 0.75rem;
+  padding: 0.45rem 2rem 0.45rem 0.75rem;
   border: 1.75px solid #3d3c3c;
   border-radius: 0;
   background: #fff;
   color: #2c2420;
   font: inherit;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%232c2420' height='10' viewBox='0 0 24 24' width='10' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  background-position: right 0.75rem center;
 }
 
 .summary-panel {
@@ -320,9 +349,13 @@ function goToCheckout() {
 .checkout-disabled-note {
   margin: -0.4rem 0 1rem;
   color: #4b3b35;
-  font-size: 0.9rem;
 }
 
+.cart-action-message {
+  margin: 0 0 1rem;
+  color: #a42020;
+  font-size: 0.95rem;
+}
 
 .summary-section,
 .info-section {

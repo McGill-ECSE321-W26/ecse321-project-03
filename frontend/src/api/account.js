@@ -69,3 +69,38 @@ export async function updateAccount(id, payload) {
   if (!res.ok) throw new Error(readErrorMessage(data))
   return data
 }
+
+export async function deleteAccount(id) {
+  const res = await fetch(`${API_BASE}/accounts/${id}`, {
+    method: 'DELETE',
+  })
+
+  const text = await res.text()
+  let data = {}
+
+  try {
+    data = text ? JSON.parse(text) : {}
+  } catch {
+    data = { message: text }
+  }
+
+  console.log("DELETE /accounts status:", res.status)
+  console.log("DELETE /accounts response:", data)
+
+  if (!res.ok) {
+    throw new Error(
+        readErrorMessage(data) || data.message || `Request failed with status ${res.status}`
+    )
+  }
+}
+
+/**
+ * Obtain all accounts stores in db
+ * @returns {Promise<any>}
+ */
+export async function getAllAccounts() {
+  const res = await fetch(`${API_BASE}/accounts`)
+  const data = await res.json().catch(() => ([]))
+  if (!res.ok) throw new Error(readErrorMessage(data))
+  return data
+}

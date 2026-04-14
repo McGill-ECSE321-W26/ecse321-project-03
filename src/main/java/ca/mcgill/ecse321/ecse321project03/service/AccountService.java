@@ -15,8 +15,12 @@ import ca.mcgill.ecse321.ecse321project03.dto.AccountCreationDto;
 import ca.mcgill.ecse321.ecse321project03.repository.AccountRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.OrderRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
+import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
 import jakarta.transaction.Transactional;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // Tutorial 7
 @Service
@@ -27,6 +31,9 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     @Autowired
+    private ManagerRepository managerRepository;
+
+    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
@@ -34,6 +41,8 @@ public class AccountService {
 
     @Autowired
     private OrderService orderService;
+
+
 
     /**
      * Create an account based on the AccountCreationDTO transfer object
@@ -54,6 +63,13 @@ public class AccountService {
         if (accountRepository.findByUsername(accountCreationDto.getUsername()) != null) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "An account with username " + accountCreationDto.getUsername() + " already exists");
         }
+
+        if ("MANAGER".equalsIgnoreCase(accountCreationDto.getAccountType().toString())) {
+        // CrudRepository gives you count() for free!
+        if (this.managerRepository.count() > 0) {
+            throw new Ecse321Project03Exception(HttpStatus.CONFLICT, "A Manager account already exists. Only one manager is allowed in the system.");
+        }
+    }
 
         Account account = new Account(accountCreationDto.getUsername(), accountCreationDto.getEmail(), accountCreationDto.getPassword(), accountCreationDto.getAddress(), 0);
 
@@ -150,6 +166,12 @@ public class AccountService {
         if (accountFromDB == null) {
              throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with email " + email);
         }
+
+        if (!accountFromDB.getActive()) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "This account has been deactivated: " + email);
+        }
+
+
         if (!accountFromDB.getPassword().equals(password)) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Incorrect password for email " + email);
         }
@@ -163,21 +185,21 @@ public class AccountService {
      * @author Maria Klinski
      */
     @Transactional
-    public void deleteAccount (int id) {
-        Account accountFromDB = accountRepository.findById(id).orElse(null);
-        
-        // check if account exists
-        if (accountFromDB == null) {
-             throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
-        }
+    public void deleteAccount(int id) {
+    Account accountFromDB = accountRepository.findById(id).orElse(null);
 
-        Role role = roleRepository.findByAccount_Id(id);
-        // check if account is a manager account
-        if (role instanceof Manager) {
-            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
-        }
-        accountRepository.delete(accountFromDB);
+    if (accountFromDB == null) {
+        throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
     }
+
+    Role role = roleRepository.findByAccount_Id(id);
+    if (role instanceof Manager) {
+        throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
+    }
+
+    accountFromDB.setActive(false);
+    accountRepository.save(accountFromDB);
+}
 
     /**
      * Update account
@@ -232,5 +254,22 @@ public class AccountService {
         Account account = findAccountById(id);
         account.setAddress(address);
         return accountRepository.save(account);
+    }
+
+    /**
+     * Author: Sonia Ly
+     * @return a list of all accounts
+     */
+    public List<AccountResponseDto> getAllAccounts() {
+        List<Account> accounts = (List<Account>) accountRepository.findAll();
+        List<AccountResponseDto> allAccountsDTO = new ArrayList<>();
+
+        for (Account account : accounts) {
+            if (account.getActive()) {
+                allAccountsDTO.add(toAccountResponseDto(account));
+            }
+        }
+
+        return allAccountsDTO;
     }
 }

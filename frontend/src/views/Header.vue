@@ -95,6 +95,15 @@ function refreshSession() {
           Cart
         </button>
 
+        <button
+            v-if="isManager"
+            type="button"
+            :class="{ on: activeTab === 'accounts' }"
+            @click="pickTab('accounts')"
+        >
+          Accounts
+        </button>
+
 
 
         <button type="button" class="logout-link" @click="logout">Log out</button>
