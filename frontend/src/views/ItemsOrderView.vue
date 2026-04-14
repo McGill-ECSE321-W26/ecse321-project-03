@@ -82,12 +82,6 @@ function goBackToOrders() {
 
         </section>
 
-        <section class="card-block checkout-card">
-          <h2>BILLING ADDRESS</h2>
-          <label class="radio-row single-option">
-            <span>My billing address and shipping address are the same</span>
-          </label>
-        </section>
       </section>
 
 
