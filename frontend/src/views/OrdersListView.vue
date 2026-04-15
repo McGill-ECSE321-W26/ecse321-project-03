@@ -46,7 +46,11 @@ function openOrderDetails(id) {
   showOrderPopup.value = true
 }
 
-
+/**
+ * Fetches and loads orders from the backend
+ * @returns {Promise<void>}
+ * @author Sonia Ly
+ */
 async function loadOrders() {
   loading.value = true
   error.value = null
@@ -126,7 +130,11 @@ function logout() {
 }
 
 
-
+/**
+ * Function that allows you to sort depending on a key
+ * @param key
+ * @author Sonia Ly
+ */
 function sortBy(key) {
   if (sortKey.value === key) {
     sortAsc.value = !sortAsc.value
@@ -136,6 +144,10 @@ function sortBy(key) {
   }
 }
 
+/**
+ * Function that allows you to search depending on a filter value
+ * @author Sonia Ly
+ */
 function searchOrders() {
   appliedFilters.value = { ...filters.value }
 }

@@ -70,6 +70,11 @@ export async function updateAccount(id, payload) {
   return data
 }
 
+/**
+ * Sends a request to remove an account by its ID.
+ * @param id
+ * @returns {Promise<void>}
+ */
 export async function deleteAccount(id) {
   const res = await fetch(`${API_BASE}/accounts/${id}`, {
     method: 'DELETE',
@@ -92,15 +97,4 @@ export async function deleteAccount(id) {
         readErrorMessage(data) || data.message || `Request failed with status ${res.status}`
     )
   }
-}
-
-/**
- * Obtain all accounts stores in db
- * @returns {Promise<any>}
- */
-export async function getAllAccounts() {
-  const res = await fetch(`${API_BASE}/accounts`)
-  const data = await res.json().catch(() => ([]))
-  if (!res.ok) throw new Error(readErrorMessage(data))
-  return data
 }
