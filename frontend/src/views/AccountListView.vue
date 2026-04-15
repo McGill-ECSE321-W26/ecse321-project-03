@@ -3,13 +3,6 @@
     <aside class="filters">
       <h3>Filter By:</h3>
 
-      <div class="filter-group">
-        <h4>Role</h4>
-        <label class="container">
-          <input type="checkbox" v-model="filters.employeesOnly" />
-          <span class="checkmark"></span> Employees only
-        </label>
-      </div>
 
       <div class="filter-group">
         <h4>Search</h4>
@@ -102,7 +95,7 @@ async function getAllAccounts() {
 const filteredEmployees = computed(() => {
   return employees.value.filter((employee) => {
     const matchesRole =
-        !filters.value.employeesOnly || employee.accountType === "EMPLOYEE";
+        !filters.value.employeesOnly || employee.accountType === 'EMPLOYEE';
 
     const query = searchQuery.value.trim().toLowerCase();
     const matchesSearch =

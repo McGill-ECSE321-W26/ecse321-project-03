@@ -189,7 +189,7 @@ public class LoyaltyIntegrationTest {
 
         // Verify the loyalty obtained is the desired one
         assertNotNull(loyaltyObtained);
-        assertEquals("Points not used.", loyaltyObtained);
+        assertEquals("You saved $0.00 on this order!", loyaltyObtained);
     }
 
     /**
