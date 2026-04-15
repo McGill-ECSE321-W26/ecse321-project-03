@@ -43,10 +43,7 @@ public class OrderService {
     private CartRepository cartRepository;
 
     @Autowired
-    private CartItemRepository cartItemRepository;
-
-    @Autowired
-    private ItemImageRepository itemImageRepository;
+    private CartItemRepository cartItemRepository;;
 
 
     /**

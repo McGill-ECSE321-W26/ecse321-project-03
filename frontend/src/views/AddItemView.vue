@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onBeforeUnmount, computed } from "vue";
+import { ref, onBeforeUnmount } from "vue";
 
 const emit = defineEmits(["create", "close"]);
 

@@ -1,5 +1,3 @@
-import { API_BASE, readErrorMessage } from './base.js'
-
 const base = 'http://localhost:8080' // In case API_BASE isn't found
 // POST /api/inventory/restock/{itemTypeId}
 export async function restockItem(itemTypeId, quantity, accountId) {

@@ -18,11 +18,9 @@ import ca.mcgill.ecse321.ecse321project03.repository.RoleRepository;
 import ca.mcgill.ecse321.ecse321project03.repository.ManagerRepository;
 import jakarta.transaction.Transactional;
 import ca.mcgill.ecse321.ecse321project03.model.Account;
-
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 
 // Tutorial 7
 @Service
@@ -36,13 +34,7 @@ public class AccountService {
     private ManagerRepository managerRepository;
 
     @Autowired
-    private OrderRepository orderRepository;
-
-    @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private OrderService orderService;
 
 
 

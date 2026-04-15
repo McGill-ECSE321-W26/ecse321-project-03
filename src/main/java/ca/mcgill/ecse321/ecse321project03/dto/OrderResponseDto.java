@@ -1,7 +1,6 @@
 package ca.mcgill.ecse321.ecse321project03.dto;
 
 import ca.mcgill.ecse321.ecse321project03.model.Order;
-import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.ecse321project03.dto;
 
 
 import ca.mcgill.ecse321.ecse321project03.model.OrderItem;
-import ca.mcgill.ecse321.ecse321project03.dto.ItemImageDto;
 
 public class OrderItemDto {
         

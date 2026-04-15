@@ -142,7 +142,6 @@ Author: Maria Klinski */
       </div>
     </div>
 
-    <!-- MODALS -->
     <RestockItemView
       :visible="showRestockForm"
       :product="product"

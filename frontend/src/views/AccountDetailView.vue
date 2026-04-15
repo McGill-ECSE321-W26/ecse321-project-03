@@ -33,8 +33,8 @@ const saveSuccess = ref('')
 const loyaltyPts = ref(50)
 const accountType = ref('CUSTOMER')
 
-// ── Delete account state ──────────────────────────────────────────
-const deleteStep = ref('idle')   // 'idle' | 'confirm' | 'deleting'
+// Delete account state
+const deleteStep = ref('idle') 
 const deleteError = ref('')
 
 async function loadAccount() {
@@ -103,7 +103,6 @@ async function submitSave() {
   }
 }
 
-// ── Delete account handlers ───────────────────────────────────────
 function requestDelete() {
   deleteError.value = ''
   deleteStep.value = 'confirm'
