@@ -18,14 +18,14 @@
     <main class="product-grid">
       <div v-if="loading" style="grid-column: 1/-1">Loading...</div>
 
-      <div v-else-if="filteredEmployees.length === 0" style="grid-column: 1/-1">
+      <div v-else-if="filteredAccounts.length === 0" style="grid-column: 1/-1">
         No employees found.
       </div>
 
       <div
           v-else
           class="product-card employee-card"
-          v-for="employee in filteredEmployees"
+          v-for="employee in filteredAccounts"
           :key="employee.id"
       >
         <div class="employee-info">
@@ -66,8 +66,26 @@ const searchQuery = ref("");
 const deletingId = ref(null);
 
 
-const employees = ref([]);
+const employees = ref([]); // list of al employees
 
+/**
+ * Maps backend account DTO to frontend model
+ *
+ * @param {Object} account - account object dto
+ * @param {number} account.id
+ * @param {string} account.username
+ * @param {string} account.email
+ * @param {string} account.address
+ * @param {string} account.accountType
+ * @returns {{
+ *   id: number,
+ *   username: string,
+ *   email: string,
+ *   address: string,
+ *   accountType: string
+ * }}
+ * @author Sonia Ly
+ */
 function mapDto(account) {
   return {
     id: account.id,
@@ -78,6 +96,14 @@ function mapDto(account) {
   };
 }
 
+/**
+ * Fetches all accounts
+ *
+ * @async
+ * @returns {Promise<Array<Object>>} List of account objects
+ * @throws {Error} If the API request fails
+ * @author Sonia Ly
+ */
 async function getAllAccounts() {
   const res = await fetch(`${API_BASE}/accounts`);
   const data = await res.json().catch(() => ([]));
@@ -89,20 +115,31 @@ async function getAllAccounts() {
   return data;
 }
 
-const filteredEmployees = computed(() => {
-  return employees.value.filter((employee) => {
+/**
+ * Computed list of accounts filtered by search
+ *
+ * @author Sonia Ly
+ */
+const filteredAccounts = computed(() => {
+  return employees.value.filter((account) => {
 
 
     const query = searchQuery.value.trim().toLowerCase();
     const matchesSearch =
         query === "" ||
-        employee.username?.toLowerCase().includes(query) ||
-        employee.email?.toLowerCase().includes(query);
+        account.username?.toLowerCase().includes(query) ||
+        account.email?.toLowerCase().includes(query);
 
     return matchesSearch;
   });
 });
 
+
+/**
+ * Loads all accounts
+ *
+ * @author Sonia Ly
+ */
 async function loadAccounts() {
   try {
     loading.value = true;
@@ -116,6 +153,12 @@ async function loadAccounts() {
   }
 }
 
+/**
+ * Deletes a given employee account.
+ *
+ * @param employee - Employee to delete
+ * @author Sonia Ly
+ */
 async function handleDelete(employee) {
   if (!employee?.id) return;
 
