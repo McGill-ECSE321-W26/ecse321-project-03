@@ -37,9 +37,9 @@ questions or regrading
 |-------------------|----------------|------------------------------------------|-----------------------|-----------------------|-----------------------|
 | Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |         22            |
 | Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             20.5      |          19           |
-| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |                       |
-| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
-| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |                       |
+| Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |          24           |
+| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |           24            |
+| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |            21           |
 | Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             23        |           24          |
 | Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |           24          |
 
@@ -48,20 +48,20 @@ questions or regrading
 **Deliverable 3 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Architecture Modelling         |                   |     2     |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         10         |    13     |    1     |            |                 |      8        |     8      |
-| Backend Services               |                   |           |          |            |                 |      12       |     12     |
+| Architecture Modelling         |                   |     2     |    2     |            |                 |               |            |
+| Web Frontend                   |         10        |    13     |    12    |      14    |      11         |      8        |     8      |
+| Backend Services               |                   |           |     2    |       5    |       6         |      12       |     12     |
 | Project Management             |          8        |           |    4     |            |                 |               |            |
-| Build system                   |                   |           |          |            |                 |               |            |
+| Build system                   |                   |           |          |      1     |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |       4         |       4       |     4      |
-| Total                          |         18        |     19    |    14    |    23.5    |       24        |      25       |    24      |
+| Total                          |         18        |     19    |    24    |    24      |       21        |      25       |    24      |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
 | -------------- | -------------------- | 
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              | [Meeting Minutes D2](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D2.0:-Project-Report#meeting-minutes)          |
-| 3              |                      | 
+| 3              | [Meeting Minutes D3](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D3.0-Project-Report#meeting-minutes)                     | 
 
 ## Other important notes 
 - When running the application and tests, ensure that your computer’s system language is set to English so that decimal numbers are formatted with a period (.) instead of a comma (,), which is required for the tests to pass.
