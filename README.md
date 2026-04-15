@@ -61,7 +61,7 @@ questions or regrading
 | -------------- | -------------------- | 
 | 1              | [Meeting Minutes D1](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/Project-Report:-Deliverable-1#meeting-minutes)      | 
 | 2              | [Meeting Minutes D2](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D2.0:-Project-Report#meeting-minutes)          |
-| 3              |                      | 
+| 3              | [Meeting Minutes D3](https://github.com/McGill-ECSE321-W26/ecse321-project-03/wiki/D3.0-Project-Report#meeting-minutes)                     | 
 
 ## Other important notes 
 - When running the application and tests, ensure that your computer’s system language is set to English so that decimal numbers are formatted with a period (.) instead of a comma (,), which is required for the tests to pass.
