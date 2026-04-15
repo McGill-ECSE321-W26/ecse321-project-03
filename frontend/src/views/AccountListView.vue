@@ -65,9 +65,6 @@ const loading = ref(true);
 const searchQuery = ref("");
 const deletingId = ref(null);
 
-const filters = ref({
-  employeesOnly: true,
-});
 
 const employees = ref([]);
 
@@ -94,8 +91,7 @@ async function getAllAccounts() {
 
 const filteredEmployees = computed(() => {
   return employees.value.filter((employee) => {
-    const matchesRole =
-        !filters.value.employeesOnly || employee.accountType === 'EMPLOYEE';
+
 
     const query = searchQuery.value.trim().toLowerCase();
     const matchesSearch =
@@ -103,7 +99,7 @@ const filteredEmployees = computed(() => {
         employee.username?.toLowerCase().includes(query) ||
         employee.email?.toLowerCase().includes(query);
 
-    return matchesRole && matchesSearch;
+    return matchesSearch;
   });
 });
 
