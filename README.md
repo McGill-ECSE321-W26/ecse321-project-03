@@ -39,7 +39,7 @@ questions or regrading
 | Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             20.5      |          19           |
 | Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |                       |
 | Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
-| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |                       |
+| Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |            21           |
 | Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             23        |           24          |
 | Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |           24          |
 
@@ -49,12 +49,12 @@ questions or regrading
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Architecture Modelling         |                   |     2     |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         10         |    13     |    1     |            |                 |      8        |     8      |
-| Backend Services               |                   |           |          |            |                 |      12       |     12     |
+| Web Frontend                   |         10        |    13     |    1     |            |      11         |      8        |     8      |
+| Backend Services               |                   |           |          |            |       6         |      12       |     12     |
 | Project Management             |          8        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |       4         |       4       |     4      |
-| Total                          |         18        |     19    |    14    |    23.5    |       24        |      25       |    24      |
+| Total                          |         18        |     19    |    14    |    23.5    |       21        |      25       |    24      |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
