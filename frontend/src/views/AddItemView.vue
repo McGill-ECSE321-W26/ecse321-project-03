@@ -1,3 +1,7 @@
+/* Vue file (JavaScript + HTML + CSS) for the add item view. 
+This is a child of the catalog
+Author: Emily Sun */
+
 <script setup>
 import { ref, onBeforeUnmount } from "vue";
 
@@ -31,7 +35,8 @@ const imageEntries = ref([]);
 const uploadError = ref("");
 const fileInputRef = ref(null);
 
-// revoke all the previews when the component is unmounted
+
+/** revokes all the previews when the component is unmounted */
 function revokeAllPreviews() {
   for (const e of imageEntries.value) {
     URL.revokeObjectURL(e.url);
@@ -39,16 +44,19 @@ function revokeAllPreviews() {
   imageEntries.value = [];
 }
 
+/** unmounts the component */
 onBeforeUnmount(() => {
   revokeAllPreviews();
 });
 
+/** opens the file picker to add an image when creating an item*/
 function openFilePicker() {
   uploadError.value = "";
   fileInputRef.value?.click();
 }
 
-// validate the file type and size
+/** validate the file type and size
+@param {file} type - Which file to validate */
 function validateFile(file) {
   if (!ALLOWED_TYPES.has(file.type)) {
     return "Only JPEG, PNG, and WebP are allowed.";
@@ -59,7 +67,8 @@ function validateFile(file) {
   return null;
 }
 
-// takes in the file input change
+/** takes in the file input change
+@param {event} event - Which event it consumes */
 function onFileInputChange(event) {
   const input = event.target;
   const picked = input.files ? Array.from(input.files) : [];
@@ -96,12 +105,16 @@ function onFileInputChange(event) {
   uploadError.value = messages.length ? messages.join(" ") : "";
 }
 
+/**removes image associated to item
+@param {index} int - the index where the image is */
 function removeImage(index) {
   const [removed] = imageEntries.value.splice(index, 1);
   if (removed) URL.revokeObjectURL(removed.url);
   uploadError.value = "";
 }
 
+/**Toggles the state of all the filters under the category "type" to either checked or unchecked
+@param {string} type - Which category of filter to toggle */
 function toggleAll(type) {
   if (type === "colors") {
     item.value.colors =
@@ -112,6 +125,7 @@ function toggleAll(type) {
   }
 }
 
+/**submits form to parent component with all the details */
 const submitForm = () => {
   const files = imageEntries.value.map((e) => e.file);
   emit("create", { ...item.value }, files.length ? files : null);
