@@ -35,7 +35,7 @@ questions or regrading
 
 | Name              | GitHub username | Team roles                              | Deliverable 1 (hours) | Deliverable 2 (hours) | Deliverable 3 (hours) |
 |-------------------|----------------|------------------------------------------|-----------------------|-----------------------|-----------------------|
-| Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |                       |
+| Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |         22            |
 | Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             20.5      |          19           |
 | Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |                       |
 | Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
@@ -49,12 +49,12 @@ questions or regrading
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
 | Architecture Modelling         |                   |     2     |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         8         |    13     |    1     |            |                 |      8        |     8      |
+| Web Frontend                   |         10         |    13     |    1     |            |                 |      8        |     8      |
 | Backend Services               |                   |           |          |            |                 |      12       |     12     |
-| Project Management             |          5        |           |    4     |            |                 |               |            |
+| Project Management             |          8        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |       4         |       4       |     4      |
-| Total                          |         16        |     19    |    14    |    23.5    |       24        |      25       |    24      |
+| Total                          |         18        |     19    |    14    |    23.5    |       24        |      25       |    24      |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
