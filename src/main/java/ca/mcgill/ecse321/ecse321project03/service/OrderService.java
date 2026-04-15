@@ -465,7 +465,12 @@ public class OrderService {
         accountRepository.save(accountFromDB);
     }
 
-
+    /**
+     * Adds one loyalty point to the given account.
+     *
+     * @param account the account whose loyalty points will be increased
+     * @author Emily Sun
+     */
     private void addLoyaltyPts(Account account){
         int pts = account.getLoyaltyPts();
         pts += 1;

@@ -12,21 +12,44 @@ const loading = ref(false)
 const errorMessage = ref('')
 const cartActionMessage = ref('')
 
+/**
+ * Computes the subtotal of all items in the cart.
+ *
+ * @returns {number} the subtotal price
+ * @author Yani Zhang
+ */
 const subtotal = computed(() =>
     cartItems.value.reduce((sum, item) => sum + item.itemType.generalItem.price * item.quantity, 0),
 )
 
+/**
+ * Computes the estimated total (currently equals subtotal).
+ *
+ * @returns {number} the total price
+ * @author Yani Zhang
+ */
 const total = computed(() => subtotal.value)
 
+/**
+ * Determines whether the user can proceed to checkout.
+ *
+ * @returns {boolean} true if not loading and cart has items
+ * @author Yani Zhang
+ */
 const canCheckout = computed(() => !loading.value && cartItems.value.length > 0)
-// for test
-//const canCheckout = computed(() => !loading.value)
 
+/**
+ * Loads all cart items for the current account.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function loadCartItems() {
   loading.value = true
   errorMessage.value = ''
   try {
     if (!accountId) throw new Error('No logged-in account')
+    // Fetch cart items from backend API
     cartItems.value = await getCartItems(accountId)
     cartActionMessage.value = ''
   } catch (error) {
@@ -36,22 +59,46 @@ async function loadCartItems() {
   }
 }
 
+/**
+ * Once the page loads, fetch cart items.
+ */
 onMounted(() => {
   loadCartItems()
 })
 
-
+/**
+ * Formats a number into a price string.
+ *
+ * @param {number} value the value to format
+ * @returns {string} formatted price string
+ * @author Yani Zhang
+ */
 function formatPrice(value) {
   return `$${value.toFixed(2)}`
 }
 
+/**
+ * Computes the total price for a single cart item.
+ *
+ * @param {Object} item the cart item
+ * @returns {number} total price for that item
+ * @author Yani Zhang
+ */
 function lineTotal(item) {
   return item.itemType.generalItem.price * item.quantity
 }
 
+/**
+ * Removes an item from the cart.
+ *
+ * @param {number} itemId the item type id to remove
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function removeItem(itemId) {
   try {
     if (!accountId) throw new Error('No logged-in account')
+    // Call backend to remove item from cart
     await removeCartItem(accountId, itemId)
     await loadCartItems()
   } catch (error) {
@@ -59,6 +106,14 @@ async function removeItem(itemId) {
   }
 }
 
+/**
+ * Updates the quantity of a cart item.
+ *
+ * @param {Object} item the cart item
+ * @param {number} quantity the new quantity
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function changeQuantity(item, quantity) {
   try {
     if (!accountId) throw new Error('No logged-in account')
@@ -68,8 +123,8 @@ async function changeQuantity(item, quantity) {
       cartActionMessage.value = `Only ${availableStock} item(s) are currently available in stock.`
       return
     }
-
     cartActionMessage.value = ''
+    // Send updated quantity to backend
     await updateCartItemQuantity(accountId, item.itemType.id, quantity)
     await loadCartItems()
   } catch (error) {
@@ -77,6 +132,11 @@ async function changeQuantity(item, quantity) {
   }
 }
 
+/**
+ * Navigates to the checkout page if allowed.
+ *
+ * @author Yani Zhang
+ */
 function goToCheckout() {
   if (!canCheckout.value) return
   emit('go-checkout')
