@@ -11,8 +11,13 @@ const route = useRoute()
 const router = useRouter()
 const session = getSession()
 
+// All needed info
 const { order, account, employees, loading, canCancelOrder, init, updateOrderStatus, assignEmployee } = useOrderInfo();
 
+/**
+ * Function that redirects to login if not connected and intializes order data
+ * @author Wissam Abchiche
+ */
 onMounted(() => {
   if (!isLoggedIn()) {
     router.push('/login')
@@ -22,23 +27,53 @@ onMounted(() => {
   init(session.accountId, orderId)
 })
 
+/**
+ * List of all items of the current order.
+ * Is empty does not exist
+ * @author Wissam Abchiche
+ */
 const orderItems = computed(() => order.value?.items || [])
+
+
+/**
+ * Retrieve total price of the order
+ * @author Wissam Abchiche
+ */
 const total = computed(() => {
-  console.log('Full order object:', JSON.stringify(order.value))
   return order.value?.totalPrice
 })
+
+/**
+ * Retrieve address of the order
+ * @author Wissam Abchiche
+ */
 const orderAddress = computed(() => order.value?.address)
 
+/**
+ * Manually calculate the subtotal (without loyalty point)
+ * @author Wissam Abchiche
+ */
 const subtotal = computed(() => 
   orderItems.value.reduce((sum, item) => sum + (item.itemType.generalItem.price * item.quantity), 0)
 )
 
+/**
+ * Format a price into a string (with $ sign)
+ * @param {number} value - Price value
+ * @returns {string} formatted price string
+ * @author Wissam Abchiche
+ */
 function formatPrice(value) {
   return `$ ${Number(value || 0).toFixed(2)}`
 }
 
+/**
+ * Navigates back to the orders tab
+ * @author Wissam Abchiche
+ */
 function goBackToOrders() {
-  router.push('/app?tab=orders');}
+  router.push('/app?tab=orders');
+}
 
 </script>
 

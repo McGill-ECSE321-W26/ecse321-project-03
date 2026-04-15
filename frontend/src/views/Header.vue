@@ -16,21 +16,41 @@ import logoImg from "../assets/images/beautiful_big_logo.png";
 const router = useRouter();
 const session = ref(getSession());
 
+/**
+ * Boolean indicating whether the current user is a manager
+ * Needed because manager has some special tabs
+ * @author Wissam Abchiche
+ */
 const isManager = computed(() => session.value?.accountType === "MANAGER");
 
-
+/**
+ * Redirect to login page
+ * @author Wissam Abchiche
+ */
 function logout() {
   clearSession();
   router.replace({ name: "login" });
 }
 
-// display inventory tab only for managers
+/**
+ * Navigates to a specific tab
+ *
+ * @param {string} tab - Name of the tab to display
+ * @author Wissam Abchiche
+ */
 function pickTab(tab) {
   router.push({ name: 'app', query: { tab: tab } });
 
 }
 
-const points = ref(0);
+const points = ref(0); // loyalty points
+
+/**
+ * Find the number of loyalty points of the user
+ * Updates variable points
+ *
+ * @author Wissam Abchiche
+ */
 async function findNumberOfPoints() {
   if (!session.value?.accountId) return;
   try {
@@ -42,10 +62,18 @@ async function findNumberOfPoints() {
   }
 }
 
+/**
+ * Loads loyalty points
+ * @author Wissam Abchiche
+ */
 onMounted(() => {
   findNumberOfPoints();
 });
 
+/**
+ * Refresh data
+ * @author Wissam Abchiche
+ */
 function refreshSession() {
   session.value = getSession();
   findNumberOfPoints();

@@ -15,12 +15,19 @@ const emit = defineEmits(['close']);
 
 
 const router = useRouter();
+// Order composable
 const { order, account, employees, loading, canCancelOrder, init, updateOrderStatus, assignEmployee } = useOrderInfo();
+
+// UI states : if employee selected, if order selected, if employee self assigned
 const selectedStatus = ref('');
 const selectedEmployeeId = ref(null);
 const isSelfAssignChecked = ref(false);
 
 
+/**
+ * Method to navigate to order items view and closes current popup.
+ * @author Wissam Abchiche
+ */
 function goToItemsView() {
   const id = props.orderId;
   if (id) {
@@ -33,38 +40,60 @@ function goToItemsView() {
   }
 }
 
-function formatSimpleDate(dateStr) {
-  if (!dateStr) return 'N/A';
+/**
+ * Formats a date into YYYY-MM-DD format
+ *
+ * @param {string} date - Date to format
+ * @returns {string} formatted date or 'N/A'
+ * @author Wissam Abchiche
+ */
+function formatSimpleDate(date) {
+  if (!date) return 'N/A';
   // Splits "2026-04-10T16:55:04.000+00:00" at 'T' and takes the first part
-  return dateStr.split('T')[0];
+  return date.split('T')[0];
 }
 
 
+/**
+ *   Handles save action which does not save the same thing depending on user role
+ * - EMPLOYEE: can self-assign, update status
+ * - CUSTOMER: can update status only (to cancel)
+ * - MANAGER: can assign employee,update status
+ * @author Wissam Abchiche
+ */
 async function saveButtonAction() {
   const session = getSession();
   const oId = props.orderId;
-  const accountId = session.accountId;
+  const accountId = session.accountId; // get current account id
 
 
+  // If account is an employee account
   if (account.value.accountType === 'EMPLOYEE') {
+    // Check if they self-assigned
     if (isSelfAssignChecked.value) {
+      // find employeeId in the list of employees and assign the order to it
       const employeeId = employees.value.find(e => e.account.id === accountId).employeeId;
       await assignEmployee(oId, employeeId, accountId);
     }
+
+    // If selected status, also update the order status
     if (selectedStatus.value) {
       await updateOrderStatus(oId, selectedStatus.value, accountId);
     }
   }
 
+  // If customer account and they updated the status, save it
   if (account.value.accountType === 'CUSTOMER' && selectedStatus.value) {
-
     await updateOrderStatus(oId, selectedStatus.value, accountId);
   }
 
+  // If manager accounr
   if (account.value.accountType === 'MANAGER') {
+    // Check if selected employee, if yes, assign the employee to the order
     if (selectedEmployeeId.value) {
       await assignEmployee(oId, selectedEmployeeId.value, accountId);
     }
+    // Check if changed status, if yes, update status
     if (selectedStatus.value) {
       await updateOrderStatus(oId, selectedStatus.value, accountId);
     }
@@ -73,7 +102,10 @@ async function saveButtonAction() {
   emit('close', true)
 };
 
-
+/**
+ * Function that redirects to login if not connected and intialize order + account data
+ * @author Wissam Abchiche
+ */
 onMounted(() => {
   if (!isLoggedIn()) {
     router.push('/login');

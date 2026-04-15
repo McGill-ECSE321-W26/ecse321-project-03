@@ -3,6 +3,22 @@ import { API_BASE, readErrorMessage } from './base.js'
 
 // export function to be accessible from other files
 // async function so that it can wait for the response from the backend before proceeding
+
+/**
+ * Create all necessary functions to manage order-related state and actions.
+ *
+ * @returns @returns {{
+ *  order: order information of the order to manage
+ *  account: account information associated to the order
+ *  employees: list of employees in the system
+ *  loading: reactive state variable
+ *  canCancelOrder: function to check who is allowed to cancel an order (UI depends on that)
+ *  updateOrderStatus: function that updates the order status
+ *  assignEmployee: function that assign an employee (from controller)
+ *  init: main setup of the composable
+ *  }}
+ * @author Wissam Abchiche
+ */
 export function useOrderInfo() {
     // Declare variables
     // ref tells variable is reactive. When the value changes, UI automatically updates.
@@ -11,7 +27,13 @@ export function useOrderInfo() {
     const employees = ref(null);
     const loading = ref(true);
 
-
+    /**
+     * Fetches account information by ID.
+     *
+     * @param {number} id - Account ID
+     * @returns {Promise<void>}
+     * @author Wissam Abchiche
+     */
     async function getAccount(id) {
         try {
             const res = await fetch(`${API_BASE}/accounts/${id}`)
@@ -26,6 +48,13 @@ export function useOrderInfo() {
         }  
     };
 
+    /**
+     * Fetches order information by ID.
+     *
+     * @param {number} id - Order ID
+     * @returns {Promise<void>}
+     * @author Wissam Abchiche
+     */
     async function getOrder(id) {
         try {
             const res = await fetch(`${API_BASE}/orders/order/${id}`)
@@ -40,6 +69,14 @@ export function useOrderInfo() {
         }  
     };
 
+    /**
+     * Fetches employees
+     *
+     * @param {number} userId - User ID of the user performing the action
+     * (only manager and employee can view all employees)
+     * @returns {Promise<void>}
+     * @author Wissam Abchiche
+    */
     async function getEmployees(userId) {
         try {
             const params = new URLSearchParams({ userID: String(userId) })
@@ -53,6 +90,13 @@ export function useOrderInfo() {
         }
     };
 
+    /**
+     * Determines whether the current order can be cancelled.
+     * An order can be cancelled only if delivery is more than 24 hours away.
+     *
+     * @returns {boolean}
+     * @author Wissam Abchiche
+     */
     function canCancelOrder() {
         if (!order.value?.delivDate) return false;
 
@@ -63,6 +107,15 @@ export function useOrderInfo() {
         return difference > 24;
     };
 
+    /**
+     * Updates the status of an order.
+     *
+     * @param {number} orderId - Order ID
+     * @param {string} newState - New order state
+     * @param {number} accountId - Account ID performing the action
+     * @returns {Promise<void>}
+     * @author Wissam Abchiche
+     */
     async function updateOrderStatus(orderId, newState, accountId) {
         try {
             const params = new URLSearchParams({
@@ -79,8 +132,17 @@ export function useOrderInfo() {
             console.error(error);
             window.alert(error.message)
         }
-    }; 
-    
+    };
+
+    /**
+     * Assigns an employee to an order.
+     *
+     * @param {number} orderId - Order ID
+     * @param {number} employeeId - Employee ID to assign
+     * @param {number} accountId - Account performing the action
+     * @returns {Promise<void>}
+     * @author Wissam Abchiche
+     */
     async function assignEmployee(orderId, employeeId, accountId) {
         try {
             const params = new URLSearchParams({
@@ -99,6 +161,14 @@ export function useOrderInfo() {
         }
     };
 
+    /**
+     * Initializes the composable
+     *
+     * @param {number} accountId - Account ID
+     * @param {number} orderId - Order ID
+     * @returns all functions defined above
+     * @author Wissam Abchiche
+     */
     async function init(accountId, orderId) {
         loading.value = true; //set loading to true while fetching data
         await Promise.all([getAccount(accountId), getOrder(orderId)]); //wait for both account and order info to be fetched before proceeding
