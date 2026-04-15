@@ -322,6 +322,11 @@ public class ItemDefinitionService {
         }
     }
 
+    /**
+     * Removes all cart items and order items associated with a given item type.
+     *
+     * @param itemTypeId the id of the item type whose related cart and order items will be deleted
+     */
     private void removeCartAndOrderItemsForItemType(int itemTypeId) {
         cartItemRepository.findByCartItemId_ItemType_Id(itemTypeId).forEach(cartItemRepository::delete);
         orderItemRepository.findByOrderItemId_ItemType_Id(itemTypeId).forEach(orderItemRepository::delete);
@@ -403,7 +408,7 @@ public class ItemDefinitionService {
         return null;
     }
 
-        /**
+    /**
      * Returns a single item by id.
      *
      * @param itemId the item id

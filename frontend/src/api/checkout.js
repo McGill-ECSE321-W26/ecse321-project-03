@@ -20,6 +20,14 @@ export async function placeOrder(payload) {
     return data
 }
 
+/**
+ * Retrieves the loyalty points of a specific account.
+ *
+ * @param {number} accountId the id of the account
+ * @returns {Promise<number>} the number of loyalty points for the account
+ * @throws {Error} if the request fails or the server returns an error
+ * @author Yani Zhang
+ */
 export async function getLoyaltyPoints(accountId) {
     const res = await fetch(`${API_BASE}/accounts/${accountId}/loyalty-points`)
     const data = await res.json().catch(() => 0)
