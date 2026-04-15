@@ -38,7 +38,7 @@ questions or regrading
 | Victoire Bergeron | Vikivik-19     | Developer, Proof-Reader                  | 13                    |            15         |         22            |
 | Emily Sun         | EmilySunKI7    | Developer, Submitter                     | 4                     |             20.5      |          19           |
 | Sonia Ly          | LySonia        | Developer, Scrum Master, Secretary, Note-taker | 5              |              14        |          24           |
-| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |                       |
+| Zirun Wang        | kana797        | Developer, Proof-reader                  | 5                     |            23.5       |           24            |
 | Wissam Abchiche   | wissamabcc     | Developer, Submitter, Contact person     | 7                     |             24        |            21           |
 | Maria Klinski     | mashaklin      | Developer, Secretary                     | 6                     |             23        |           24          |
 | Yani Zhang        | yannniiii      | Developer, Submitter                     | 6                     |            20         |           24          |
@@ -48,13 +48,13 @@ questions or regrading
 **Deliverable 3 - hours spent on each task per teammate** 
 | Task                           | Victoire Bergeron | Emily Sun | Sonia Ly | Zirun Wang | Wissam Abchiche | Maria Klinski | Yani Zhang |
 |--------------------------------|-------------------|-----------|----------|------------|-----------------|---------------|------------|
-| Architecture Modelling         |                   |     2     |    2     |      7.5   |                 |               |            |
-| Web Frontend                   |         10        |    13     |    12    |            |      11         |      8        |     8      |
-| Backend Services               |                   |           |     2    |            |       6         |      12       |     12     |
+| Architecture Modelling         |                   |     2     |    2     |            |                 |               |            |
+| Web Frontend                   |         10        |    13     |    12    |      14    |      11         |      8        |     8      |
+| Backend Services               |                   |           |     2    |       5    |       6         |      12       |     12     |
 | Project Management             |          8        |           |    4     |            |                 |               |            |
-| Build system                   |                   |           |          |            |                 |               |            |
+| Build system                   |                   |           |          |      1     |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |       4         |       4       |     4      |
-| Total                          |         18        |     19    |    24    |    23.5    |       21        |      25       |    24      |
+| Total                          |         18        |     19    |    24    |    24      |       21        |      25       |    24      |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
