@@ -54,7 +54,7 @@ questions or regrading
 | Project Management             |          8        |           |    4     |            |                 |               |            |
 | Build system                   |                   |           |          |            |                 |               |            |
 | Meetings                       |         4         |     4     |     4    |     4      |       4         |       4       |     4      |
-| Total                          |         18        |     19    |    14    |    23.5    |       21        |      25       |    24      |
+| Total                          |         18        |     19    |    24    |    23.5    |       21        |      25       |    24      |
 
 ## Project reports (meeting minutes)
 | Deliverable    | Link                 |                    
