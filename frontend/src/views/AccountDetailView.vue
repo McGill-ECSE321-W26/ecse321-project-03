@@ -127,6 +127,9 @@ async function confirmDelete() {
     deleteStep.value = 'confirm'
   }
 }
+const isManager = computed(() => {
+  return session.value?.accountType === "MANAGER";
+});
 
 onMounted(loadAccount)
 </script>
@@ -228,7 +231,7 @@ onMounted(loadAccount)
         </section>
 
         <!-- ── Delete Account Section ─────────────────────────────── -->
-        <section class="delete-panel" aria-label="Delete account">
+        <section v-if="!isManager" class="delete-panel" aria-label="Delete account">
           <h2 class="delete-title">DELETE ACCOUNT:</h2>
 
           <template v-if="deleteStep === 'idle'">
