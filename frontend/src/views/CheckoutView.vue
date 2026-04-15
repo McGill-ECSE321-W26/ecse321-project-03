@@ -22,6 +22,13 @@ const billingSameAsShipping = ref(true)
 
 const selectedDeliveryDate = ref('')
 
+/**
+ * Formats a Date object into YYYY-MM-DD format for the date input field.
+ *
+ * @param {Date} date the date to format
+ * @returns {string} the formatted date string
+ * @author Yani Zhang
+ */
 function formatDateForInput(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -29,6 +36,13 @@ function formatDateForInput(date) {
   return `${year}-${month}-${day}`
 }
 
+/**
+ * Computes the earliest delivery date allowed for checkout.
+ * The minimum delivery date is set to 2 days after today.
+ *
+ * @returns {string} the minimum allowed delivery date in YYYY-MM-DD format
+ * @author Yani Zhang
+ */
 function getMinimumDeliveryDate() {
   const minDate = new Date()
   minDate.setDate(minDate.getDate() + 2)
@@ -61,6 +75,12 @@ const discountRate = computed(() => {
 const discount = computed(() => subtotal.value * discountRate.value)
 const total = computed(() => Math.max(subtotal.value - discount.value, 0))
 
+/**
+ * Loads the loyalty points of the currently logged-in account.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function loadLoyaltyPoints() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
@@ -71,6 +91,12 @@ async function loadLoyaltyPoints() {
   }
 }
 
+/**
+ * Loads the current shipping address of the logged-in account.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function loadCurrentAddress() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
@@ -83,16 +109,32 @@ async function loadCurrentAddress() {
   }
 }
 
+/**
+ * Opens the address editing mode and pre-fills the textarea.
+ *
+ * @author Yani Zhang
+ */
 function startEditingAddress() {
   editedAddress.value = currentAddress.value
   isEditingAddress.value = true
 }
 
+/**
+ * Cancels address editing and restores the original address value.
+ *
+ * @author Yani Zhang
+ */
 function cancelEditingAddress() {
   editedAddress.value = currentAddress.value
   isEditingAddress.value = false
 }
 
+/**
+ * Saves the updated shipping address for the logged-in account.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function saveAddress() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
@@ -109,31 +151,53 @@ async function saveAddress() {
   }
 }
 
+/**
+ * Loads all cart items to display in the checkout summary.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function loadCheckoutCartItems() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
     const data = await getCartItems(accountId)
+    // Store the cart items for checkout summary and total calculation
     cartItems.value = data
   } catch (error) {
     addressError.value = error.message || 'Failed to load cart items.'
   }
 }
 
-
+/**
+ * Once the page loads, fetch the loyalty points, saved address, and cart items.
+ */
 onMounted(() => {
   loadLoyaltyPoints()
   loadCurrentAddress()
   loadCheckoutCartItems()
 })
 
+/**
+ * Formats a numeric value as a price string.
+ *
+ * @param {number} value the price value to format
+ * @returns {string} the formatted price string
+ * @author Yani Zhang
+ */
 function formatPrice(value) {
   return `$ ${value.toFixed(2)}`
 }
 
+/**
+ * Places an order using the selected delivery date and current shipping address.
+ *
+ * @returns {Promise<void>}
+ * @author Yani Zhang
+ */
 async function placeOrder() {
   try {
     if (!accountId) throw new Error('No logged-in account found.')
-
+    // Send the checkout request to the backend with delivery date and address
     await placeOrderRequest({
       customerId: accountId,
       delivDate: new Date(`${selectedDeliveryDate.value}T12:00:00`).toISOString(),

@@ -80,6 +80,15 @@ public class AccountService {
         return new AccountResponseDto(account, role);
     }
 
+    /**
+     * Assigns a role to a newly created account based on the provided account type.
+     * <p>
+     * If the normalized account type is MANAGER or EMPLOYEE, a corresponding role
+     * entity is created and saved. CUSTOMER accounts do not require a role entry.
+     *
+     * @param account         the account to assign a role to
+     * @param accountTypeRaw  the raw account type input (may be null or unformatted)
+     */
     private void assignRoleForNewAccount(Account account, String accountTypeRaw) {
         String type = normalizeAccountType(accountTypeRaw);
         switch (type) {
@@ -89,6 +98,17 @@ public class AccountService {
         }
     }
 
+    /**
+     * Normalizes the input account type string into a valid standardized value.
+     * <p>
+     * Accepts MANAGER, EMPLOYEE, or CUSTOMER (case-insensitive). If the input is
+     * null or blank, it defaults to CUSTOMER. Throws an exception if the input
+     * does not match any valid account type.
+     *
+     * @param raw the raw account type string
+     * @return the normalized account type in uppercase
+     * @throws Ecse321Project03Exception if the account type is invalid
+     */
     private static String normalizeAccountType(String raw) {
         if (raw == null || raw.isBlank()) {
             return "CUSTOMER";
@@ -156,16 +176,12 @@ public class AccountService {
      */
     public Account login (String email, String password) {
         Account accountFromDB = accountRepository.findByEmail(email);
-        
         if (accountFromDB == null) {
              throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with email " + email);
         }
-
         if (!accountFromDB.getActive()) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "This account has been deactivated: " + email);
         }
-
-
         if (!accountFromDB.getPassword().equals(password)) {
             throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Incorrect password for email " + email);
         }
@@ -180,20 +196,17 @@ public class AccountService {
      */
     @Transactional
     public void deleteAccount(int id) {
-    Account accountFromDB = accountRepository.findById(id).orElse(null);
-
-    if (accountFromDB == null) {
-        throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
+        Account accountFromDB = accountRepository.findById(id).orElse(null);
+        if (accountFromDB == null) {
+            throw new Ecse321Project03Exception(HttpStatus.NOT_FOUND, "No account found with id " + id);
+        }
+        Role role = roleRepository.findByAccount_Id(id);
+        if (role instanceof Manager) {
+            throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
+        }
+        accountFromDB.setActive(false);
+        accountRepository.save(accountFromDB);
     }
-
-    Role role = roleRepository.findByAccount_Id(id);
-    if (role instanceof Manager) {
-        throw new Ecse321Project03Exception(HttpStatus.BAD_REQUEST, "Cannot delete a manager account");
-    }
-
-    accountFromDB.setActive(false);
-    accountRepository.save(accountFromDB);
-}
 
     /**
      * Update account
@@ -203,7 +216,6 @@ public class AccountService {
      * @return the updated account
      * @author Maria Klinski
      */
-
     @Transactional
     public Account updateAccount (int id, @Valid AccountCreationDto accountCreationDto) {
         Account accountFromDB = accountRepository.findById(id).orElse(null);
@@ -243,7 +255,6 @@ public class AccountService {
      */
     public int getLoyaltyPoints(int accountId) {
         Account account = findAccountById(accountId);
-
         return account.getLoyaltyPts();
     }
 

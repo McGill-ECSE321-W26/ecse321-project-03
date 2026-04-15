@@ -102,13 +102,11 @@ public class OrderInfoService {
     /**
      * Helper method to determine if a user is a Staff member from their user ID. Throws an error if it isn't the case.
      * @param userID
-     * @return
      */
     private void checkIfStaffMember(int userID) {
         if(roleRepository.findByAccount_Id(userID) == null){
             //return false;
              throw new Ecse321Project03Exception(HttpStatus.FORBIDDEN, "Customers may not view of all of the orders in the system");
         }
-
     }
 }
